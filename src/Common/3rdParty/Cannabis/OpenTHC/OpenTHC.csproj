@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5E315974-DF79-4FA3-AB13-C86303EE25DC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OpenTHC</RootNamespace>
+    <AssemblyName>OpenTHC</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="V20150831\Dispensing.cs" />
+    <Compile Include="V20150831\GrowRooms.cs" />
+    <Compile Include="V20150831\Inventory.cs" />
+    <Compile Include="V20150831\InventoryAdjustments.cs" />
+    <Compile Include="V20150831\InventoryCombinations.cs" />
+    <Compile Include="V20150831\InventoryConversions.cs" />
+    <Compile Include="V20150831\InventoryLog.cs" />
+    <Compile Include="V20150831\InventoryRooms.cs" />
+    <Compile Include="V20150831\InventorySamples.cs" />
+    <Compile Include="V20150831\InventoryTransfers.cs" />
+    <Compile Include="V20150831\Inventory_Fifteen.cs" />
+    <Compile Include="V20150831\Inventory_QA_Fail_Exempt.cs" />
+    <Compile Include="V20150831\Inventory_Statistics.cs" />
+    <Compile Include="V20150831\Labresults_Foreign_Matter.cs" />
+    <Compile Include="V20150831\Labresults_Micro_Screening.cs" />
+    <Compile Include="V20150831\Labresults_Moisture_Content.cs" />
+    <Compile Include="V20150831\Labresults_Potency_Analysis.cs" />
+    <Compile Include="V20150831\Labresults_Samples.cs" />
+    <Compile Include="V20150831\Labresults_Solvent_Screening.cs" />
+    <Compile Include="V20150831\Locations.cs" />
+    <Compile Include="V20150831\Locations_Labs.cs" />
+    <Compile Include="V20150831\Organizations.cs" />
+    <Compile Include="V20150831\Organizations_Labs.cs" />
+    <Compile Include="V20150831\PlantDerivatives.cs" />
+    <Compile Include="V20150831\Plants.cs" />
+    <Compile Include="V20150831\PlantsLog.cs" />
+    <Compile Include="V20150831\Tax_Obligation_Reports.cs" />
+    <Compile Include="V20150831\Undo_History.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="V20150831\ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,1 @@
+﻿backup database {{DATABASE_NAME}} to disk = '{{FILE_NAME_HERE}}'

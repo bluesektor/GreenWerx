@@ -1,0 +1,99 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<app-messageboxes></app-messageboxes>
+<div id="pnlCurrencies">
+            <p-dataTable [value]="listData"
+                          [totalRecords]="listCount"
+                         selectionMode="single"
+                         [(selection)]="currency"
+                         (onRowSelect)="onRowSelect($event.data)"
+                         [paginator]="true"
+                         rows="25"
+                         [responsive]="true"
+                         [lazy]="true"
+                         (onLazyLoad)="lazyLoadCurrencyList($event)"
+                        >
+                <p-header>Currencies</p-header>
+                <p-column field="Name" header="Name" [sortable]="false">
+                    <ng-template let-listItem="rowData" pTemplate="body">
+                        <img src="{{baseUrl}}{{listItem.Image}}" style="height:32px;" (click)="onRowSelect(listItem)" />
+                        <label (click)="onRowSelect(listItem)"  >{{listItem.Name}}</label>
+                    </ng-template>
+                </p-column>
+                <p-column field="Symbol"            header="Symbol" [sortable]="false"></p-column>
+                <p-column field="AssetClass"        header="Asset Class" [sortable]="false"></p-column>
+                <p-column field="Test"              header="Test" [sortable]="false"></p-column>
+                <p-footer>
+                    <div class="cell-block" style="width:25%">
+                        <button type="button" class="form-control input-sm" value="Add"
+                                (click)="showDialogToAdd()" label="Add">
+                            <i class="fa fa-plus" style="color:green;"></i> Add
+                        </button>
+                    </div>
+
+                    <div class="cell-block" style="width:25%">
+                        <p-checkbox [(ngModel)]="loadDefaultData" label="Defaults" (onChange)="loadDefaultsClick($event)" binary="loadDefaultData"></p-checkbox>
+                    </div>
+                </p-footer>
+            </p-dataTable>
+
+            <!--Dialog for  crud actions -->
+            <p-dialog header="Currency Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+                <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="currency">
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input pInputText id="Name" [(ngModel)]="currency.Name" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+
+                        <img src="{{baseUrl}}{{currency.Image}}" style="max-width:64px;max-width:64px;cursor:pointer; " (click)="editImage = !editImage" />
+                        <p-fileUpload *ngIf="editImage" name="uploadedFiles[]" url="{{fileUploadUrl}}{{currency.UUID}}/{{currency.UUIDType}}"
+                                      id="{{currency.UUID}}"
+                                      (onBeforeSend)="onBeforeSendFile($event)"
+                                      (onUpload)="onImageUpload($event,currency.UUID)" accept="image/*" maxFileSize="1000000"></p-fileUpload>
+                    </div>
+                  
+                    <div *ngIf="currency.AssetClass == 'CRYPTO'" class="form-group">
+                        <p-checkbox label="Use Test Environment" [(ngModel)]="currency.Test" binary="currency.Test"  ></p-checkbox>
+                       
+                    </div>
+                    <div class="form-group">
+                          <p-dropdown appendTo="body" 
+                                     (onChange)="onCboChangeSymbol($event )"
+                                    (onBlur)="onCboLeaveSymbol($event )"
+                                    [options]="currencySymbolOptions" 
+                                   [(ngModel)]="currency.Symbol"
+                                    [style]="{'width':'150px' }" 
+                                    editable="true" 
+                                    placeholder="Select Symbol"
+                                  ></p-dropdown>
+                    </div>
+
+                        <div class="form-group">
+                            
+                            <div class="form-group">
+                                <p-dropdown appendTo="body"
+                                            (onChange)="onCboChangeAssetClass($event )"
+                                            (onBlur)="onCboLeaveAssetClass($event )"
+                                            [options]="assetClassOptions"
+                                            [(ngModel)]="currency.AssetClass"
+                                            [style]="{'width':'150px' }"
+                                            editable="true"
+                                            placeholder="Select Asset Class"></p-dropdown>
+                            </div>
+
+                        </div>
+                    </div>
+                <p-footer>
+                    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px;" pButton class="form-control input-sm" (click)="save()" label="Save"><i class="fa fa-check" style="color:green;"></i> Save</button>
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm" (click)="cancel()" label="Cancel"><i class="fa fa-close"></i> Cancel</button>
+                        <button *ngIf="!newCurrency" type="button" style="display: block; margin: 0 auto;" pButton class="form-control input-sm" (click)="delete()" label="Delete"><i class="fa fa-trash" style="color:red;"></i> Delete</button>
+                    </div>
+                </p-footer>
+            </p-dialog>
+
+      
+</div>

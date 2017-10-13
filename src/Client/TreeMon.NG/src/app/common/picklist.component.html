@@ -1,0 +1,11 @@
+﻿Type: {{pluralType}}
+<p-pickList [source]="availableNodes" [target]="selectedNodes" sourceHeader="Available"
+            (onMoveToTarget)="addNodes($event)" (onMoveToSource)="removeNodes($event)"
+            targetHeader="Selected" [responsive]="true" [sourceStyle]="{'height':'300px'}" [targetStyle]="{'height':'300px'}">
+    <ng-template let-node pTemplate="node">
+        <div class="ui-helper-clearfix">
+            <!--   <img src="showcase/resources/demo/images/car/{{node.Thumb}}.gif" style="display:inline-block;margin:2px 0 2px 2px" />-->
+            <div style="font-size:14px;float:right;margin:15px 5px 0 0">{{node.Name}}</div>
+        </div>
+    </ng-template>
+</p-pickList>

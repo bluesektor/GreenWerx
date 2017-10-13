@@ -1,0 +1,22 @@
+﻿extensions: designer.cs generated.cs
+extensions: .cs .cpp .h
+// Copyright (c) 2017 TreeMon.org.
+//Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+extensions: .html .htm
+<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+extensions: .aspx .ascx
+<%-- 
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+--%>
+extensions: .vb
+'Copyright (c) 2017 TreeMon.org.
+'Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+extensions:  .xml .config .xsd
+<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->

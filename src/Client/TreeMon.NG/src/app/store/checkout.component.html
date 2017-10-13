@@ -1,0 +1,128 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<app-messageboxes></app-messageboxes>
+
+<div *ngIf="isValidCart" class="row">
+    <div class="col-md-6 col-md-offset-4">
+        <p-steps [model]="items" [(activeIndex)]="activeIndex" [readonly]="true"></p-steps>
+    </div>
+</div>
+
+
+<div *ngIf="isValidCart" class="row" style="padding-top:10px;">
+    <div class="col-md-6 col-md-offset-4">
+        <form id="formCheckout" name="formCheckout" [formGroup]="formCheckout" >
+            <div *ngIf="activeIndex == 0" class="step-pane active" id="step1">
+                <div id="pnlLogin" *ngIf="!loggedIn" class="cell-block" style="width:45%;margin-right:5px;vertical-align:top;">
+                    <fieldset style="width:90%;">
+                        <legend *ngIf="!newUser">Existing Member</legend><legend *ngIf="newUser">Create Account</legend>
+                        <p-inputSwitch onLabel="Login" offLabel="Create Account" [(ngModel)]="newUser" [ngModelOptions]="{standalone: true}"></p-inputSwitch>
+                        <div id="pnlUserName" class="form-group">
+                            <label class="control-label" for="UserName">Username</label>
+                            <input  [(ngModel)]="formCheckout.UserName"  name="Login" #name formControlName="UserName" class="input-sm form-control" type="text">
+                            <div *ngIf="formCheckout.controls.UserName.touched && !formCheckout.controls.UserName.valid" class="alert alert-danger">
+                                Username is required.
+                            </div>
+                        </div>
+                        <div id="pnlUserPassword" class="form-group">
+                            <label class="control-label" for="UserPassword">Password</label>
+                            <input type="password" [(ngModel)]="customerPassword" #UserPassword formControlName="UserPassword" id="UserPassword" name="UserPassword" class="input-sm form-control">
+                            <div *ngIf="formCheckout.controls.UserPassword.touched && !formCheckout.controls.UserPassword.valid" class="alert alert-danger">
+                                Please type a valid password.
+                            </div>
+                        </div>
+                        <div *ngIf="newUser" id="pnlConfirmPassword" class="form-group">
+                            <label class="control-label" for="ConfirmPassword">Confirm Password</label>
+                            <input type="password" [(ngModel)]="formCheckout.ConfirmPassword" #ConfirmPassword formControlName="ConfirmPassword" id="ConfirmPassword" name="ConfirmPassword" class="input-sm form-control">
+                        </div>
+                        <p-checkbox *ngIf="!newUser" [(ngModel)]="RememberMe" label="Remember Me" binary="true" formControlName="RememberMe"></p-checkbox>
+                        <div *ngIf="newUser" id="pnlUserEmail" class="form-group">
+                            <label class="control-label" for="UserEmail">Email</label>
+                            <input type="text" [(ngModel)]="formCheckout.UserEmail" #UserEmail formControlName="UserEmail" id="UserEmail" name="UserEmail" class="input-sm form-control">
+                        </div>
+                        <div *ngIf="newUser" id="pnlSecurityQuestion" class="form-group">
+                            <label class="control-label" for="SecurityQuestion">Security Question</label>
+                            <input type="text" [(ngModel)]="formCheckout.SecurityQuestion" #SecurityQuestion formControlName="SecurityQuestion" id="SecurityQuestion" name="SecurityQuestion" class="input-sm form-control">
+                        </div>
+                        <div *ngIf="newUser" id="pnlUserSecurityAnswer" class="form-group">
+                            <label class="control-label" for="UserSecurityAnswer">Answer</label>
+                            <input type="text" [(ngModel)]="formCheckout.UserSecurityAnswer" #UserSecurityAnswer formControlName="UserSecurityAnswer" id="UserSecurityAnswer" name="UserSecurityAnswer" class="input-sm form-control">
+                        </div>
+
+                        <button *ngIf="newUser" class="btn btn-primary btn-block" (click)="registerUser($event)">Register</button>
+                        <button *ngIf="!newUser" class="btn btn-primary btn-block" (click)="login($event)">Login</button>
+                        <div *ngIf="authorizing" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+                    </fieldset>
+                </div>
+                <div id="pnlLogOut" *ngIf="loggedIn" class="cell-block" style="width:45%;margin-right:5px;vertical-align:top;text-align:center;">
+                        <button (click)="logOut()" *ngIf="!authorizing" type="button" id="bntLogout" class="btn btn-default">Log Out</button>
+                        <div *ngIf="authorizing" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+                </div>
+            </div>
+            <div *ngIf="activeIndex == 1" class="step-pane" id="step2">
+                <div id="pnlShipping" class="cell-block" style="width:100%;margin-right:5px;vertical-align:top;">
+                    <tm-address [address]=shoppingCart?.ShippingAddress 
+                                [title]="'Shipping Information'" 
+                                [required]="'true'"
+                                (update)="shippingUpdate($event)" ></tm-address>
+                </div>
+            
+            </div>
+            <div *ngIf="activeIndex == 2" class="step-pane" id="step3"  >
+                <div id="pnlPayment" class="row row-sameheight"  >
+                    <div class="col-md-6"  >
+                        <fieldset name="paymentTab">
+                            <legend>Order Total</legend>
+
+                            <div id="pnlCouponCode" class="form-group">
+                                <div class="ui-g-6">{{shoppingCart.CartItems.length}} Item(s)</div><div class="ui-g-6">{{currencySymbol}}{{shoppingCart.subTotal}}</div>
+                                <div style="clear:both"></div>
+                                <div class="ui-g-6">Discounts</div><div class="ui-g-6">{{currencySymbol}}{{shoppingCart.discount}}</div>
+                                <div style="clear:both"></div>
+                                <div class="ui-g-6">Shipping</div>     <div class="ui-g-6">{{currencySymbol}}{{shoppingCart.shippingCost}}</div>
+                                <div style="clear:both"></div>
+                                <div class="ui-g-6">Taxes</div> <div class="ui-g-6">{{currencySymbol}}{{shoppingCart.taxes}}</div>
+                                <div style="clear:both"></div>
+                                <div class="ui-g-12" style="border-bottom:solid;border-bottom-width:1px;border-bottom-color:#d2d2d2;"> </div>
+                                <div style="clear:both"></div>
+                                <div class="ui-g-6">Total</div> <div class="ui-g-6"><label>{{currencySymbol}}{{shoppingCart.total}}</label></div>
+                                <div style="clear:both"></div>
+                                <div class="ui-g-12" style="border-bottom:solid;border-bottom-width:1px;border-bottom-color:#d2d2d2;"> </div>
+
+                                <br />
+                                <div class="control-label" for="CouponCode">Coupon / Promotion Code</div>
+                                <div class="cell-block">
+                                    <input [(ngModel)]="shoppingCart.coupon.CouponCode" name="CouponCode" #name formControlName="CouponCode" style="width:100px;" class="input-sm form-control" type="text">
+                                </div>
+                                <div class="cell-block">
+                                    <button class="btn btn-primary" (click)="onClickRedeemCoupon($event)" type="button">Redeem</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-6" >
+                        <fieldset name="paymentTab">
+                            <legend>Select Payment Method</legend>
+                            <div *ngFor="let option of paymentOptions">
+                               
+                                <div *ngIf="option.ClientCode == 'tm-paypal-gateway'" >
+                                    <tm-finance-gateways-paypal (checkout)="saveCartToServer($event)"
+                                                                [financeAccountUUID]="option.UUID"
+                                                                ></tm-finance-gateways-paypal>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="actions m-t" style="padding-top:5px;">
+            <button *ngIf="activeIndex > 0 && !processingRequest" id="btnPrevInstall" (click)="onClickBackStep()" type="button" class="btn btn-primary btn-prev">Back</button>
+            <button *ngIf="activeIndex < maxSteps - 1" [disabled]="!enableNext" (click)="onClickNextStep()" id="btnNextInstall" type="button" class="btn btn-primary btn-next">Next</button>
+            <!--<br/>Requires shipping:{{requiresShipping}}<br/>
+            Enable next:{{enableNext}}-->
+        </div>
+    </div>
+</div>

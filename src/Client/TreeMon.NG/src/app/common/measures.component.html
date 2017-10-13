@@ -1,0 +1,62 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<app-messageboxes></app-messageboxes>
+
+<div id="pnlMeasures">
+        <div class="row">
+            <p-dataTable [value]="measures"
+                         selectionMode="single"
+                         [(selection)]="selectedMeasure"
+                         (onRowSelect)="onRowSelect($event)"
+                         [paginator]="true"
+                         rows="25"
+                         [loading]="loadingData"
+                         [responsive]="true"
+                         [lazy]="true"
+                         (onLazyLoad)="lazyLoadUnitOfMeasuresList($event)"
+                         [totalRecords]="totalRecords">
+                <p-header>Measures</p-header>
+                <p-column field="Name" header="Name" [sortable]="true"></p-column>
+                <p-footer>
+                    <div class="ui-helper-clearfix" style="width:25%">
+                        <button type="button" class="form-control input-sm" value="Add"
+                                (click)="showDialogToAdd()" label="Add">
+                            <i class="fa fa-plus" style="color:green;"></i> Add
+                        </button>
+                    </div>
+                </p-footer>
+            </p-dataTable>
+
+            <!--Dialog for  crud actions -->
+            <p-dialog header="Measure Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+               
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input pInputText id="Name" [(ngModel)]="selectedMeasure.Name" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Name">Short Name</label>
+                        <input pInputText id="ShortName" [(ngModel)]="selectedMeasure.ShortName" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Category">Category</label>
+                        <select class="form-control input-sm" id="cboCategories" name="cboCategories"
+                                [(ngModel)]="selectedMeasure.Category">
+                            <option *ngFor="let category of categories" value="{{category.UUID}}">
+                                {{category.Name}}
+                            </option>
+                        </select>
+                    </div>
+                <p-footer>
+                    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px;" pButton class="form-control input-sm" (click)="saveMeasure()" label="Save"><i class="fa fa-check" style="color:green;"></i> Save</button>
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm" (click)="cancel()" label="Cancel"><i class="fa fa-close"></i> Cancel</button>
+                        <button *ngIf="!newMeasure" type="button" style="display: block; margin: 0 auto;" pButton class="form-control input-sm" (click)="onDeleteMeasure()" label="Delete"><i class="fa fa-trash" style="color:red;"></i> Delete</button>
+                    </div>
+                </p-footer>
+            </p-dialog>
+
+        </div>
+</div>

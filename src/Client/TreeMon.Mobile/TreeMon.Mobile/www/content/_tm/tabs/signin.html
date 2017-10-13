@@ -1,0 +1,39 @@
+﻿<ion-view title="Signup/Join" ng-controller="UserSignInCtrl as login" >
+    <ion-content class="padding">
+        <form name="frmLogin" action="#" novalidate>
+            <div class="form-group">
+                <label>Username</label>
+                <span ng-show="frmLogin.UserName.$valid" class="ion-checkmark-circled" style="color:green;"></span>
+                <input type="text" name="UserName" class="form-control"
+                       ng-model="login.User.UserName" required ng-minlength=2 ng-maxlength=20
+                       style="background-color:lightgray;width:95%;" />
+            </div>
+            <div class="form-group">
+               
+                <div style="display:inline;" >
+                    <span><label>Password</label></span>
+                    <span ng-show="frmLogin.Password.$valid" class="ion-checkmark-circled" style="color:green;"></span>
+                    <span  ng-messages="frmLogin.Password.$error"><span ng-messages-include="../content/_tm/messages.html"></span></span>     
+                </div>
+                <input type="password" name="Password" class="form-control"
+                       ng-model="login.User.Password" ng-minlength=7
+                       required style="background-color:lightgray;width:95%;" />
+                
+            </div>
+        </form>
+        <h5 style="color:red">{{ login.Message }}</h5>
+        <div class="row">
+            <div class="col">
+                <a ng-disabled="frmLogin.$invalid" ng-click="Authenticate(frmLogin.$valid); $event.preventDefault();" class="button button-block button-positive" href="#">Sign In</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <a class="button button-block button-stable" href="#/tab/signup">Sign Up</a>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>
+
+
+  

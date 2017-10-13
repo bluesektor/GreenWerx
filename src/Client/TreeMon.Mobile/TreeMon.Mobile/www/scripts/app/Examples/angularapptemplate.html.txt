@@ -1,0 +1,634 @@
+
+    <link rel="stylesheet" href="http://devhpapts/login/MktSummary/PRINTreport.css" type="text/css">
+
+    <div style="display:block;position:relative; width:8.5in; height:11in;">
+        <div class="header">
+            <div class="title">
+                <span class="reporttitle">
+                    MARKETING SUMMARY
+                </span><br>
+                <span class="propertyname">
+                    {{marketSummary.Listing.PropName}}
+                </span>
+            </div>
+        </div>
+        <div id="photobrokers">
+            <div id="photo" style="background-image:URL('{{marketSummary.Listing.PhotoURL}}');">&nbsp;</div>
+
+            <div id="brokers" ng-repeat="broker in marketSummary.Brokers">
+
+                <div class="broker">
+                    <span class="brokername">{{broker.FullName}}</span><br>     <!-- MARGIE MOLLOY -->
+                    <span class="brokeremail">{{broker.Email}}</span><br>       <!-- test@test.com-->
+                    <span class="brokerphone">{{broker.Phone}}</span><br><br>   <!-- 951.506.2512-->
+                </div>
+            </div>
+        </div>
+        <br><br>
+        <div id="marketingsummary">
+            <div id="marketingsummary">
+                <div id="timelinestatistics">
+                    <div id="timelineheader">
+                        <span class="timelineheader">TIMELINE</span>
+                    </div>
+                    <table align="left" bgcolor="white" border="0" cellpadding="2" cellspacing="2" width="746">
+                        <tbody>
+                            <tr>
+                                <td class="marketingsummarytd" align="left" valign="top" width="146"></td>
+                                    {{marketSummary.SummaryData.DocsDelivered}}
+                                <td class="marketingsummarytd" align="left" valign="top" width="600">
+                                    Seller delivers necessary property documentation.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="marketingsummarytd" align="left" valign="top" width="146"></td>
+                                    {{marketSummary.SummaryData.FlyerCompleted}}
+                                <td class="marketingsummarytd" align="left" valign="top" width="600">
+                                    Berkadia completes Marketing Flyer.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="marketingsummarytd" align="left" valign="top" width="146"></td>
+                                    {{marketSummary.SummaryData.PackageCompleted}}
+                                <td class="marketingsummarytd" align="left" valign="top" width="600">
+                                    Berkadia completes Marketing Package.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="marketingsummarytd" align="left" valign="top" width="146">
+                                    {{marketSummary.SummaryData.TeaserSentToGroup}}
+                                </td>
+                                <td class="marketingsummarytd" align="left" valign="top" width="600">
+                                    Berkadia completes eTeaser.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="marketingsummarycomments" style="background-color:#09f; display:block;">
+                    <div id="marketingsummaryheader">
+                        <span class="marketingsummaryheader">
+                            COMMENTS
+                        </span>
+                    </div>
+                  
+                    <div id="marketingsummarybody">
+                        <table align="center" bgcolor="white" border="0" cellpadding="2" cellspacing="2" width="746">
+                            <tbody>
+                                <tr  ng-repeat="comment in marketSummary.SummaryComments" >
+                                    <td>{{comment.DateTimeStamp}} <!--TODO this should be DATE only-->| {{comment.DateTimeStamp}}<!--TODO this should be time only--> <br /> {{comment.Author}} </td>
+                                    <td>{{comment.Comment}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div><br><br><br>
+
+                <div class="footer">
+                    <span class="officename">
+                        {{marketSummary.Listing.OfficeAddress.Title}}
+                     
+                    </span><br>
+                    <span class="officeinfo">
+                        {{marketSummary.Listing.OfficeAddress.Address1}} &nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;
+                        {{marketSummary.Listing.OfficeAddress.City}},
+                        {{marketSummary.Listing.OfficeAddress.State}}
+                        {{marketSummary.Listing.OfficeAddress.Zip}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Phone: {{marketSummary.Listing.OfficeAddress.Phone}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Fax: {{marketSummary.Listing.OfficeAddress.Fax}}
+                    </span>
+                    <div class="footerBottom">
+                        www.BerkadiaREA.com&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;www.ApartmentUpdate.com
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <br><br>
+    <div style="display:block;position:relative; width:8.5in; height:11in;">
+        <div class="header">
+            <div class="title">
+                <span class="reporttitle">
+                    MARKETING UPDATE NOTES
+                </span><br>
+                <span class="propertyname">
+                    {{marketSummary.Listing.PropName}}
+                </span>
+            </div>
+        </div>
+
+        <div id="marketingupdatenotes">
+            <div id="marketingupdatenotescomments">
+                <div id="marketingupdatenotesheader">
+                    <span class="marketingupdatenotesheader">
+                        MARKETING UPDATE NOTES
+                    </span>
+                </div>
+                <div id="marketingupdatenotesbody">
+                    <table align="center" bgcolor="white" border="0" cellpadding="2" cellspacing="2" width="746">
+                        <tbody>
+                            <tr bgcolor="#ffffff">
+                                <td class="marketingupdatenotessubheading" width="146">Date</td>
+                                <td class="marketingupdatenotessubheading" width="600">Notes</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><hr></td>
+                            </tr>
+                           <!-- TODO figure out how to toggle row colors =>  bgcolor="#e1e1e1" "#ffffff" --> 
+                            <tr ng-repeat="note in marketSummary.SummaryNotes">
+                                <td class="marketingupdatenotestd" valign="top" width="146">{{note.NoteDate}}  </td>
+                                <td class="marketingupdatenotestd" valign="top" width="600"   ><div ng-bind-html-unsafe="note.Notes"></div>{{note.Notes}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="footer">
+                <span class="officename">
+                    {{marketSummary.Listing.OfficeAddress.Title}}
+                </span><br>
+                <span class="officeinfo">
+                    {{marketSummary.Listing.OfficeAddress.Address1}} &nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;
+                    {{marketSummary.Listing.OfficeAddress.City}},
+                    {{marketSummary.Listing.OfficeAddress.State}}
+                    {{marketSummary.Listing.OfficeAddress.Zip}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Phone: {{marketSummary.Listing.OfficeAddress.Phone}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Fax: {{marketSummary.Listing.OfficeAddress.Fax}}
+                </span>
+                <div class="footerBottom">
+                    www.BerkadiaREA.com&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;www.ApartmentUpdate.com
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <br><br>
+    <div style="display:block;position:relative; width:8.5in; height:11in;">
+        <div class="header">
+            <div class="title">
+                <span class="reporttitle">INTERESTED BUYERS</span><br>
+                <span class="propertyname">{{marketSummary.Listing.PropName}}</span>
+            </div>
+        </div>
+        <div id="interestedbuyers">
+            <div id="interestedbuyerscomments">
+                <div id="interestedbuyersheader">
+                    <span class="interestedbuyersheader">INTERESTED BUYERS</span>
+                </div>
+                <div id="interestedbuyersbody">
+                    <table align="center" bgcolor="white" border="0" cellpadding="2" cellspacing="2" width="746">
+                        <tbody>
+                            <tr bgcolor="#ffffff">
+                                <td class="interestedbuyerssubheading" width="146">Company</td>
+                                <td class="interestedbuyerssubheading" width="600">Notes</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><hr></td>
+                            </tr>
+
+                            <!-- TODO alternate colors.. <tr bgcolor="#e1e1e1"> "#ffffff" -->
+                            <tr ng-repeat="buyer in marketSummary.InterestedBuyers">
+                                <td class="interestedbuyerstd" nowrap="nowrap" valign="top">
+                                    {{buyer.Place}}
+                                    <b>Search Account / Company</b>
+                                    <div ng-if="buyer.potData_intCID <= 0"><b>{{buyer.Company}}</b></div>
+                                    <div ng-if="buyer.potData_intCID > 0">
+                                        <div ng-if="buyer.ContactCompany > 0">
+                                            <b>{{buyer.ContactCompany}}</b>
+                                        </div>
+                                        <div ng-if="!buyer.ContactCompany > 0">
+                                            <b>{{buyer.Company}}</b>
+                                        </div>
+                                     </div>
+                                    <div ng-show="marketSummary.IncludePhoneNumber">{{buyer.ContactPhone}}</div>
+                                </td>
+                                <td class="interestedbuyerstd" valign="top">
+                                   <div ng-if="buyer.potData_intCID <= 0">{{buyer.FullName}}</div>
+                                   <div ng-show="marketSummary.IncludePhoneNumber">{{buyer.PhoneName1}}<br />{{buyer.Phone1}}</div>
+                                   <br>
+                                   <div ng-repeat="ibNote in buyer.IBComments" ><p>{{ibNote.DateTimeStamp}} {{ibNote.Author}} {{ibNote.Comment}}</p></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="footer">
+                <span class="officename">
+                    {{marketSummary.Listing.OfficeAddress.Title}}
+                </span><br>
+                <span class="officeinfo">
+                    {{marketSummary.Listing.OfficeAddress.Address1}} &nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;
+                    {{marketSummary.Listing.OfficeAddress.City}},
+                    {{marketSummary.Listing.OfficeAddress.State}}
+                    {{marketSummary.Listing.OfficeAddress.Zip}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Phone: {{marketSummary.Listing.OfficeAddress.Phone}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Fax: {{marketSummary.Listing.OfficeAddress.Fax}}
+                </span>
+                <div class="footerBottom">
+                    www.BerkadiaREA.com&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;www.ApartmentUpdate.com
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <br><br> 
+    <div style="display:block;position:relative; width:8.5in; height:11in;">
+        <div class="header">
+            <div class="title">
+                <span class="reporttitle">OFFER SUMMARY</span><br>
+                <span class="propertyname">{{marketSummary.Listing.PropName}}</span>
+            </div>
+        </div>
+        <div id="offersummary">
+            <div id="offersummarycomments">
+                <div id="offersummaryheader">
+                    <span class="offersummaryheader">OFFER SUMMARY</span>
+                </div>
+                <div id="offersummarybody">
+
+                    <table align="center" bgcolor="white" border="0" cellpadding="2" cellspacing="2" width="746">
+                        <tbody>
+                            <tr bgcolor="#ffffff">
+                                <td class="offersummarysubheading" align="left" width="150">Name<br>Company</td>
+                                <td class="offersummarysubheading" align="left" valign="bottom" width="75">Offering Price</td>
+                                <td class="offersummarysubheading" align="left" valign="bottom" width="75">Terms</td>
+                                <td class="offersummarysubheading" align="left" width="100"> </td>
+                                <td class="offersummarysubheading" align="center" width="50">Seen<br>Property</td>
+                                <td class="offersummarysubheading" align="center" width="50">Funds<br>Verified</td>
+                                <td class="offersummarysubheading" align="left" valign="bottom" width="246">Notes</td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"><hr></td>
+                            </tr>
+
+                            <tr ng-repeat="offer in marketSummary.Offers">
+                                <td class="offersummarytd" valign="top">
+                                    {{offer.Place}}.
+                                    <div ng-if="offer.Contact" >
+                                        <b> {{offer.Contact}} <br /><br /> {{offer.Company}}</b>
+                                    </div>
+                                    <div ng-if="!offer.Contact">
+                                        <b>{{offer.Company}}</b>
+                                    </div>
+                                </td>
+
+                                <td class="offersummarytd" valign="top">${{offer.Price}}</td>
+                                <td class="offersummarytd" valign="top">{{offer.Terms}}</td>
+                                <td valign="top">
+                                    <table align="center" bgcolor="white" border="0" width="100%">
+                                        <tbody>
+                                            <tr>
+                                                <td class="offersummarytd" bgcolor="#e1e1e1" valign="top"><b>Earnest Money</b><br>{{offer.EarnestMoney}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="offersummarytd" bgcolor="#e1e1e1" valign="top"><b>Due Diligence</b><br>{{offer.DueDilligence}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="offersummarytd" bgcolor="#e1e1e1" valign="top"><b>Closing</b><br>{{offer.Closing}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td class="offersummarytd" align="center" valign="top">{{offer.SeenProperty}}</td>
+                                <td class="offersummarytd" align="center" valign="top">{{offer.VerifyFunds}}</td>
+                                <td class="offersummarytd" valign="top">{{offer.Notes}}</td>
+                            </tr>
+                            <!-- TODO THIS SPACER IS MISSING  <tr>
+                                <td colspan="7"><hr class="gray"></td>
+                            </tr>-->
+
+                            <tr>
+                                <td class="offersummarytd"><b>Average Offering Amount:</b></td>
+                                <td class="offersummarytd"><b>${{marketSummary.AverageOffer}}</b></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+            <div class="footer">
+                <span class="officename">
+                    {{marketSummary.Listing.OfficeAddress.Title}}
+                </span><br>
+                <span class="officeinfo">
+                    {{marketSummary.Listing.OfficeAddress.Address1}} &nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;
+                    {{marketSummary.Listing.OfficeAddress.City}},
+                    {{marketSummary.Listing.OfficeAddress.State}}
+                    {{marketSummary.Listing.OfficeAddress.Zip}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Phone: {{marketSummary.Listing.OfficeAddress.Phone}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Fax: {{marketSummary.Listing.OfficeAddress.Fax}}
+                </span>
+                <div class="footerBottom">
+                    www.BerkadiaREA.com&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;www.ApartmentUpdate.com
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <br><br> 
+    <div style="display:block;position:relative; width:8.5in; height:11in;">
+        <div class="header">
+            <div class="title">
+                <span class="reporttitle">ESCROW TRACKING</span><br>
+                <span class="propertyname">{{marketSummary.Listing.PropName}}</span>
+            </div>
+        </div>
+        <div id="escrowtracking">
+            <div id="escrowtrackingcomments">
+                <div id="escrowtrackingheader">
+                    <span class="escrowtrackingheader">ESCROW TRACKING</span>
+                </div>
+                <div id="escrowtrackingbody">
+                    <table align="center" bgcolor="white" border="0" cellpadding="2" cellspacing="2" width="746">
+                        <tbody>
+                            <tr bgcolor="#ffffff">
+                                <td class="escrowtrackingsubheading" align="center" valign="bottom" width="93">Purchase<br>Price</td>
+                                <td class="escrowtrackingsubheading" align="center" valign="bottom" width="93">Buyer<br>Execution Date</td>
+                                <td class="escrowtrackingsubheading" align="center" valign="bottom" width="93">Seller<br>Execution Date</td>
+                                <td class="escrowtrackingsubheading" align="center" valign="bottom" width="93">Opening<br>of Escrow</td>
+                                <td class="escrowtrackingsubheading" align="center" valign="bottom" width="93">Earnest<br>Money</td>
+                                <td class="escrowtrackingsubheading" align="center" valign="bottom" width="93">Wiring<br>Date</td>
+                                <td class="escrowtrackingsubheading" align="center" valign="bottom" width="93">Removal of<br>Physical Contingency</td>
+                                <td class="escrowtrackingsubheading" align="center" valign="bottom" width="93">Removal of<br>Financing Contingency</td>
+                            </tr>
+                            <tr bgcolor="#ffffff">
+                                <td class="escrowtrackingtd" align="center" valign="bottom" width="93">{{marketSummary.Listing.SalesPrice}}</td>
+                                <td class="escrowtrackingtd" align="center" valign="bottom" width="93">{{marketSummary.Listing.BuyerExecutionDate}}</td>
+                                <td class="escrowtrackingtd" align="center" valign="bottom" width="93">{{marketSummary.Listing.SellerExecutionDate}}</td>
+                                <td class="escrowtrackingtd" align="center" valign="bottom" width="93">{{marketSummary.Listing.OpeningOfEscrow }}</td>
+                                <td class="escrowtrackingtd" align="center" valign="bottom" width="93">{{marketSummary.Listing.EarnestMoney}}</td>
+                                <td class="escrowtrackingtd" align="center" valign="bottom" width="93">{{marketSummary.Listing.WiringDate}}</td>
+                                <td class="escrowtrackingtd" align="center" valign="bottom" width="93">{{marketSummary.Listing.RemovalPhysical}}</td>
+                                <td class="escrowtrackingtd" align="center" valign="bottom" width="93">{{marketSummary.Listing.ContingencyRemovalDate}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="8"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="8"><hr class="gray"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="8" class="escrowtrackingsubheading">Expected Close Date:{{marketSummary.Listing.ExpectedClose}} </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!--string rowColor = "#e1e1e1";                    if( currentRow % 2 == 1)                    rowColor = "#ffffff";-->
+                    <table width="746" bgcolor="white" >
+                        <tr><td colspan="3"><img src="http://www.berkadiarea.com/images/graydot.jpg" width="100%" height="1" /> </td></tr>
+                        <tr ng-repeat="escrowComment in marketSummary.EscrowComments">                         <!-- todo alt colors <tr  bgcolor="[BACKGROUND.COLOR]">-->
+
+                            <td valign="top" class="escrowtrackingtd">
+                                <ul>
+                                    <li>
+                                        {{escrowComment.DateTimeStamp}} <br /><!-- todo this should be short date only -->
+                                        {{escrowComment.DateTimeStamp}}<br /> <!-- todo this should be time only -->
+                                        {{escrowComment.Author}}
+                                    </li>
+                                </ul>
+                            </td>
+                            <td class="escrowtrackingtd" valign="top"><i>{{escrowComment.Comment}}</i></td>
+
+                        </tr>
+                    </table>
+
+
+                </div>
+            </div>
+            <div class="footer">
+                <span class="officename">
+                    {{marketSummary.Listing.OfficeAddress.Title
+}}
+                </span><br>
+                <span class="officeinfo">
+                    {{marketSummary.Listing.OfficeAddress.Address1}} &nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;
+                    {{marketSummary.Listing.OfficeAddress.City}},
+                    {{marketSummary.Listing.OfficeAddress.State}}
+                    {{marketSummary.Listing.OfficeAddress.Zip}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Phone: {{marketSummary.Listing.OfficeAddress.Phone}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Fax: {{marketSummary.Listing.OfficeAddress.Fax}}
+                </span>
+                <div class="footerBottom">
+                    www.BerkadiaREA.com&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;www.ApartmentUpdate.com
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <br><br>
+    <div style="display:block;position:relative; width:8.5in; height:11in;">
+        <div class="header">
+            <div class="title">
+                <span class="reporttitle">CONTACT INFORMATION</span><br>
+                <span class="propertyname">{{marketSummary.Listing.PropName}}</span>
+            </div>
+        </div>
+        <div id="contactinformation">
+            <div id="contactinformationcomments">
+                <div id="contactinformationheader">
+                    <span class="contactinformationheader">CONTACT INFORMATION</span>
+                </div>
+                <div id="contactinformationbody">
+                    <table bgcolor="#ffffff" border="0" width="100%">
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="contactinformationsubheading">Seller</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Contact:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerContact}}</td>
+                                <td class="contactinformationtd"><b>Email:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerEmail}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Company:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerCompany}}</td>
+                                <td class="contactinformationtd"><b>Phone:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerPhone}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Address:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerStreet}}</td>
+                                <td class="contactinformationtd"><b>Fax:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerFax}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerCity}},&nbsp;{{marketSummary.Listing.SellerState}}&nbsp;{{marketSummary.Listing.SellerZip}}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="8"><hr class="gray"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="contactinformationsubheading"><b>Seller Legal Counsel</b></td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Contact:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerLegalContact}}</td>
+                                <td class="contactinformationtd"><b>Email:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerLegalEmail}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Company:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerLegalCompany}}</td>
+                                <td class="contactinformationtd"><b>Phone:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerLegalPhone}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Address:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerLegalAddress}}</td>
+                                <td class="contactinformationtd"><b>Fax:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerLegalFax}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.SellerLegalAddress2}}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="8"><hr class="gray"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="contactinformationsubheading"><b>Buyer</b></td>
+                            </tr>
+                            <!-- TODO if(_reportOptions.HideBuyer == false ) show below  double check this logic. it was hiding legal contact if hideBuyer == true -->
+                            <tr>
+                                <td class="contactinformationtd"><b>Contact:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerContact}}</td>
+                                <td class="contactinformationtd"><b>Email:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerEmail}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Company:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerCompany}}</td>
+                                <td class="contactinformationtd"><b>Phone:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerPhone}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Address:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerStreet}}</td>
+                                <td class="contactinformationtd"><b>Fax:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerFax}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerCity}},&nbsp;{{marketSummary.Listing.BuyerState}}&nbsp;{{marketSummary.Listing.BuyerZip}}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="8"><hr class="gray"></td>
+                            </tr>
+                            <!-- END if(_reportOptions.HideBuyer == false ) show below -->   
+                            <tr>
+                                <td colspan="4" class="contactinformationsubheading"><b>Buyer Legal Counsel</b></td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Contact:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerLegalContact}}</td>
+                                <td class="contactinformationtd"><b>Email:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerLegalEmail}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Company:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerLegalCompany}}</td>
+                                <td class="contactinformationtd"><b>Phone:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerLegalPhone}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Address:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerLegalAddress}}</td>
+                                <td class="contactinformationtd"><b>Fax:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerLegalFax}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.BuyerLegalAddress2}}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="8"><hr class="gray" /></td>
+                            </tr>
+                         
+                            <tr>
+                                <td colspan="4" class="contactinformationsubheading"><b>Escrow Officer</b></td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Contact:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.TitleContact}}</td>
+                                <td class="contactinformationtd"><b>Email:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.TitleEmail}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Company:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.TitleCompany}}</td>
+                                <td class="contactinformationtd"><b>Phone:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.TitlePhone}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Address:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.TitleStreet}}</td>
+                                <td class="contactinformationtd"><b>Fax:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.TitleFax}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.TitleCity}},&nbsp;{{marketSummary.Listing.TitleState}}&nbsp;{{marketSummary.Listing.TitleZip}}</td>
+                                <td class="contactinformationtd"><b>Web:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.TitleURL}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="8"><hr class="gray"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="contactinformationsubheading"><b>Lender</b></td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Contact:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.LenderContact}}</td>
+                                <td class="contactinformationtd"><b>Email:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.LenderEmail}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Company:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.LenderCompany}}</td>
+                                <td class="contactinformationtd"><b>Phone:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.LenderPhone}}</td>
+                            </tr>
+                            <tr>
+                                <td class="contactinformationtd"><b>Address:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.LenderAddress}}</td>
+                                <td class="contactinformationtd"><b>Fax:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.LenderFax}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.LenderAddress2}}</td>
+                                <td class="contactinformationtd"><b>Web:</b></td>
+                                <td class="contactinformationtd">{{marketSummary.Listing.LenderURL}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="footer">
+                <span class="officename">
+                    {{marketSummary.Listing.OfficeAddress.Title
+}}
+                </span><br>
+                <span class="officeinfo">
+                    {{marketSummary.Listing.OfficeAddress.Address1}} &nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;
+                    {{marketSummary.Listing.OfficeAddress.City}},
+                    {{marketSummary.Listing.OfficeAddress.State}}
+                    {{marketSummary.Listing.OfficeAddress.Zip}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Phone: {{marketSummary.Listing.OfficeAddress.Phone}}&nbsp;&nbsp;&nbsp;<span class="blue">|</span>&nbsp;&nbsp;&nbsp;Fax: {{marketSummary.Listing.OfficeAddress.Fax}}
+                </span>
+                <div class="footerBottom">
+                    www.BerkadiaREA.com&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;www.ApartmentUpdate.com
+                </div>
+            </div>
+        </div>
+    </div>
+

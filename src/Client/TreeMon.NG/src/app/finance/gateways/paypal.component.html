@@ -1,0 +1,170 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<form ngNoForm action="{{paypalUrl}}" method="POST" id="frmPayPal">
+    <input type="hidden" name="cmd" value="_xclick">
+    <input type="hidden" name="business" value="{{paytoEmail}}">
+    <input type="hidden" name="undefined_quantity" value="{{itemCount}}">
+    <input type="hidden" name="item_name" value="{{itemName}}">
+    <input type="hidden" name="item_number" value="{{itemNumber}}">
+    <input type="hidden" name="amount" value="{{shoppingCart.total}}">
+    <input type="hidden" name="shipping" value="{{shoppingCart.shippingCost}}">
+    <input type="hidden" name="shipping2" value="0">
+    <input type="hidden" name="currency_code" value="{{currencyCode}}">
+    <input type="hidden" name="first_name" value="{{shoppingCart.BillingAddress?.FirstName}}">
+    <input type="hidden" name="last_name" value="{{shoppingCart.BillingAddress?.LastName}}">
+    <input type="hidden" name="address1" value="{{shoppingCart.BillingAddress?.StreetAddress1}}">
+    <input type="hidden" name="address2" value="{{shoppingCart.BillingAddress?.StreetAddress2}}">
+    <input type="hidden" name="city" value="{{shoppingCart.BillingAddress?.City}}">
+    <input type="hidden" name="state" value="{{shoppingCart.BillingAddress?.State}}">
+    <input type="hidden" name="zip" value="{{shoppingCart.BillingAddress?.PostalCode}}">
+    <input type="hidden" name="lc" value="{{shoppingCart.BillingAddress?.Country}}">
+    <input type="hidden" name="email" value="{{shoppingCart.customer?.Email}}">
+    <input type="hidden" name="night_phone_a" value="{{shoppingCart.BillingAddress?.PhoneNumber}}">
+    <input type="hidden" name="night_phone_b" value="">
+    <input type="hidden" name="night_phone_c" value="">
+    <input type="hidden" name="return" value="{{returnUrl}}" />
+    <input type="hidden" name="cancel_return" value="{{cancelUrl}}" />
+    <input name="notify_url" value="{{notifyUrl}}" type="hidden">
+    <input type="hidden" name="custom" value={{customValue}}>
+    <!-- the visible button is going to use this button to submit to paypal-->
+    <button type="submit" value="Submit" #btnPayPalSubmit style="visibility:hidden;"   ></button>
+  <!-- 
+    The following are passthrough variables:
+    custom
+    item_number oritem_number_x
+    invoice
+      -->
+
+</form>
+  <!-- this button is going to call the function to save the form data to the server, then -->
+<button class="button-paypal-checkout"  value="Checkout" (click)="checkOutPaypal($event)" title="checkout"></button>
+<!--<form ngNoForm action="{{paypalUrl}}" method="post">
+
+    <input type="hidden" name="cmd" value="_xclick" />
+    <input type="hidden" name="business" value="{{paytoEmail}}" />
+
+    <input type="hidden" name="item_name" value="{{itemName}}" />
+    <input type="hidden" name="amount" value="{{shoppingCart.total}}" />
+
+    <input type="hidden" name="shipping" value="{{shoppingCart.shippingCost}}" />
+    <input type="hidden" name="handling" value="0" />
+    <input type="submit" value="Buy!" />
+
+</form>
+
+ <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=youremailaddress@yourdomain.com&amount=10.00&item_name=Save Polar Bears!" >donate</a>
+
+<br /><br /><br />
+
+My Cart Item 1:
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="paypal">
+
+    <input type="hidden" name="cmd" value="_cart">
+    <input type="hidden" name="add" value="1">
+
+    <input type="hidden" name="business" value="{{paytoEmail}}">
+    <input type="hidden" name="item_name" value="My Cart Item 1">
+
+    <input type="hidden" name="amount" value="10.00">
+    <input type="hidden" name="shopping_url" value="http://www.yourwebsite.com/shoppingpage.html">
+
+    <input type="hidden" name="return" value="{{returnUrl}}">
+    <input type="hidden" name="cancel_return" value="{{cancelUrl}}">
+
+    <input type="hidden" name="bn" value="PP-ShopCartBF:x-click-but22.gif:NonHosted">
+    <input type="image" src="https://www.paypal.com/en_US/i/btn/x-click-but22.gif" border="0"
+           name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+    <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1"
+         height="1">
+</form>
+
+My Cart Item 2:
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="paypal">
+
+    <input type="hidden" name="cmd" value="_cart">
+    <input type="hidden" name="add" value="1">
+
+    <input type="hidden" name="business" value="{{paytoEmail}}">
+    <input type="hidden" name="item_name" value="My Cart Item 2">
+
+    <input type="hidden" name="amount" value="5.00">
+    <input type="hidden" name="shipping" value="1.00">
+
+    <input type="hidden" name="shopping_url"  value="http://www.yourwebsite.com/shoppingpage.html">
+    <input type="hidden" name="return" value="{{returnUrl}}">
+
+    <input type="hidden" name="cancel_return" value="{{cancelUrl}}">
+    <input type="hidden" name="bn" value="PP-ShopCartBF:x-click-but22.gif:NonHosted">
+
+    <input type="image" src="https://www.paypal.com/en_US/i/btn/x-click-but22.gif" border="0"
+           name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+
+    <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1"
+         height="1">
+</form>
+
+View Cart:
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="paypal">
+    <input type="hidden" name="cmd" value="_cart">
+
+    <input type="hidden" name="display" value="1">
+    <input type="hidden" name="business" value="{{paytoEmail}}">
+
+    <input type="hidden" name="shopping_url" value="http://www.yourwebsite.com/shoppingpage.html">
+    <input type="image" src="https://www.paypal.com/en_US/i/btn/view_cart_02.gif"
+           name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+
+</form>
+
+Recurring Payments
+ a 3 day free trial after which the user will have to pay you $10.00 per month to keep using the service
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+    <input type="hidden" name="cmd" value="_xclick-subscriptions" />
+    <input type="hidden" name="business" value="{{paytoEmail}}" />
+    <input type="hidden" name="item_name" value="Something" />
+    <input type="submit" value="Subscribe!" />
+
+    <input type="hidden" name="a1" value="0" />
+    <input type="hidden" name="p1" value="3" />
+    <input type="hidden" name="t1" value="D" />
+    <input type="hidden" name="a3" value="10.00" />
+    <input type="hidden" name="p3" value="1" />
+    <input type="hidden" name="t3" value="M" />
+    <input type="hidden" name="src" value="1" />
+    <input type="hidden" name="srt" value="0" />
+    <input type="hidden" name="sra" value="1" />
+
+</form>
+   
+
+
+<br /><br/><br />
+<input type="text" name="cartuuid" value="{{shoppingCart.UUID}}"><br />
+<input type="text" name="business" value="{{paytoEmail}}"><br/>
+<input type="text" name="undefined_quantity" value="{{itemCount}}"><br />
+<input type="text" name="item_name" value="{{itemName}}"><br />
+<input type="text" name="item_number" value="{{itemNumber}}"><br />
+<input type="text" name="amount" value="{{shoppingCart?.total}}"><br />
+<input type="text" name="shipping" value="{{shoppingCart?.shippingCost}}"><br />
+<input type="text" name="shipping2" value="0"><br />
+<input type="text" name="currency_code" value="{{currencyCode}}"><br />
+<input type="text" name="first_name" value="{{shoppingCart.BillingAddress?.FirstName}}"><br />
+<input type="text" name="last_name" value="{{shoppingCart.BillingAddress?.LastName}}"><br />
+<input type="text" name="address1" value="{{shoppingCart.BillingAddress?.StreetAddress1}}"><br />
+<input type="text" name="address2" value="{{shoppingCart.BillingAddress?.StreetAddress2}}"><br />
+<input type="text" name="city" value="{{shoppingCart.BillingAddress?.City}}"><br />
+<input type="text" name="state" value="{{shoppingCart.BillingAddress?.State}}"><br />
+<input type="text" name="zip" value="{{shoppingCart.BillingAddress?.PostalCode}}"><br />
+<input type="text" name="lc" value="{{shoppingCart.BillingAddress?.Country}}"><br />
+<input type="text" name="email" value="{{shoppingCart.customer?.Email}}"><br />
+<input type="text" name="night_phone_a" value="{{shoppingCart.BillingAddress?.PhoneNumber}}"><br />
+<input type="text" name="night_phone_b" value=""><br />
+<input type="text" name="night_phone_c" value=""><br />
+<input type="text" name="return" value="{{returnUrl}}" /><br />
+<input type="text" name="cancel_return" value="{{cancelUrl}}" /><br />
+<input name="notify_url" value="{{notifyUrl}}" type="hidden"><br />
+<input type="text" name="custom" value={{customvalue}}><br />
+ -->
+    

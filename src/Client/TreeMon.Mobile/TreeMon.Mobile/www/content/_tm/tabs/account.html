@@ -1,0 +1,15 @@
+﻿<ion-view title="Account" ng-controller="AccountTabCtrl as accountTab" data-ng-init="Initialize()">
+    <ion-content class="padding">
+        
+        <div class="row">
+            <a href="#/tab/profile" class="btn btn-circle btn-info"><i class="ion-information"></i>Profile</a>
+
+
+            <button ng-show="IsLoggedIn()" ng-click="Logout(); $event.preventDefault();" class="disable-hover button button-default"><span class="button-inner">Log Out</span><ion-button-effect></ion-button-effect></button>
+
+        </div>
+      
+        <h5 style="color:red;">{{ accountTab.Message }}</h5>
+    
+    </ion-content>
+</ion-view>

@@ -1,0 +1,161 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<app-messageboxes></app-messageboxes>
+
+
+<div id="pnlInventory" >
+      <!--  <div class="row" *ngIf="!deletingData">
+            <div *ngIf="deletingData" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+            <br />
+        </div> -->
+        <div class="row" style="align-content:center;">
+            <p-dataTable [value]="inventoryItems" id="myDataTable"
+                         [editable]="true"
+                         (onEdit)="onEditValue($event)"
+                         >
+                <p-header>
+                    <div class="cell-block" style="float:left;vertical-align:central;">
+                        <label>Location:</label>
+                    </div>
+                    <div class="cell-block" style="float:left;vertical-align:central;">
+                        <select class="form-control input-sm" id="cboLocations" name="cboLocations"
+                                [disabled]="defaultOnly"
+                                [(ngModel)]="selectedLocationUUID"
+                                (ngModelChange)="cboLocationChange($event)">
+                            <option value="">Select location..</option>
+                            <option *ngFor="let location of locations" [attr.selected]="selectedLocationUUID == location.UUID" value="{{location.UUID}}">
+                                {{location.Name}}
+                            </option>
+                        </select>
+                    </div>
+                    <h4 style="width:80%;">Inventory</h4>
+                </p-header>
+                <p-column field="Image" header="Image" [editable]="false" [style]="{ 'text-align':'center', 'width': '10%'}">
+                    <ng-template let-product="rowData" pTemplate="body">
+                        <img src="{{product.Image}}" style="width:64px;height:64px;" (click)="editImage = !editImage" />
+
+                        <p-fileUpload *ngIf="editImage" name="uploadedFiles[]" url="{{fileUploadUrl}}{{product.UUID}}/{{product.UUIDType}}"
+                                      id="{{product.UUID}}"
+                                      (onBeforeSend)="onBeforeSendFile($event)"
+                                      (onUpload)="onImageUpload($event,product.UUID)" accept="image/*" maxFileSize="1000000"></p-fileUpload>
+                    </ng-template>
+                </p-column>
+                <p-column field="Name" header="Name" [editable]="true"></p-column>
+                <p-column field="Price" header="Price" [editable]="true" [style]="{ 'text-align':'right', 'width': '10%'}"></p-column>
+                <p-column field="Weight" header="Weight" [editable]="true" [style]="{ 'text-align':'right', 'width': '10%'}"></p-column>
+                <p-column field="WeightUOM" header="WeightUOM" [editable]="false"  >
+
+                    <ng-template pTemplate="body" let-product="rowData" >
+
+                        <p-dropdown appendTo="body" 
+                                     (onChange)="onCboChangeUOM($event, product.UUID)"
+                                    (onBlur)="onCboLeaveUOM($event, product.UUID)"
+                                    [options]="unitsOfMeasureOptions" 
+                                   [(ngModel)]="product.UOM"
+                                    [style]="{'width':'150px' }" 
+                                    editable="true" 
+                                    placeholder="Select UOM"
+                                  ></p-dropdown>
+                    </ng-template>
+                    
+                </p-column>
+              
+                <p-column field="Quantity" header="Quantity" [editable]="true" [style]="{'text-align':'right', 'width': '10%'}"></p-column>
+
+
+                <p-column field="Published" header="Published" [editable]="false" [style]="{ 'width': '10%'}">
+                    <ng-template let-product="rowData" pTemplate="body">
+                        <p-checkbox label="" [(ngModel)]="product.Published" binary="product.Published" (click)="onEditTemplateValue($event, product.UUID)"></p-checkbox>
+                    </ng-template>
+                </p-column>
+                <p-column field="Virtual" header="Virtual" [editable]="false" [style]="{ 'width': '10%'}">
+                    <ng-template let-product="rowData" pTemplate="body">
+                        <p-checkbox label="" [(ngModel)]="product.Virtual" binary="product.Virtual" (click)="onEditTemplateValue($event, product.UUID)"></p-checkbox>
+                    </ng-template>
+                </p-column>
+        <!--
+        maybe have a sub panel or link to open the detail record based on params below..
+        ReferenceType: string;
+        ReferenceUUID: string;
+        -->
+
+        <p-column header="Action" [style]="{'overflow':'visible', 'width': '10%'}">
+            <ng-template let-product="rowData" pTemplate="body">
+                <button (click)="removeItemFromInventory($event , product.UUID  )" id="{{product.UUID}}" type="button" style="display: block; margin: 0 auto;"><i class="fa fa-trash" style="color:red;"></i></button>
+            </ng-template>
+        </p-column>
+
+
+        <p-footer>
+            <div class="cell-block" style="width:25%">
+
+                <button type="button" class="form-control input-sm" value="Products"
+                        [disabled]="selectedLocationUUID == ''"
+                        (click)="showDialogToAdd('Product')" label="Products">
+                    <i class="fa fa-plus" style="color:blue;"></i> Products
+                </button>
+
+            </div>
+
+            <div class="cell-block" style="width:25%">
+                <button type="button" class="form-control input-sm" value="Equipment"
+                        [disabled]="selectedLocationUUID == ''"
+                        (click)="showDialogToAdd('Equipment')" label="Equipment">
+                    <i class="fa fa-plus" style="color:blue;"></i> Equipment
+                </button>
+            </div>
+
+            <div class="cell-block" style="width:25%">
+                <button type="button" class="form-control input-sm" value="Save"
+                        [disabled]="editedItems.length <= 0"
+                        (click)="saveEditedItems()" label="Save">
+                    <i class="fa fa-floppy-o" style="color:green;"></i> Save
+                </button>
+            </div>
+        </p-footer>
+        </p-dataTable>
+
+        <!--Dialog for  crud actions -->
+        <p-dialog header="{{dialogTitle}}" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+            <div class="ui-grid ui-grid-responsive ui-fluid">
+
+                <p-dataTable [value]="availableItems" [rows]="10" [paginator]="true"
+                             [totalRecords]="availableItemCount"
+                             [lazy]="true"
+                             (onLazyLoad)="lazyLoadProductsList($event)">
+                    <!--<p-header>Products</p-header>-->
+                    <p-column field="Name" header="Name" [filter]="true">
+                        <ng-template pTemplate="filter" let-col>
+                            <input (ngModelChange)="filterProductsByName($event)" [(ngModel)]="nameFilter" placeholder="Search..." class="ui-column-filter ui-inputtext ui-corner-all ui-state-default ui-widget" pinputtext="" type="text" ng-reflect-value="">
+                        </ng-template>
+                    </p-column>
+                    <p-column field="CategoryName" header="Category" [filter]="true" [style]="{'overflow':'visible'}" filterMatchMode="equals">
+                        <!--Angular4 use ng-template <ng-template let-node pTemplate="item">-->
+                        <ng-template pTemplate="filter" let-col>
+                            <p-dropdown [options]="categories" [style]="{'width':'100%'}" (onChange)="filterByCategory($event)" styleClass="ui-column-filter"></p-dropdown>
+                        </ng-template>
+                        <ng-template let-product="rowData" pTemplate="body">
+                            <label>{{product.CategoryName}}</label>
+                        </ng-template>
+                    </p-column>
+                    <p-column header="Action" [style]="{'overflow':'visible', 'width': '10%'}">
+                        <ng-template let-product="rowData" pTemplate="body">
+                            <button (click)="addItemToInventory($event , product.UUID  )" type="button" id="{{product.UUID}}" icon="fa-plus">Add</button>
+                        </ng-template>
+                    </p-column>
+                </p-dataTable>
+
+            </div>
+
+            <p-footer>
+                <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+                    <button type="button" style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm" (click)="close()" label="Close"><i class="fa fa-close"></i> Close</button>
+                </div>
+            </p-footer>
+        </p-dialog>
+
+    
+   
+</div>

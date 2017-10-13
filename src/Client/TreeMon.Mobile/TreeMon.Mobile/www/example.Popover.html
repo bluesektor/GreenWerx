@@ -1,0 +1,33 @@
+﻿
+<!DOCTYPE html>
+<html ng-app="ionicApp">
+<head>
+    <link href="/css/ionic.css" rel="stylesheet" />
+    <style> body {background: white;}  </style>
+    <script src="/scripts/ionic/ionic.bundle.min.js"></script>
+    <script src="scripts/examples/example.Popover.js"></script>
+
+</head>
+
+<body class="platform-ios" ng-controller="MainCtrl">
+
+    <ion-header-bar>
+        <h1 class="title">Popover</h1>
+        <button ng-click="popover.show($event)" class="button button-icon ion-more"></button>
+    </ion-header-bar>
+
+    <script id="popover.html" type="text/ng-template">
+
+        <ion-popover-view>
+            <ion-header-bar>
+                <h1 class="title">My Popover Title</h1>
+            </ion-header-bar>
+            <ion-content class="padding">
+                Hello!
+            </ion-content>
+        </ion-popover-view>
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<app-messageboxes></app-messageboxes>
+<div id="pnlOrders">
+            <p-dataTable [value]="listData"
+                         [totalRecords]="listCount"
+                         selectionMode="single"
+                         [(selection)]="selectedItem"
+                         (onRowSelect)="onRowSelect($event.data)"
+                         [paginator]="true"
+                         rows="25"
+                         [responsive]="true"
+                         [lazy]="true"
+                         (onLazyLoad)="lazyLoadOrderList($event)">
+                <p-header>Orders</p-header>
+                <p-column field="Name" header="Name" [sortable]="true">
+                    <ng-template let-listItem="rowData" pTemplate="body">
+                        <img src="{{baseUrl}}{{listItem.Image}}" style="height:32px;" (click)="onRowSelect(listItem)" />
+                        <label (click)="onRowSelect(listItem)">{{listItem.Name}}</label>
+                    </ng-template>
+                </p-column>
+                <p-column field="CustomerEmail" header="Customer Email" [sortable]="true"></p-column>
+                <p-column field="Total" header="Total" [sortable]="true"></p-column>
+                <p-column field="PayStatus" header="Pay Status" [sortable]="true"></p-column>
+                <p-footer>
+                    <div class="cell-block" style="width:25%">
+                        <button type="button" class="form-control input-sm" value="Add"
+                                (click)="showDialogToAdd()" label="Add">
+                            <i class="fa fa-plus" style="color:green;"></i> Add
+                        </button>
+                    </div>
+                </p-footer>
+            </p-dataTable>
+
+            <!--Dialog for  crud actions -->
+            <p-dialog header="Order Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+                <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="selectedItem">
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input pInputText id="Name" [(ngModel)]="selectedItem.Name" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+
+                        <img src="{{baseUrl}}{{selectedItem.Image}}" style="width:64px;height:64px;" (click)="editImage = !editImage" />
+                        <p-fileUpload *ngIf="editImage" name="uploadedFiles[]" url="{{fileUploadUrl}}{{selectedItem.UUID}}/{{selectedItem.UUIDType}}"
+                                      id="{{selectedItem.UUID}}"
+                                      (onBeforeSend)="onBeforeSendFile($event)"
+                                      (onUpload)="onImageUpload($event,selectedItem.UUID)" accept="image/*" maxFileSize="1000000"></p-fileUpload>
+                    </div>
+
+                    <div class="form-group">
+                        <!--<label for="OrderUUID">Location Type</label>
+                        <select class="form-control input-sm" id="cboOrderTypes" name="cboLocationTypes"
+                                [(ngModel)]="location.LocationType"
+                                  (ngModelChange)="cboOrderTypeChange($event)">
+                            <option *ngFor="let orderType of orderTypes;" value="{{orderType}}">
+                                {{orderType}}
+                            </option>
+                            <option value="custom"   >Custom...</option>
+                        </select>
+                        <input *ngIf="order.OrderType == 'custom'"    [(ngModel)]="customOrder" pInputText id="OrderType"  class="input-sm form-control" />-->
+                    </div>
+                </div>
+                <p-footer>
+                    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px;" pButton class="form-control input-sm" (click)="save()" label="Save"><i class="fa fa-check" style="color:green;"></i> Save</button>
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm" (click)="cancel()" label="Cancel"><i class="fa fa-close"></i> Cancel</button>
+                        <button *ngIf="!newItem" type="button" style="display: block; margin: 0 auto;" pButton class="form-control input-sm" (click)="delete()" label="Delete"><i class="fa fa-trash" style="color:red;"></i> Delete</button>
+                    </div>
+                </p-footer>
+            </p-dialog>
+</div>

@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <!-- Other good stuff here like deploying etc https://thinkster.io/ionic-framework-tutorial -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
+
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+
+
+    <title>Ionic Test App</title>
+    <link href="/css/ionic.css" rel="stylesheet" />
+    <link href="/css/app.favs.css" rel="stylesheet" />
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+    <!-- ionic/angularjs js -->
+    <script src="/scripts/ionic/ionic.bundle.min.js"></script>
+    <!-- your app's js -->
+    <script src="/scripts/app/app.favs.js"></script>
+    <script src="/scripts/app/app.favs.controller.js"></script>
+    <script src="/scripts/app/app.favs.services.js"></script>
+    <script src="/scripts/app/app.favs.utils.js"></script>
+
+</head>
+<body class="app">
+
+    <div class="list">
+        <a class="item item-icon-left" href="#">
+            <i class="icon ion-mic-a"></i>
+            Record album
+            <span class="item-note">
+                Grammy
+            </span>
+        </a>
+
+        <a class="item item-icon-left" href="#">
+            <i class="icon ion-person-stalker"></i>
+            Friends
+            <span class="badge badge-assertive">0</span>
+        </a>
+    </div>
+
+   <hr />
+
+    <div class="list">
+        <div class="item item-divider">Candy Bars</div>
+        <a class="item" href="#">Butterfinger</a>
+
+        <a class="item" href="#">Kit Kat</a>
+    </div>
+
+
+    <script type="text/javascript" src="/cordova.js"></script>
+    <script type="text/javascript" src="/scripts/platformOverrides.js"></script>
+    <script type="text/javascript" src="scripts/examples/example.lists.js"></script>
+</body>
+</html>

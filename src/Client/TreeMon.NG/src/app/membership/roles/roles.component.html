@@ -1,0 +1,111 @@
+﻿
+<app-messageboxes></app-messageboxes>
+<div id="pnlProfile">
+        <div class="row" *ngIf="!deletingData" >
+            <div class="cell-block">
+                    <select class="form-control input-sm" id="cboRoles" name="cboRoles"
+                            [(ngModel)]="roleDetail.UUID"
+                            
+                            (ngModelChange)="cboRolesChange($event)">
+                        <option *ngFor="let role of roles;let i = index;" [attr.selected]="roleDetail.UUID == role.UUID" value="{{role.UUID}}"
+                                >
+                            {{role.Name}} 
+                        </option>
+                    </select>
+                </div>
+            <div class="cell-block">
+                    <button (click)="onClickAddNewRole()"  class="form-control input-sm" value="New Role">
+                        <i class="fa fa-plus icon-large" style="color:green;"></i>
+                    </button>
+                  
+                </div>
+            <div class="cell-block">
+                
+                <button pbutton="" type="button"  class="form-control input-sm" value="Delete Role"  (click)="onClickDeleteRoleDetail()"  
+                         [disabled]='roleDetail.UUID == activeRole?.UUID'               >
+                    <i class="fa fa-trash"  style="color:red;"></i></button>
+                <p-confirmDialog width="425"></p-confirmDialog>
+                <p-growl [value]="msgs"></p-growl>
+            </div>
+            <div *ngIf="deletingData" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+            <br/>
+            <p-accordion   (onOpen)="onTabShow($event)"    >
+                    <p-accordionTab header="Details" [selected]="true" >
+                        <div *ngIf="loadingData" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+                        <form role="form" [formGroup]="formRoleDetail" (ngSubmit)="saveRoleDetail()" id="ngFormRoleDetail" #roleDetailForm="ngForm">
+
+                            <fieldset>
+                                <div class="form-group">
+                                    <label for="Name">Name</label>
+                                    <input 
+                                           [(ngModel)]="roleDetail.Name"
+                                            name="Name"
+                                            #name formControlName="Name"
+                                            required type="text"
+                                            class="input-sm form-control" />
+
+                                    <div *ngIf="formRoleDetail.controls.Name.touched && !formRoleDetail.controls.Name.valid" class="alert alert-danger">
+                                        Name is required.
+                                    </div>
+                                </div>
+                                <div id="pnlRoleSortOrder" class="form-group">
+                                    <label class="control-label" for="SortOrder">SortOrder</label>
+                                    <input [(ngModel)]="roleDetail.SortOrder" #Email formControlName="SortOrder" type="text" class="input-sm form-control">
+                                </div>
+                                <div id="pnlRolePrivate" class="form-group">
+                                    <p-checkbox [(ngModel)]="roleDetail.Private"  label="Private" binary="true" formControlName="Private"  ></p-checkbox>
+                                </div>
+                                <div id="pnlRoleActive" class="form-group">
+                                    <p-checkbox [(ngModel)]="roleDetail.Active" label="Active" binary="true" formControlName="Active"></p-checkbox>
+                                </div>
+                             
+                            </fieldset>
+                            <button *ngIf="!loadingData" [disabled]="!roleDetailForm.form.valid" (click)="roleDetailForm.ngSubmit.emit()" type="submit" class="btn btn-primary btn-block">
+                             Save
+                            </button>
+                            </form>
+
+
+                        </p-accordionTab>
+                    <p-accordionTab header="Users">
+                        <div *ngIf="loadingData" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+                      
+                            <p-pickList  [source]="roleNonMembers" [target]="roleMembers" sourceHeader="Available"
+                                             (onMoveToTarget)="addUsers($event)" (onMoveToSource)="removeUsers($event)"
+                                             targetHeader="Selected" [responsive]="true" [sourceStyle]="{'height':'300px'}" [targetStyle]="{'height':'300px'}"
+                                            >
+                            <ng-template let-node pTemplate="node">
+                               <div class="ui-helper-clearfix">
+                                    <div style="font-size:14px;float:right;margin:15px 5px 0 0">{{node.Name}}</div>
+                               </div>
+                            </ng-template>
+                        </p-pickList>
+                    </p-accordionTab>
+                   <p-accordionTab header="Permissions">
+                       <!--<input type="text" [ngModel]="mymodel" (ngModelChange)="valuechange($event)" />-->
+                       <div class="cell-block"><input type="text" class="form-control"  id="txtAvailablePermissionsFilter" 
+                                                       (ngModelChange)="filterAvailableChanged($event)"
+                                                       [(ngModel)]="filterAvailablePermissions.SearchTerm" /> </div>
+                       
+                       <div class="cell-block" style="float:right;" ><input type="text" class="form-control" id="txtSelectedPermissionsFilter" 
+                                                                             (ngModelChange)="filterSelectedChanged($event)"
+                                                                              [(ngModel)]="filterSelectedPermissions.SearchTerm" 
+                                                                             /> </div>
+
+                           <div *ngIf="loadingData" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+                           <p-pickList [source]="availablePermissions" [target]="selectedPermissions" sourceHeader="Available"
+                                       (onMoveToTarget)="addPermissions($event)" (onMoveToSource)="removePermissions($event)"
+                                       targetHeader="Selected" [responsive]="true" [sourceStyle]="{'height':'500px'}" [targetStyle]="{'height':'500px'}">
+
+                               <ng-template let-node pTemplate="user">
+                                   <div class="ui-helper-clearfix">
+                                       <div style="font-size:14px;float:right;margin:15px 5px 0 0">{{node.Name}}  - {{node.RoleWeight}}</div>
+                                   </div>
+                               </ng-template>
+                           </p-pickList>
+                    </p-accordionTab>
+            </p-accordion>
+        </div>
+  
+</div>
+

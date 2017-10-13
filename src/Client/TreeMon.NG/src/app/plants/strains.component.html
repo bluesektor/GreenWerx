@@ -1,0 +1,120 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<app-messageboxes></app-messageboxes>
+
+<div id="pnlStrains">
+        <div  *ngIf="!deletingData">
+            <div class="cell-block">
+                <label>Varieties:</label>
+            </div>
+            <div class="cell-block">
+                <select class="form-control input-sm" id="cboCategories" name="cboCategories"
+                        [(ngModel)]="selectedCategoryUUID"
+                        (ngModelChange)="cboCategoryChange($event)">
+                    <option value="">Select a variety</option>
+                    <option *ngFor="let category of categories;let i = index;" [attr.selected]="selectedCategoryUUID == category.UUID" value="{{category.UUID}}">
+                        {{category.Name}}
+                    </option>
+                   
+                </select>
+            </div>
+            <div class="cell-block" style="width:50%;" >
+                <input type="text" class="form-control" id="txtStrainsSearch" placeholder="&#xF002;" 
+                       style="font-family:Arial, FontAwesome;"
+                       (ngModelChange)="onSearchStrains($event)"
+                       [(ngModel)]="searchStrains.SearchTerm" />
+            </div>
+            <div *ngIf="deletingData" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+            <br />
+        </div>
+        <div class="row">
+            <p-dataTable [value]="strains"
+                         selectionMode="single"
+                         [(selection)]="selectedStrain"
+                         (onRowSelect)="onRowSelect($event)"
+                         [paginator]="true"
+                         rows="25"
+                         [loading]="loadingData"
+                         [responsive]="true"
+                         [lazy]="true"
+                         (onLazyLoad)="lazyLoadStrainsList($event)"
+                         [totalRecords]="totalRecords">
+                <p-header>Strains</p-header>
+                <p-column field="Name" header="Name" [sortable]="true"></p-column>
+                <p-footer>
+                    <div class="ui-helper-clearfix" style="width:25%">
+                        <button type="button" class="form-control input-sm" value="Add"
+                                (click)="showDialogToAdd()" label="Add">
+                            <i class="fa fa-plus" style="color:green;"></i> Add
+                        </button>
+                    </div>
+                </p-footer>
+            </p-dataTable>
+
+            <!--Dialog for  crud actions -->
+            <p-dialog header="Strain Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+                <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="selectedStrain">
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input pInputText id="Name" [(ngModel)]="selectedStrain.Name" class="input-sm form-control" />
+                    </div>
+                      
+                    <div class="form-group">
+                        <label for="CategoryUUID">Variety</label>
+                        <select class="form-control input-sm" id="cboCategories" name="cboCategories"
+                                [(ngModel)]="selectedStrain.CategoryUUID">
+                            <option *ngFor="let category of categories" value="{{category.UUID}}">
+                                {{category.Name}}
+                            </option>
+                        </select>
+                    </div>
+               
+                    <div class="form-group" style="z-index:9050!important;">
+                        <label for="cboAccounts">Breeder:{{selectedAccount}}</label>
+                        <p-autoComplete  [suggestions]="filteredAccounts" field="Name" 
+                            (completeMethod)="filterAccounts($event)" [size]="30"
+                            [minLength]="1" placeholder="Hint: type 'v' or 'f'" 
+                            [dropdown]="true" (onDropdownClick)="handleAccountDropdownClick($event)"
+                            (onSelect)="onSelectAccount($event)" >
+                        </p-autoComplete>
+                    </div>
+                  <div class="form-group">
+                        <p-checkbox [(ngModel)]="selectedStrain.AutoFlowering" label="Autoflowering" binary="selectedStrain.AutoFlowering"></p-checkbox>
+                    </div>
+                    <div class="form-group">
+                        <label for="IndicaPercent">Indica Percent</label>
+                        <input pInputText id="IndicaPercent" [(ngModel)]="selectedStrain.IndicaPercent" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="SativaPercent">Sativa Percent</label>
+                        <input pInputText id="SativaPercent" [(ngModel)]="selectedStrain.SativaPercent" class="input-sm form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Generation">Generation</label>
+                        <input pInputText id="Generation" [(ngModel)]="selectedStrain.Generation" class="input-sm form-control" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="HarvestTime">HarvestTime</label>
+                        <input pInputText id="HarvestTime" [(ngModel)]="selectedStrain.HarvestTime" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Lineage">Lineage</label>
+                        <input pInputText id="Lineage" [(ngModel)]="selectedStrain.Lineage" class="input-sm form-control" />
+                    </div>
+                    
+                </div>
+                <p-footer>
+                    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px;" pButton class="form-control input-sm" (click)="saveStrain()" label="Save"><i class="fa fa-check" style="color:green;"></i> Save</button>
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm" (click)="cancel()" label="Cancel"><i class="fa fa-close"></i> Cancel</button>
+                        <button *ngIf="!newStrain" type="button" style="display: block; margin: 0 auto;" pButton class="form-control input-sm" (click)="onClickDeleteStrain()" label="Delete"><i class="fa fa-trash" style="color:red;"></i> Delete</button>
+                    </div>
+                </p-footer>
+            </p-dialog>
+
+        </div>
+</div>

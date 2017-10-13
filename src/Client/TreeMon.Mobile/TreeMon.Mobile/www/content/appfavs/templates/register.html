@@ -1,0 +1,45 @@
+﻿<ion-view view-title="Ionic Test" hide-nav-bar="true" class="splash-page">
+    <ion-content scroll="false">
+        <div class="padding logo">
+            <h1>Ionic Test</h1>
+        </div>
+        <div class="login-form">
+            http://plnkr.co/edit/FipgiTUaaymm5Mk6HIfn?p=preview
+            <div class="card">
+                <div class="list">
+                    <label class="item item-input" >
+                        <input name="UserName" type="text" ng-model="form.UserName" placeholder="Enter your desired username" required >
+                    </label>
+                <label class="item item-input" style="padding-top:10px;">
+                    
+                    <input name="Password" type="password" ng-model="form.UserPassword" placeholder="Password"   required >
+                </label>
+                <label class="item item-input">
+                    <i class="icon ion-search placeholder-icon"></i>
+                    <input name="PasswordConfirm" type="password" ng-model="form.UserPasswordConfirm" placeholder="Confirm Password"
+                       required    compare-to="form.password" >
+                </label>
+                    <!--<div ng-messages-include="messages.html"></div>-->
+                    <div  ng-messages="form.UserPasswordConfirm.$error">
+                         
+                        <!--<div class="messages">
+                            <div ng-message="required">Required</div>
+                            <div ng-message="minlength">Too short</div>
+                            <div ng-message="maxlength">Too long</div>
+                            <div ng-message="email">Invalid email address</div>
+                            <div ng-message="compareTo">Must match the previous entry</div>
+                        </div>-->
+
+                    </div>
+                </div>
+            </div>
+            <div class="padding-left padding-right">
+                <button class="button button-block action-button" ng-class="button-balanced" ng-click="submitForm(form)">Sign Up</button>
+            </div>
+        </div>
+
+
+        <div class="padding signup-opt" ></div>
+        <a style="text-decoration:none;" href="#/"><div class="padding signup-opt">Have an account? Sign in!</div></a>
+    </ion-content>
+</ion-view>

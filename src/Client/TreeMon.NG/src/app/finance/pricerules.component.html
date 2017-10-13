@@ -1,0 +1,126 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<app-messageboxes></app-messageboxes>
+<div id="pnlPriceRules">
+        <div class="row">
+            <p-dataTable #dt [value]="listData" 
+                [totalRecords]="listCount" 
+                selectionMode="single" 
+                [(selection)]="selectedItem" 
+                (onRowSelect)="onRowSelect($event.data)"
+                [paginator]="true" rows="25" [responsive]="true" [lazy]="true" (onLazyLoad)="lazyLoadPriceRuleList($event)">
+                <p-header>PriceRules</p-header>
+                <p-column field="Name" header="Name" [sortable]="true">
+                    <ng-template let-listItem="rowData" pTemplate="body">
+                        <img src="{{baseUrl}}{{listItem.Image}}" style="height:32px;" (click)="onRowSelect(listItem)" />
+                        <label (click)="onRowSelect(listItem)">{{listItem.Name}}</label>
+                    </ng-template>
+                </p-column>
+                <p-column field="ReferenceType" header="Type"></p-column>
+                <p-column field="Code" header="Code"></p-column>
+                <p-column field="MaxUseCount" header="Max Use"></p-column>
+                <p-column field="Expires" header="Expires"></p-column>
+                <p-column field="Mandatory" header="Mandatory"></p-column>
+                <p-column field="Minimum" header="Minimum"></p-column>
+                <p-column field="Maximum" header="Maximum"></p-column>
+                <p-footer>
+                    <div class="cell-block" style="width:25%">
+                        <button type="button" class="form-control input-sm" value="Add" (click)="showDialogToAdd()" label="Add">
+                            <i class="fa fa-plus" style="color:green;"></i> Add
+                        </button>
+                    </div>
+                </p-footer>
+            </p-dataTable>
+           
+            <!--Dialog for  crud actions -->
+            <p-dialog header="PriceRule Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+                <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="selectedItem">
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input pInputText id="Name" [(ngModel)]="selectedItem.Name" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Type">Type</label>
+                        <select class="form-control input-sm" id="cboPriceReferenceRuleTypes" name="cboPriceReferenceRuleTypes" [(ngModel)]="selectedItem.ReferenceType"
+                            (ngModelChange)="cboPriceRuleTypeChange($event)">
+                            <option *ngFor="let priceRuleType of priceRuleTypes;" value="{{priceRuleType}}">
+                                {{priceRuleType}}
+                            </option>
+                            <option value="custom">Custom...</option>
+                        </select>
+                        <input *ngIf="selectedItem.ReferenceType == 'custom'" [(ngModel)]="customType" pInputText id="ReferenceType" class="input-sm form-control"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="Code">Code</label>
+                        <input pInputText id="Code" [(ngModel)]="selectedItem.Code" class="input-sm form-control" />
+                    </div>
+                    <div class="form=group">
+                        <label>Expires:<span style="margin-left:35px">{{selectedItem.Expires|date}}</span></label>
+                        <p-calendar  [(ngModel)]="expires"    [showIcon]="true"></p-calendar>
+                       
+
+                    </div>
+                    <div class="form=group">
+                        <label>Price:${{price}}</label>
+                    </div>
+                    <div class="form=group">
+                        <label for="Type">Operators</label>
+                        <select class="form-control input-sm" id="cboPriceRuleOperators" name="cboPriceRuleOperators" [(ngModel)]="selectedItem.Operator"
+                            (ngModelChange)="cboPriceRuleOperatorChange($event)">
+                            <option *ngFor="let operator of operators;" value="{{operator}}">
+                                {{operator}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form=group">
+                        <label for="Operand">Operand</label>
+                        <input pInputText id="Operand" (ngModelChange)="txtOperandChanged($event)" [(ngModel)]="selectedItem.Operand" class="input-sm form-control"
+                        />
+                    </div>
+                    <div class="form=group">
+                        <label for="Result">Total: ${{this.selectedItem.Result}}</label>
+                    </div>
+                    <!--<div class="form-group" style="padding-top:10px;">
+                            <img src="{{baseUrl}}{{selectedItem.Image}}" style="width:64px;height:64px;" (click)="editImage = !editImage" />
+                            <p-fileUpload *ngIf="editImage" name="uploadedFiles[]" url="{{fileUploadUrl}}{{selectedItem.UUID}}/{{selectedItem.UUIDType}}"
+                                          id="{{selectedItem.UUID}}"
+                                          (onBeforeSend)="onBeforeSendFile($event)"
+                                          (onUpload)="onImageUpload($event,selectedItem.UUID)" accept="image/*" maxFileSize="1000000"></p-fileUpload>
+                     </div>-->
+                    <div class="form-group">
+                        <label for="MaxUse">Max Use Count</label>
+                        <input pInputText id="MaxUse" (ngModelChange)="txtMaxUseChanged($event)" [(ngModel)]="selectedItem.MaxUseCount" class="input-sm form-control"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="Minimum">Minimum</label>
+                        <input pInputText id="Minimum" (ngModelChange)="txtMinimumChanged($event)" [(ngModel)]="selectedItem.Minimum" class="input-sm form-control"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="Maximum">Maximum</label>
+                        <input pInputText id="Maximum" (ngModelChange)="txtMaximumChanged($event)" [(ngModel)]="selectedItem.Maximum" class="input-sm form-control"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <p-checkbox [(ngModel)]="selectedItem.Mandatory" id="Mandatory" label="Mandatory" binary="false"></p-checkbox>
+                    </div>
+                </div>
+                <p-footer>
+                    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px;" pButton class="form-control input-sm" (click)="save()"
+                            label="Save"><i class="fa fa-check" style="color:green;"></i> Save</button>
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm"
+                            (click)="cancel()" label="Cancel"><i class="fa fa-close"></i> Cancel</button>
+                        <button *ngIf="!newPriceRule" type="button" style="display: block; margin: 0 auto;" pButton class="form-control input-sm"
+                            (click)="delete()" label="Delete"><i class="fa fa-trash" style="color:red;"></i> Delete</button>
+                    </div>
+                </p-footer>
+            </p-dialog>
+
+        </div>
+  
+</div>

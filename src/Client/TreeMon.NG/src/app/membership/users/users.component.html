@@ -1,0 +1,47 @@
+﻿<br/>
+<app-messageboxes></app-messageboxes>
+<p-dataTable [value]="users" 
+             selectionMode="single" 
+             [(selection)]="selectedUser" 
+             (onRowSelect)="onRowSelect($event)" [paginator]="true" rows="15" [responsive]="true">
+    <p-header>Users</p-header>
+    <p-column field="Name" header="Name" [sortable]="true"></p-column>
+    <p-column field="Email" header="Email" [sortable]="true"></p-column>
+    <p-column field="Approved" header="Approved" [sortable]="true"></p-column>
+    <p-column field="Banned" header="Banned" [sortable]="true"></p-column>
+  
+    <p-footer>
+        <div class="ui-helper-clearfix" style="width:25%">
+            <button type="button"  class="form-control input-sm" value="Add"
+                    (click)="showDialogToAdd()" label="Add"><i class="fa fa-plus" style="color:green;" ></i> Add</button>
+        </div>
+    </p-footer>
+</p-dataTable>
+
+<!--Dialog for  crud actions -->
+<p-dialog header="User Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+    <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="user">
+        <div class="form-group">
+            <label for="Name">Name</label>
+          <input pInputText id="Name" [(ngModel)]="user.Name"  class="input-sm form-control" />
+        </div>
+        <div class="form-group">
+            <label for="Email">Email</label>
+           <input pInputText id="Email" [(ngModel)]="user.Email"  class="input-sm form-control" />
+        </div>
+       
+        <div class="form-group">
+            <p-checkbox [(ngModel)]="user.Approved"  id="Approved" label="Approved" binary="true" ></p-checkbox>
+        </div>
+        <div class="form-group">
+            <p-checkbox [(ngModel)]="user.Banned" id="Banned" label="Banned" binary="true"></p-checkbox>
+        </div>
+    </div>
+    <p-footer>
+        <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+            <button type="button"  style="display: block; margin: 0 auto;  margin-top:10px;" pButton class="form-control input-sm" (click)="save()" label="Save"><i class="fa fa-check" style="color:green;"></i> Save</button>
+            <button type="button"  style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm" (click)="cancel()" label="Cancel"><i class="fa fa-close"></i> Cancel</button>
+            <button type="button"  style="display: block; margin: 0 auto;" pButton class="form-control input-sm" (click)="delete()" label="Delete"><i class="fa fa-trash" style="color:red;"></i> Delete</button>
+        </div>
+</p-footer>
+</p-dialog>

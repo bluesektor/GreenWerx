@@ -1,0 +1,214 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+
+<app-messageboxes></app-messageboxes>
+<div class="row" style="padding-top:15px;">
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-md-6">
+                        Database: <label name="lblDefaultDatabase">{{defaultDatabase}}</label>
+                    </div>
+                    <div class="col-md-6">
+                    
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <p-dataTable [value]="databaseBackups" 
+                             selectionMode="single"
+                             [(selection)]="selectedDbBackup"
+                             (onRowSelect)="onDbBackupRowSelect($event)"
+                             [paginator]="true" rows="15" [responsive]="true">
+                    <p-header>Backups</p-header>
+                    <p-column  header="File" [sortable]="true"  >
+                        <ng-template let-col let-q="rowData" let-ri="rowIndex" pTemplate="body"  >
+                            <div>{{q}}</div>
+                        </ng-template>
+                    </p-column>
+                   
+                    <p-footer>
+                        {{selectedDbBackup}}
+                            <div class="cell-block">
+                                <button *ngIf="!processingRequest" id="btnBackupDatabase" (click)="btnBackupDatabaseClick($event)" type="button" class="form-control" style="width:100px;float:right;margin-right: .3em;">
+                                    Backup
+                                </button>
+                            </div>
+                            <div class="cell-block">
+                                <button *ngIf="!processingRequest" id="btnRestoreDatabase" (click)="btnRestoreDatabaseClick($event)" type="button" class="form-control" style="width:100px;float:right;margin-right: .3em;margin-top:.3em;">
+                                    Restore
+                                </button>
+                            </div>
+                    </p-footer>
+                </p-dataTable>
+            </div>
+            <div class="panel-footer">
+              
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel panel-warning">
+            <div class="panel-heading">Encryption</div>
+            <div class="panel-body">
+                    <input type="text"  class="form-control block"  [(ngModel)]="cipherSource" /> <br />
+                <div class="cell-block">
+
+                    <button *ngIf="!processingRequest" id="btnEncrypt" (click)="btnEncryptClick($event)" type="button" class="form-control" style="width:100px;">
+                        Encrypt
+                    </button>
+                </div>
+                <div class="cell-block">
+                    <button *ngIf="!processingRequest" id="btnDecrypt" (click)="btnDecryptClick($event)" type="button" class="form-control" style="width:100px;">
+                        Decrypt
+                    </button>
+                </div>
+                    <br />
+                    <br />
+                    <label>Result:</label><br />
+                    <div id="result">{{cipherResult}}</div>
+                </div>
+            <div class="panel-footer panel-custom-warning">Encryption</div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel panel-warning">
+            <div class="panel-heading">Test Code</div>
+            <div class="panel-body">
+                <div class="cell-block">
+                    <button *ngIf="!processingRequest" id="btnTestCode" (click)="btnTestCodeClick($event)" type="button" class="form-control" style="width:100px;">
+                        Test
+                    </button>
+                </div>
+                <br />
+                <br />
+                <label>Result:</label><br />
+                <div id="result">{{testResult}}</div>
+            </div>
+            <div class="panel-footer panel-custom-warning"></div>
+        </div>
+    </div>
+</div>
+<!-- Second Row  -->
+<div class="row" style="padding-top:15px;">
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Import Files</h5>  
+                    </div>
+                    <div class="col-md-6">
+
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+<!-- Upload files  -->
+                <div class="row"   >
+                    Upload a file:<br/>
+                    <div class="cell-block" style="width:45%">
+                        <!--todo these two should be radio buttons not checkboxes import {RadioButtonModule} <p-radioButton  -->
+                        <p-checkbox name="validationgroup" [(ngModel)]="validate" label="Validate" (onChange)="chkValidateClick($event)" binary="validate"></p-checkbox>
+                    </div>
+                    <div class="cell-block" style="width:45%">
+                        <p-checkbox name="validationgroup" [(ngModel)]="validateGlobally" label="Validate Globally" (onChange)="chkValidateGloballyClick($event)" binary="validateGlobally"></p-checkbox>
+                    </div>
+                    <select id="cboDataTypes" class="form-control input-sm" style="width:100%;" (change)="cboDataTypeChanged($event.target.value)">
+                        <option value="">Select type..</option>
+                        <option *ngFor="let type of dataTypes" value="{{type}}">{{type}}</option>
+                    </select>
+                    <p-fileUpload *ngIf="dataType !== ''"   name="uploadedFiles[]" url="{{baseUrl}}api/Tools/ImportFile/{{dataType}}/Validate/{{validate}}/ValidateGlobally/{{validateGlobally}}"
+                        id="xxTESTxx"
+                        (onBeforeSend)="onBeforeSendFile($event)"
+                        (onUpload)="onFileUpload($event )" accept=".txt,.json,.csv/*" maxFileSize="1000000000000"></p-fileUpload>
+                    
+                </div>
+                <!--
+                <br/>
+                <label>Import files on server:</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <select id="cboImportFiles" class="form-control input-sm" style="width:100%;"
+                                [(ngModel)]="selectedImportFile">
+                            <option *ngFor="let file of importFiles" value="{{file}}">
+                                {{file}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <button *ngIf="!processingRequest" id="btnImportFiles" (click)="btnImportFilesClick($event)" 
+                                type="button" class="form-control" style="width:100px;float:left;margin-bottom:.3em;">
+                            Import
+                        </button>
+                    </div>
+                </div>
+            -->
+            </div>
+            <div class="panel-footer">
+               
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="panel panel-warning">
+            <div class="panel-heading">Data Management</div>
+            <div class="panel-body">
+                <div class="cell-block">
+                    <select id="cboTableNames" class="form-control input-sm" style="width:100%;" (change)="cboTableNamesChanged($event.target.value)" >
+                        <option *ngFor="let name of tableNames" value="{{name}}">{{name}}</option>
+                    </select>
+                </div>
+                <div class="cell-block">
+                    <button *ngIf="!processingRequest" id="btnScanTableNames" (click)="btnScanTableNamesClick($event)"
+                            type="button" class="form-control" style="width:100%;">
+                        Scan Names
+                    </button>
+                </div>
+                <p-dataTable [value]="scanResult"
+                             [totalRecords]="scanResultCount"
+                             selectionMode="single"
+                             [(selection)]="selectedDuplicate"
+                             (onRowSelect)="onRowSelectDuplicate($event.data)"
+                             [paginator]="true"
+                             rows="25"
+                             [responsive]="true">
+                    <p-header>Duplicates</p-header>
+                    <p-column field="key" header="Name" [sortable]="true" ></p-column>
+                    <p-footer>
+                    </p-footer>
+                </p-dataTable>
+
+                <table>
+                    <tr><th>Table and Name</th><th>Account</th><th>Action</th></tr>
+                    <tr *ngFor="let result of searchResults" > 
+                        <td >{{result.SafeName}}</td>
+                        <td><a  target="_blank" href="https://www.google.com/search?q={{result.Name}}">{{result.Name}}</a></td>
+                        
+                        <td>{{result.AccountUUID}}</td>
+                        <td>
+                            <button *ngIf="!processingRequest" id="btnScanTableNames" (click)="btnDeleteRecordClick($event,result.UUID)"
+                                 style="background-color:red;width:50px;"      type="button" class="form-control">
+                                Delete
+                                <!--{{result.UUID}}-->
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+                
+             <!--select table
+                scan for duplicates (exact and homoginize the name - take out spaces .. only alpha numeric)
+                                     see if we can implement the search all tables query
+                    check for references via uuid
+                merge duplicates
+                    select core record (merge into)
+                delete duplicates-->
+            </div>
+            <div class="panel-footer panel-custom-warning"> </div>
+        </div>
+    </div>
+</div>

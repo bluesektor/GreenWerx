@@ -1,0 +1,14 @@
+﻿<div *ngIf="showMessageBox" id="msgBoxes" class="message-boxes">
+    <div id="msgBoxError" 
+         [ngClass]="{ 'alert alert-danger alert-dismissible' : messageType === 'error'
+                 , 'alert alert-info alert-dismissible' : messageType === 'info'
+                 , 'alert alert-warning alert-dismissible' : messageType === 'warning'
+                 , 'alert alert-ok alert-dismissible' : messageType === 'ok'
+                 , 'alert alert-success alert-dismissible' : messageType === 'success' }"
+         role="alert" >
+        <button type="button" class="close" data-dismiss="alert" (click)="closeMessageBox()"  >
+            <span>&times;</span><span  class="sr-only"> Close</span>
+        </button>
+        <div ID="msgError" Font-Bold="true" style="padding:15px;" >{{message}}</div>
+    </div>
+</div>

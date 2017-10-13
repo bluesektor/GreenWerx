@@ -1,0 +1,94 @@
+﻿<ion-view title="Profile" ng-controller="UserProfileCtrl as userProfile" data-ng-init="Initialize()">
+    <ion-content>
+        <form name="frmProfile" action="#" novalidate role="form">
+            <ion-content class="padding">
+                <label class="item item-input">
+                    <span class="input-label">Username</span>
+                    <input ng-model="userProfile.UserName" name="UserName" type="text" value="{{userProfile.UserName}}">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Email</span>
+                    <input ng-model="userProfile.Email" name="Email" type="email" value="{{userProfile.Email}}">
+                </label>
+                <!--  pic             -->
+                <label class="item item-input">
+                    <span class="input-label">Gender</span>
+                    <input ng-model="userProfile.Gender" name="Gender" type="text" value="{{userProfile.Gender}}">
+                </label>
+
+                <label class="item item-input">
+                    <span class="input-label">Height</span>
+                    <input ng-model="userProfile.Height" name="Height" type="text" value="{{userProfile.Height}}">
+                </label>
+
+                <label class="item item-input">
+                    <span class="input-label">Weight</span>
+                    <input ng-model="userProfile.Weight" name="Weight" type="text" value="{{userProfile.Weight}}">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">BF%</span>
+                    <input ng-model="userProfile.BodyFat" name="BodyFat" type="text" value="{{userProfile.BodyFat}}">
+                </label>
+
+                <label class="item item-input">
+                    <span class="input-label">Birth Date</span>
+                    <input ng-model="userProfile.BirthDate" name="BirthDate" type="date" value="{{userProfile.BirthDate}}">
+                </label>
+
+        </form>
+
+        <button ng-hide="IsLoggedIn()" ng-click="SaveProfile(userProfile); $event.preventDefault();" class="disable-hover button button-default"><span class="button-inner">Save</span><ion-button-effect></ion-button-effect></button>
+        <button ng-hide="IsLoggedIn()" class="disable-hover button button-default"><span class="button-inner">Sign In</span><ion-button-effect></ion-button-effect></button>
+        <button ng-show="IsLoggedIn()" danger="" class="disable-hover button button-default button-danger"><span class="button-inner">Sign Out</span><ion-button-effect></ion-button-effect></button>
+        <button ng-show="IsLoggedIn()" danger="" class="disable-hover button button-default button-danger"><span class="button-inner">Sign Up</span><ion-button-effect></ion-button-effect></button>
+
+        <hr />
+        other controls
+        <label class="item item-input">
+            <span class="input-label">Password</span>
+            <input type="password">
+        </label>
+
+        <label class="item item-input">
+            <span class="input-label">Month</span>
+            <input type="month">
+        </label>
+
+        <label class="item item-input">
+            <span class="input-label">Date</span>
+            <input type="date">
+        </label>
+
+        <label class="item item-input">
+            <span class="input-label">Number</span>
+            <input type="number">
+        </label>
+
+        <label class="item item-input">
+            <i class="icon ion-search placeholder-icon"></i>
+            <input type="search" placeholder="Search">
+        </label>
+
+        <label class="item item-input">
+            <span class="input-label">Telephone</span>
+            <input type="tel">
+        </label>
+
+        <hr /> custom
+        <!--
+
+            CSS
+            label#rounded{border-radius:15px; }
+            div#container{width: 300px; margin-left:auto; margin-right: auto; }
+
+            HTML
+            <label id="rounded" class="item item-input">
+                <img src="https://dl.dropboxusercontent.com/s/n2s5u9eifp3y2rz/search_icon.png?dl=0">
+                <input type="text" placeholder="Search">
+            </label>
+
+            -->
+
+        <a class="button icon ion-home" href="#/tab/home">Home</a>
+    </ion-content>
+</ion-view>

@@ -1,0 +1,42 @@
+﻿[
+  {
+    "outputFile": "www/css/app.wp.css",
+    "inputFile": "www/css/app.wp.scss"
+  },
+  {
+    "outputFile": "www/css/app.core.css",
+    "inputFile": "www/css/app.core.scss"
+  },
+  {
+    "outputFile": "www/css/app.ios.css",
+    "inputFile": "www/css/app.ios.scss"
+  },
+  {
+    "outputFile": "www/css/app.md.css",
+    "inputFile": "www/css/app.md.scss"
+  },
+  {
+    "outputFile": "www/css/src/ionic.ios.css",
+    "inputFile": "www/css/src/ionic.ios.scss"
+  },
+  {
+    "outputFile": "www/css/src/globals.ios.css",
+    "inputFile": "www/css/src/globals.ios.scss"
+  },
+  {
+    "outputFile": "www/css/src/components/app/app.ios.css",
+    "inputFile": "www/css/src/components/app/app.ios.scss"
+  },
+  {
+    "outputFile": "www/css/src/components/app/app.md.css",
+    "inputFile": "www/css/src/components/app/app.md.scss"
+  },
+  {
+    "outputFile": "www/css/src/components/app/app.wp.css",
+    "inputFile": "www/css/src/components/app/app.wp.scss"
+  },
+  {
+    "outputFile": "www/css/src/fonts/ionicons.css",
+    "inputFile": "www/css/src/fonts/ionicons.scss"
+  }
+]

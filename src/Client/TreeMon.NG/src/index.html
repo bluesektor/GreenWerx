@@ -1,0 +1,34 @@
+<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+    <base href="/">
+  <meta charset="utf-8">
+  <title>TreeMon.NG</title>
+  
+  <link href="assets/styles/bootstrap.css" rel="stylesheet" />
+  <link href="assets/styles/themes/sbadmin2.css" rel="stylesheet" />
+  <link href="assets/styles/site.css" rel="stylesheet" type="text/css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico?1">
+  <style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+  </style>
+  <script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+</head>
+<body>
+  <app-root>Loading app....</app-root>
+</body>
+</html>

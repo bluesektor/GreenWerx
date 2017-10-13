@@ -1,0 +1,523 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6747723C-E97E-461D-9936-B2A3CC230A36}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TreeMon.WebAPI</RootNamespace>
+    <AssemblyName>TreeMon.WebAPI</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort>44318</IISExpressSSLPort>
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AutoMapper, Version=5.2.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.5.2.0\lib\net45\AutoMapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MoreLinq, Version=2.6.20831.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
+      <HintPath>..\packages\morelinq.2.6.0\lib\net40\MoreLinq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Cors, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Cors.5.2.3\lib\net45\System.Web.Cors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Http.Cors, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Cors.5.2.3\lib\net45\System.Web.Http.Cors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+    </Reference>
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="WebApiThrottle, Version=1.5.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebApiThrottle.1.5.4\lib\net45\WebApiThrottle.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="XCaptcha, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Common\3rdParty\XCaptcha.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="api\ApiBaseController.cs" />
+    <Compile Include="api\v1\OrdersController.cs" />
+    <Compile Include="api\v1\PaymentGateway.cs" />
+    <Compile Include="Helpers\ContextHelper.cs" />
+    <Compile Include="Helpers\NetworkHelper.cs" />
+    <Compile Include="api\v1\AccountsController.cs" />
+    <Compile Include="api\v1\AnatomyController.cs" />
+    <Compile Include="api\v1\AnatomyTagsController.cs" />
+    <Compile Include="api\v1\AppsController.cs" />
+    <Compile Include="api\v1\CategoriesController.cs" />
+    <Compile Include="api\v1\DosesController.cs" />
+    <Compile Include="api\v1\EquipmentController.cs" />
+    <Compile Include="api\v1\FinanceController.cs" />
+    <Compile Include="api\v1\GeoController.cs" />
+    <Compile Include="api\v1\InventoryController.cs" />
+    <Compile Include="api\v1\NotificationsController.cs" />
+    <Compile Include="api\v1\PollsController.cs" />
+    <Compile Include="api\v1\ProductsController.cs" />
+    <Compile Include="api\v1\RemindersController.cs" />
+    <Compile Include="api\v1\ReportsController.cs" />
+    <Compile Include="api\v1\RolesController.cs" />
+    <Compile Include="api\v1\SessionsController.cs" />
+    <Compile Include="api\v1\SideAffectsController.cs" />
+    <Compile Include="api\v1\SiteController.cs" />
+    <Compile Include="api\v1\StatusMessageController.cs" />
+    <Compile Include="api\v1\StoreController.cs" />
+    <Compile Include="api\v1\StrainsController.cs" />
+    <Compile Include="api\v1\SymptomsController.cs" />
+    <Compile Include="api\v1\ToolsController.cs" />
+    <Compile Include="api\v1\UnitsOfMeasureController.cs" />
+    <Compile Include="api\v1\UsersController.cs" />
+    <Compile Include="api\v1\VendorsController.cs" />
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Filters\ApiAuthenticationFilter.cs" />
+    <Compile Include="Filters\ApiAuthorizationRequiredAttribute.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Globals.cs" />
+    <Compile Include="Helpers\CookieHelper.cs" />
+    <Compile Include="Helpers\Select2Helpers.cs" />
+    <Compile Include="Models\ApiCommand.cs" />
+    <Compile Include="Models\ChangePassword.cs" />
+    <Compile Include="Models\ContactUsForm.cs" />
+    <Compile Include="Models\Dashboard.cs" />
+    <Compile Include="Models\DatabaseBackupForm.cs" />
+    <Compile Include="Models\DoseLogForm.cs" />
+    <Compile Include="Models\MenuItem.cs" />
+    <Compile Include="Models\ProductForm.cs" />
+    <Compile Include="Models\ProfileForm.cs" />
+    <Compile Include="Models\ReminderForm.cs" />
+    <Compile Include="Models\SendAccountInfoForm.cs" />
+    <Compile Include="Models\StrainForm.cs" />
+    <Compile Include="Models\TosApiKey.cs" />
+    <Compile Include="Models\UserForm.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebApplication.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="api\index.html" />
+    <Content Include="App_Data\SQLScripts\MS.Backup.sql" />
+    <Content Include="App_Data\SQLScripts\MS.Restore.sql" />
+    <Content Include="App_Data\SQLScripts\SearchAllTables.sql" />
+    <Content Include="App_Data\Templates\EmailNewMember.html" />
+    <Content Include="App_Data\Templates\PasswordReset.html" />
+    <Content Include="App_Data\Templates\PasswordResetEmail.html" />
+    <Content Include="Content\Default\Images\Currency\Coin - Single %28Gold%29_32x32.png" />
+    <Content Include="Content\Default\Images\Currency\Coin - Single %28Silver%29_32x32.png" />
+    <Content Include="Content\Default\Images\Currency\Coin - Stack %28Gold%29.ico" />
+    <Content Include="Content\Default\Images\Currency\Coin - Stack %28Silver%29.ico" />
+    <Content Include="Content\Default\Images\Currency\Coin - Stacks %28Copper%29_32x32.png" />
+    <Content Include="Content\Default\Images\Currency\default.png" />
+    <Content Include="docs\affilliatetos.html" />
+    <Content Include="App_Data\Templates\EmailDelayedPaymentOrderReceived.html" />
+    <Content Include="App_Data\Templates\EmailOrderReceived.html" />
+    <Content Include="App_Data\Templates\EmailPaymentCleared.html" />
+    <Content Include="App_Data\Templates\TermsOfService.html" />
+    <Content Include="App_Data\Templates\UserInfo.html" />
+    <Content Include="App_Data\Templates\UserInfoEmail.html" />
+    <Content Include="App_Data\WordLists\CommonPasswords.txt" />
+    <Content Include="App_Data\WordLists\word.lst" />
+    <Content Include="Content\Default\Images\add.png" />
+    <Content Include="Content\Default\Images\Add_48x48.png" />
+    <Content Include="Content\Default\Images\bank.png" />
+    <Content Include="Content\Default\Images\Currency\Afghan-Afghani.ico" />
+    <Content Include="Content\Default\Images\Currency\Albanian-Lek.ico" />
+    <Content Include="Content\Default\Images\Currency\Albanian-Qindarka.ico" />
+    <Content Include="Content\Default\Images\Currency\Algerian-Dinar.ico" />
+    <Content Include="Content\Default\Images\Currency\Angolan-Kwanza.ico" />
+    <Content Include="Content\Default\Images\Currency\Aruban-Florin.ico" />
+    <Content Include="Content\Default\Images\Currency\Australian-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Bahamian-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Bahraini-Dinar.ico" />
+    <Content Include="Content\Default\Images\Currency\Bangladeshi-Taka.ico" />
+    <Content Include="Content\Default\Images\Currency\Barbadian-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Belarusian-Ruble.ico" />
+    <Content Include="Content\Default\Images\Currency\Belize-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Bermudian-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Bhutanese-Chetrum.ico" />
+    <Content Include="Content\Default\Images\Currency\Bhutanese-Ngultrum.ico" />
+    <Content Include="Content\Default\Images\Currency\Bosnian and Herzegovina-Convertible Mark.ico" />
+    <Content Include="Content\Default\Images\Currency\Botswana-Pula.ico" />
+    <Content Include="Content\Default\Images\Currency\Brazilian-Real.ico" />
+    <Content Include="Content\Default\Images\Currency\British-Pennies.ico" />
+    <Content Include="Content\Default\Images\Currency\British-Pounds.ico" />
+    <Content Include="Content\Default\Images\Currency\Brunei-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\btc.png" />
+    <Content Include="Content\Default\Images\Currency\Bulgarian-Lev.ico" />
+    <Content Include="Content\Default\Images\Currency\Burundian-Franc.ico" />
+    <Content Include="Content\Default\Images\Currency\Cambodian-Riel.ico" />
+    <Content Include="Content\Default\Images\Currency\Canadian-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Cape Verdean-Escudo.ico" />
+    <Content Include="Content\Default\Images\Currency\Cayman Islands-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Cent.ico" />
+    <Content Include="Content\Default\Images\Currency\Central African-CFA Franc.ico" />
+    <Content Include="Content\Default\Images\Currency\Chilean-Peso.ico" />
+    <Content Include="Content\Default\Images\Currency\Chinese-Renminbi Yuan.ico" />
+    <Content Include="Content\Default\Images\Currency\Colombian-Peso.ico" />
+    <Content Include="Content\Default\Images\Currency\Comorian-Franc.ico" />
+    <Content Include="Content\Default\Images\Currency\Costa Rican-Cólon.ico" />
+    <Content Include="Content\Default\Images\Currency\Croatian-Kuna-01.ico" />
+    <Content Include="Content\Default\Images\Currency\Croatian-Kuna-02.ico" />
+    <Content Include="Content\Default\Images\Currency\Cuban-Convertible Peso.ico" />
+    <Content Include="Content\Default\Images\Currency\Cuban-Peso.ico" />
+    <Content Include="Content\Default\Images\Currency\Czech-Haler.ico" />
+    <Content Include="Content\Default\Images\Currency\Czech-Koruna.ico" />
+    <Content Include="Content\Default\Images\Currency\dgc.jpg" />
+    <Content Include="Content\Default\Images\Currency\Djiboutian-Franc.ico" />
+    <Content Include="Content\Default\Images\Currency\Dobra.ico" />
+    <Content Include="Content\Default\Images\Currency\Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Dominican-Peso.ico" />
+    <Content Include="Content\Default\Images\Currency\East Caribbean-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Egyptian-Piastre.ico" />
+    <Content Include="Content\Default\Images\Currency\Egyptian-Pound.ico" />
+    <Content Include="Content\Default\Images\Currency\Eritrean-Nakfa.ico" />
+    <Content Include="Content\Default\Images\Currency\Ethiopian-Birr.ico" />
+    <Content Include="Content\Default\Images\Currency\Euro.ico" />
+    <Content Include="Content\Default\Images\Currency\European-Euro.ico" />
+    <Content Include="Content\Default\Images\Currency\Exchange.ico" />
+    <Content Include="Content\Default\Images\Currency\Fijian-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Franc.ico" />
+    <Content Include="Content\Default\Images\Currency\ftc.jpg" />
+    <Content Include="Content\Default\Images\Currency\Gambian-Dalasi.ico" />
+    <Content Include="Content\Default\Images\Currency\Georgian-Lari.ico" />
+    <Content Include="Content\Default\Images\Currency\Ghana-Cedi.ico" />
+    <Content Include="Content\Default\Images\Currency\gld.jpg" />
+    <Content Include="Content\Default\Images\Currency\Guatemalan-Quetzal.ico" />
+    <Content Include="Content\Default\Images\Currency\Guinean.ico" />
+    <Content Include="Content\Default\Images\Currency\Guyanese-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Haitian-Gourde.ico" />
+    <Content Include="Content\Default\Images\Currency\Hong Kong-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Hungarian-Forint.ico" />
+    <Content Include="Content\Default\Images\Currency\Icelandic-Krone.ico" />
+    <Content Include="Content\Default\Images\Currency\Indian-Rupee.ico" />
+    <Content Include="Content\Default\Images\Currency\Indonesian-Rupiah.ico" />
+    <Content Include="Content\Default\Images\Currency\Iranian-Rial.ico" />
+    <Content Include="Content\Default\Images\Currency\Iraqi-Dinar.ico" />
+    <Content Include="Content\Default\Images\Currency\Israeli-New Shekel.ico" />
+    <Content Include="Content\Default\Images\Currency\Jamaican-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Japanese-Yen.ico" />
+    <Content Include="Content\Default\Images\Currency\Jordanian-Dinar.ico" />
+    <Content Include="Content\Default\Images\Currency\Kenyan-Shilling.ico" />
+    <Content Include="Content\Default\Images\Currency\Kuwaiti-Dinar.ico" />
+    <Content Include="Content\Default\Images\Currency\Kyrgyzstani-Som.ico" />
+    <Content Include="Content\Default\Images\Currency\Lao-Kip.ico" />
+    <Content Include="Content\Default\Images\Currency\Latvian-Lats.ico" />
+    <Content Include="Content\Default\Images\Currency\Latvian-Santims.ico" />
+    <Content Include="Content\Default\Images\Currency\Lesotho-Loti.ico" />
+    <Content Include="Content\Default\Images\Currency\Liberian-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Libyan-Dinar.ico" />
+    <Content Include="Content\Default\Images\Currency\Lithuanian-Litas-01.ico" />
+    <Content Include="Content\Default\Images\Currency\Lithuanian-Litas-02.ico" />
+    <Content Include="Content\Default\Images\Currency\ltc.png" />
+    <Content Include="Content\Default\Images\Currency\Macanese-Pataca.ico" />
+    <Content Include="Content\Default\Images\Currency\Macedonian-Denar.ico" />
+    <Content Include="Content\Default\Images\Currency\Malagasy-Ariary.ico" />
+    <Content Include="Content\Default\Images\Currency\Malawian-Kwacha.ico" />
+    <Content Include="Content\Default\Images\Currency\Malaysian-Ringgit.ico" />
+    <Content Include="Content\Default\Images\Currency\Maldivian-Rufiyaa.ico" />
+    <Content Include="Content\Default\Images\Currency\Mauritanian-Ouguiya.ico" />
+    <Content Include="Content\Default\Images\Currency\Mexican-Peso.ico" />
+    <Content Include="Content\Default\Images\Currency\Mill.ico" />
+    <Content Include="Content\Default\Images\Currency\Mongolian-Togrog.ico" />
+    <Content Include="Content\Default\Images\Currency\Moroccan-Dirham.ico" />
+    <Content Include="Content\Default\Images\Currency\Mozambican-Metical.ico" />
+    <Content Include="Content\Default\Images\Currency\Mynamar-Kyat.ico" />
+    <Content Include="Content\Default\Images\Currency\Namibian-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Netherlands Antillean-Guilder.ico" />
+    <Content Include="Content\Default\Images\Currency\New Zealand-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Nicaraguan-Cordoba.ico" />
+    <Content Include="Content\Default\Images\Currency\Nigerian-Naira.ico" />
+    <Content Include="Content\Default\Images\Currency\nmc.jpg" />
+    <Content Include="Content\Default\Images\Currency\Omani-Rial.ico" />
+    <Content Include="Content\Default\Images\Currency\Panamanian-Balboa.ico" />
+    <Content Include="Content\Default\Images\Currency\Paraguayan-Guarani.ico" />
+    <Content Include="Content\Default\Images\Currency\Peruvian Nuevo-Sol.ico" />
+    <Content Include="Content\Default\Images\Currency\Philippine-Peso.ico" />
+    <Content Include="Content\Default\Images\Currency\pld.jpg" />
+    <Content Include="Content\Default\Images\Currency\plt.jpg" />
+    <Content Include="Content\Default\Images\Currency\Polish-Grosz.ico" />
+    <Content Include="Content\Default\Images\Currency\Polish-Zloty.ico" />
+    <Content Include="Content\Default\Images\Currency\Pound.ico" />
+    <Content Include="Content\Default\Images\Currency\ppc.png" />
+    <Content Include="Content\Default\Images\Currency\Qatari-Riyal.ico" />
+    <Content Include="Content\Default\Images\Currency\rho.png" />
+    <Content Include="Content\Default\Images\Currency\rpl.jpg" />
+    <Content Include="Content\Default\Images\Currency\Rupee.ico" />
+    <Content Include="Content\Default\Images\Currency\Rwandan-Franc.ico" />
+    <Content Include="Content\Default\Images\Currency\Samoan-Tala.ico" />
+    <Content Include="Content\Default\Images\Currency\Saudi-Riyal.ico" />
+    <Content Include="Content\Default\Images\Currency\Serbian-Dinar.ico" />
+    <Content Include="Content\Default\Images\Currency\Seychellois-Rupee.ico" />
+    <Content Include="Content\Default\Images\Currency\Sierra Leonean-Leone.ico" />
+    <Content Include="Content\Default\Images\Currency\Singapore-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\slv.jpg" />
+    <Content Include="Content\Default\Images\Currency\Solomon Islands-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Somali-Shilling.ico" />
+    <Content Include="Content\Default\Images\Currency\South African-Rand.ico" />
+    <Content Include="Content\Default\Images\Currency\Special-Drawing-Rights.ico" />
+    <Content Include="Content\Default\Images\Currency\Sri Lankan-Rupee.ico" />
+    <Content Include="Content\Default\Images\Currency\Stock-Exchange.ico" />
+    <Content Include="Content\Default\Images\Currency\Surinamese-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Swazi-Lilangeni.ico" />
+    <Content Include="Content\Default\Images\Currency\Swedish-Krona.ico" />
+    <Content Include="Content\Default\Images\Currency\Swiss-Franc.ico" />
+    <Content Include="Content\Default\Images\Currency\Taiwanese-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Thai-Baht.ico" />
+    <Content Include="Content\Default\Images\Currency\Transaction-Fee.ico" />
+    <Content Include="Content\Default\Images\Currency\Trinidad and Tobago-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Tunisian-Dinar.ico" />
+    <Content Include="Content\Default\Images\Currency\Ugandan-Shilling.ico" />
+    <Content Include="Content\Default\Images\Currency\Ukrainian-Hryvnia.ico" />
+    <Content Include="Content\Default\Images\Currency\United Arab Emirates-Dirham.ico" />
+    <Content Include="Content\Default\Images\Currency\United States-Dollar.ico" />
+    <Content Include="Content\Default\Images\Currency\Uruguayan-Peso.ico" />
+    <Content Include="Content\Default\Images\Currency\Vanuatu-Vatu.ico" />
+    <Content Include="Content\Default\Images\Currency\Venezuelan-Bolivar.ico" />
+    <Content Include="Content\Default\Images\Currency\Vietnamese-Dong.ico" />
+    <Content Include="Content\Default\Images\Currency\vtc.png" />
+    <Content Include="Content\Default\Images\Currency\West African-CFA Franc.ico" />
+    <Content Include="Content\Default\Images\Currency\Won.ico" />
+    <Content Include="Content\Default\Images\Currency\Yen.ico" />
+    <Content Include="Content\Default\Images\Currency\Zambian-Kwacha.ico" />
+    <Content Include="Content\Default\Images\Currency\Zimbabwean-Dollar.ico" />
+    <Content Include="docs\apitos.txt" />
+    <Content Include="docs\datalicenseagreement.txt" />
+    <Content Include="docs\eula.html" />
+    <Content Include="docs\privacynotice.html" />
+    <Content Include="Global.asax">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs\license.txt" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\Logs\" />
+    <Folder Include="App_Data\temp\" />
+    <Folder Include="Content\Uploads\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Common\TreeMon.Data\TreeMon.Data.csproj">
+      <Project>{bdf06218-41fa-4808-9dae-d027771a757f}</Project>
+      <Name>TreeMon.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\TreeMon.Managers\TreeMon.Managers.csproj">
+      <Project>{4b594255-e277-44aa-9107-cd4bffde0f5d}</Project>
+      <Name>TreeMon.Managers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\TreeMon.Models\TreeMon.Models.csproj">
+      <Project>{11a65c6e-7398-450d-b1e8-4152d0a1f48f}</Project>
+      <Name>TreeMon.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\TreeMon.Utilites\TreeMon.Utilites.csproj">
+      <Project>{3b4c1739-da22-4da4-bca6-99d52535112a}</Project>
+      <Name>TreeMon.Utilites</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_Data\WordLists\firehol_level1.netset" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_Data\DBBackups\web.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_Data\DBBackups\install.json" />
+    <Content Include="App_Data\DBBackups\SeedData\accounts.json" />
+    <Content Include="App_Data\DBBackups\SeedData\Anatomy.json" />
+    <Content Include="App_Data\DBBackups\SeedData\AnatomyTags.json" />
+    <Content Include="App_Data\DBBackups\SeedData\Categories.json" />
+    <Content Include="App_Data\DBBackups\SeedData\Currency.json" />
+    <Content Include="App_Data\DBBackups\SeedData\Locations.json" />
+    <Content Include="App_Data\DBBackups\SeedData\products.json" />
+    <Content Include="App_Data\DBBackups\SeedData\strains.json" />
+    <Content Include="App_Data\DBBackups\SeedData\UnitsOfMeasure.json" />
+    <None Include="App_Data\DBBackups\Web.Debug.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+    <Content Include="TreeMon.WebAPI.licenseheader" />
+    <Content Include="App_Data\Install\SeedData\Accounts.json" />
+    <Content Include="App_Data\Install\SeedData\Anatomy.json" />
+    <Content Include="App_Data\Install\SeedData\AnatomyTags.json" />
+    <Content Include="App_Data\Install\SeedData\Categories.json" />
+    <Content Include="App_Data\Install\SeedData\Currency.json" />
+    <Content Include="App_Data\Install\SeedData\Locations.json" />
+    <Content Include="App_Data\Install\SeedData\Products.json" />
+    <Content Include="App_Data\Install\SeedData\strains.json" />
+    <Content Include="App_Data\Install\SeedData\UnitsOfMeasure.json" />
+    <None Include="Properties\PublishProfiles\TreeMon.org DEV.pubxml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App_Data\DBBackups\Web.Release.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>51859</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>https://localhost:44318/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+</Project>

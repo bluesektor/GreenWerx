@@ -1,0 +1,1 @@
+﻿restore database {{DATABASE_NAME}} from disk = N'{{FILE_NAME_HERE}}' with file = 1

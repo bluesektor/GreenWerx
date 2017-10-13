@@ -1,0 +1,70 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<br />
+<app-messageboxes></app-messageboxes>
+<p-dataTable [value]="settings"
+             selectionMode="single"
+             [(selection)]="setting"
+             (onRowSelect)="onRowSelect($event)" 
+               [lazy]="true"
+                (onLazyLoad)="lazyLoadSettingsList($event)"
+              [totalRecords]="totalSettings"
+             [paginator]="true"
+              rows="25" 
+             [responsive]="true">
+    <p-header>Settings</p-header>
+    <p-column field="Name" header="Name" [sortable]="true"></p-column>
+    <p-column field="Value" header="Value" [sortable]="true"></p-column>
+    <p-column field="Type" header="Type" [sortable]="true"></p-column>
+    <p-column field="AppType" header="App. Type" [sortable]="true"></p-column>
+    <p-column field="RoleWeight" header="Role Weight" [sortable]="true"></p-column>
+    <p-column field="RoleOperation" header="Role Operation" [sortable]="true"></p-column>
+    <p-footer>
+        <div class="ui-helper-clearfix" style="width:25%">
+            <button type="button" class="form-control input-sm" value="Add"
+                    (click)="showDialogToAdd()" label="Add">
+                <i class="fa fa-plus" style="color:green;"></i> Add
+            </button>
+        </div>
+    </p-footer>
+</p-dataTable>
+
+<!--Dialog for  crud actions -->
+<p-dialog header="Setting Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+    <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="setting">
+        <div class="form-group">
+            <label for="Name">Name</label>
+            <input pInputText id="Name" [(ngModel)]="setting.Name" class="input-sm form-control" />
+            <label for="Value">Value</label>
+            <input pInputText id="Value" [(ngModel)]="setting.Value" class="input-sm form-control" />
+            <label for="cboTypes">Type</label>
+            <select class="form-control input-sm" id="cboTypes" name="cboTypes"
+                    [(ngModel)]="setting.Type"
+                    (ngModelChange)="cboTypeChange($event)">
+                <option *ngFor="let type of types" [attr.selected]="setting.Type === type.value" value="{{type.value}}">
+                    {{type.name}}
+                </option>
+            </select>
+
+            <label for="AppType">App Type</label>
+            <input pInputText id="AppType" [(ngModel)]="setting.AppType" class="input-sm form-control" />
+            <label for="RoleWeight">Role Weight</label>
+            <input pInputText id="RoleWeight" [(ngModel)]="setting.RoleWeight" class="input-sm form-control" (keypress)="keyPressRoleWeight($event)" />
+
+            <label for="RoleOperation">Role Operation</label>
+            <input pInputText id="RoleOperation" [(ngModel)]="setting.RoleOperation" class="input-sm form-control" />
+            <div class="form-group">
+                <p-checkbox [(ngModel)]="setting.Private" id="Private" label="Private" binary="false"></p-checkbox>
+            </div>
+        </div>
+    </div>
+    <p-footer>
+        <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+            <button type="button" style="display: block; margin: 0 auto;  margin-top:10px;" pButton class="form-control input-sm" (click)="save()" label="Save"><i class="fa fa-check" style="color:green;"></i> Save</button>
+            <button type="button" style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm" (click)="cancel()" label="Cancel"><i class="fa fa-close"></i> Cancel</button>
+            <button type="button" style="display: block; margin: 0 auto;" pButton class="form-control input-sm" (click)="delete()" label="Delete"><i class="fa fa-trash" style="color:red;"></i> Delete</button>
+        </div>
+    </p-footer>
+</p-dialog>

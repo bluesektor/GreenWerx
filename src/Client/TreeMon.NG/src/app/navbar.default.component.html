@@ -1,0 +1,41 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0;">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="/">{{pageTitle}}</a>
+        <ul *ngIf="navbarLinks?.length > 0" class="nav navbar-nav">
+            <li *ngFor="let link of navbarLinks; let index = index;" [ngClass]="{'active': highlightedDiv === index}" [attr.id]="index">
+
+                <a (click)="toggleActive(index);" routerLink="{{link.routerLink}}" routerLinkActive="active" class="{{link.icon}}">
+                    {{ link.label }}
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <ul class="nav navbar-top-links navbar-right" style="padding-right:20px;">
+        <!--as the other dropdowns are added remove the float:right -->
+        <tm-cart-dropdown></tm-cart-dropdown>
+        <li class="dropdown" (click)="toggleUserDropDown()" [class.open]="userDropDownExpanded" style="float:right;">
+
+            <a aria-expanded="false" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+            </a>
+            <ul *ngIf="userIsLoggedIn === true" class="dropdown-menu dropdown-user">
+                <li><a routerLink="/membership/profile" routerLinkActive="active"><i class="fa fa-user fa-fw"></i> Profile</a></li>
+                <li *ngIf="userIsAdmin === true" id="mnuAdminItem"><a href="/Admin"><i class="fa fa-gear fa-fw"></i> Admin</a></li>
+                <li class="divider"></li>
+                <li><a routerLink="/membership/login" routerLinkActive="active"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
+            </ul>
+            <ul *ngIf="userIsLoggedIn === false" class="dropdown-menu dropdown-user">
+                <li><a routerLink="/membership/login" routerLinkActive="active"><i class="fa fa-sign-out fa-fw"></i>Log in</a></li>
+                <li><a routerLink="/membership/profile" routerLinkActive="active"><i class="fa fa-pencil-square-o fa-fw"></i>Register</a></li>
+                <li><a routerLink="/membership/profile" routerLinkActive="active"><i class="fa fa-user fa-fw"></i> Orders</a></li>
+            </ul>
+            <!-- /.dropdown-user -->
+        </li>
+        <!-- /.dropdown -->
+    </ul>
+</nav>

@@ -1,0 +1,99 @@
+
+@{
+    ViewBag.Title = "CreateReport";
+    Layout = "~/Views/Shared/OmniView_Layout.cshtml";
+}
+
+
+@*   use this in browser to test..
+    http://localhost:58693/OmniView/Marketing/CreateReport?lid=16072
+
+*@
+
+    <div ng-controller="MarketingController as marketSummary" data-ng-init="Initialize()">
+
+
+        <div style="position:relative;">
+            <div class="container" style="position:absolute;top:0;right:800px;">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="button-group">
+                            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-cog"></span> <span class="caret"></span>&nbsp;Options</button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" class="small" tabIndex="-1"><input type="checkbox" id="MarketingSummary"              ng-click="GetReportData($event,'MarketingSummary'     );"     />&nbsp;Marketing Summary</a></li>
+                                <li><a href="#" class="small" tabIndex="-1"><input type="checkbox" id="MarketingUpdate"               ng-click="GetReportData($event,'MarketingUpdate'             );"     />&nbsp;Marketing Update</a></li>
+                                <li><a href="#" class="small" tabIndex="-1"><input type="checkbox" id="InterestedBuyers"              ng-click="GetReportData($event,'InterestedBuyers'            );"     />&nbsp;Interested Buyers</a></li>
+                                <li><a href="#" class="small" tabIndex="-1"><input type="checkbox" id="IncludePhoneNumber"            ng-click="GetReportData($event,'IncludePhoneNumber'          );"     />&nbsp;Include phone number</a></li>
+                                <li><a href="#" class="small" tabIndex="-1"><input type="checkbox" id="OfferSummary"                  ng-click="GetReportData($event,'OfferSummary'                );"     />&nbsp;Offer Summary</a></li>
+                                <li><a href="#" class="small" tabIndex="-1"><input type="checkbox" id="EscrowTracking"                ng-click="GetReportData($event,'EscrowTracking'              );"     />&nbsp;Escrow Tracking</a></li>
+                                <li><a href="#" class="small" tabIndex="-1"><input type="checkbox" id="ContactInformation"            ng-click="GetReportData($event,'ContactInformation'          );"     />&nbsp;Contact Information</a></li>
+                                <li><a href="#" class="small" tabIndex="-1"><input type="checkbox" id="HideSensitiveBuyerInformation" ng-click="GetReportData($event,'HideSensitiveBuyerInformation');"    />&nbsp;Hide Sensitive Buyer Information</a></li>
+                            </ul>
+
+                        
+                        </div>
+                   
+                    </div>
+                    <div class="col-md-4">
+                        <input id="txtReportTitle" class="form-control" type="hidden" placeholder="Title" style="width:400px;" value="test" />
+                        <button id="btnCreatePDF" type="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-save"></span>&nbsp;Get Report</button>
+                    </div>
+                 </div>
+            </div>
+        </div>
+        <br/>
+        <br />
+        
+        <!-- jquery will grab html for #template then post to serv-->
+        <div id="template" ng-include src="'/Content/templates/marketing/MarketingSummary.html'"></div>
+
+    </div>
+
+<script src="~/Scripts/jquery-2.2.0.min.js"></script>
+<script type="text/javascript">
+
+    
+    $(document).ready(function () {
+
+        $('#btnCreatePDF').on('click', function (e) {
+
+            var title = $('#txtReportTitle').val();
+            var temp = $('#template').html();
+
+            $.ajax({
+               
+                url: "/v1/Report/GeneratePDF/" + title,
+                type: "POST",
+                contentType: 'text/plain; charset=utf-8',
+                data: temp,
+                success: function (data) {
+
+                    console.log('preview sucess');
+
+                    //Display in new window. <= This is no longer working. Try the window open below..
+                    //var w = window.open();
+                    //w.document.open();
+                    //w.document.write( data);
+                    //w.document.close();
+                    window.open("data:application/pdf;base64, " + data, '', '_blank');
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    console.log('preview error' + textStatus + errorThrown);
+                }
+            });
+
+        });
+
+        //$("#template").load("/Content/templates/marketing/MarketingSummary.html", function (response, status, xhr) {
+        //    if (status != "success") {
+        //        console.log('load msgBoxesSettings failed');
+        //        return;
+        //    }
+        //});
+    });
+
+    function UpdateReport(setting) {
+
+      
+    }
+</script>

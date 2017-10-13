@@ -1,0 +1,47 @@
+﻿<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<app-messageboxes></app-messageboxes>
+
+<div class="container" style="padding-top:25px;">
+    <div class="row">
+        <div class="col">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 id="panelTitle" class="panel-title">Contact Us</h3>
+                </div>
+                <div class="panel-body">
+                    <form role="form" [formGroup]="form" (ngSubmit)="SendContactMessage()" #frmContact="ngForm">
+                        <div class="form-group">
+                            <label for="sentFrom">Email</label>
+                            <input [(ngModel)]="SentFrom" name="sentFrom" #name formControlName="sentFrom" class="input-sm form-control" type="text"
+                                required>
+                            <div *ngIf="form.controls.sentFrom.touched && !form.controls.sentFrom.valid" class="alert alert-danger">
+                                Email is required.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input [(ngModel)]="Subject" name="subject" #name formControlName="subject" class="input-sm form-control" type="text">
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Message</label>
+                            <textarea [(ngModel)]="Comment" name="comment" #name formControlName="comment" class="form-control" cols="30" rows="10" required></textarea>
+                            <div *ngIf="form.controls.comment.touched && !form.controls.comment.valid" class="alert alert-danger">
+                                Message is required.
+                            </div>
+                        </div>
+                        <button *ngIf="!sendingMessage" class="btn btn-primary btn-block" [disabled]="!frmContact.form.valid">
+                            Send
+                        </button>
+                        <div *ngIf="sendingMessage" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+                        <input type="text" [(ngModel)]="Type" #name formControlName="type" id="type" name="type" text="ContactUs" style="display: none"
+                        />
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

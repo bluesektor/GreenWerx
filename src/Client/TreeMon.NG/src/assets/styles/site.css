@@ -1,0 +1,36 @@
+﻿.ng-valid[required], .ng-valid.required  {
+  border-left: 5px solid #42A948; /* green */
+}
+.ng-touched.ng-invalid:not(form)  {
+  border:1px solid red;
+}
+
+.cell-block{
+    display:inline-block;
+}
+
+
+.box900x430{width:900px; height:430px; background:url(../images/content_bg.png) 0 0 no-repeat; padding:30px 34px 31px 47px; position:relative}
+
+.button-paypal-checkout {
+    width:170px;
+    height:32px;
+      background-image: url('../images/checkout-logo-medium.png');
+  
+    cursor:pointer;
+    background-size: 100% 100%;
+    border: 0;
+    box-shadow:none;
+     border-radius: 0px;
+}
+
+.row-sameheight [class*="col-"]{
+  margin-bottom: -99999px;
+  padding-bottom: 99999px;
+}
+
+.row-sameheight{
+  overflow: hidden; 
+}
+
+
