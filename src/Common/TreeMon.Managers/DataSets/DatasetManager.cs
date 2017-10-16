@@ -46,23 +46,24 @@ namespace TreeMon.Managers.DataSets
                 return dataset;
             }
             IDataReader reader = null;
-            using (var context = new TreeMonDbContext(this._connectionKey))
-            {
-                reader = context.Execute(dq.SQL, dq.Parameters);
-
-            }
-            if (reader == null || reader.FieldCount == 0)
-                return null;
 
             try
             {
-                while (reader.Read())
+                using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    dataset.Add(new DataPoint()
+                    reader = context.Execute(dq.SQL, dq.Parameters);
+             
+                    if (reader == null || reader.FieldCount == 0)
+                        return dataset;
+
+                    while (reader.Read())
                     {
-                        Value = reader[field].ToString(),
-                        ValueType = reader[field].GetType().Name
-                    });
+                        dataset.Add(new DataPoint()
+                        {
+                            Value = reader[field].ToString(),
+                            ValueType = reader[field].GetType().Name
+                        });
+                    }
                 }
             }
             catch (Exception ex)

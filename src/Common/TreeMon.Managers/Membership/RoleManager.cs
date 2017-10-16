@@ -791,7 +791,7 @@ namespace TreeMon.Managers.Membership
                 parameters.Add("@ACCOUNTUUID", r.AccountUUID);
                 using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                    if( context.Delete<UserRole>("WHERE UserUUID=@USERUUID AND RoleUUID=@ROLEUUID AND AccountUUID=@ACCOUNTUUID", parameters) == 0)
+                     if( context.Delete<UserRole>("WHERE UserUUID=@USERUUID AND RoleUUID=@ROLEUUID AND AccountUUID=@ACCOUNTUUID", parameters) == 0)
                         return ServiceResponse.Error(u.Name + " failed to remove from role. ");
                 }
                 //SQLITE
@@ -897,7 +897,7 @@ namespace TreeMon.Managers.Membership
                 //Get permissions  for the account and path and distinct Request
                 permissions = context.GetAll<Permission>().Where(
                     pw => (pw.AccountUUID == accountUUID  &&//Whether the permission was created by the account or if it was a system created permission doesn't matter, we'll match the true permission below.
-                    pw.Request == requestPath && //get the permission for the request bing made
+                    pw.Request == requestPath && //get the permission for the request being made
                     pw.Deleted == false
                      && rolePermissions.Any(ry => ry.PermissionUUID == pw.UUID) //now match the permission that was assigned to the account (above) in the resulting permissions.    
                     )).DistinctBy(db => db.Request).ToList();

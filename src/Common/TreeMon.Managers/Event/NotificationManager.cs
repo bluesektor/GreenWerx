@@ -16,7 +16,7 @@ namespace TreeMon.Managers.Event
     {
         public NotificationManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
         {
-            Debug.Assert(string.IsNullOrWhiteSpace (connectionKey), "NotificationManager CONTEXT IS NULL!");
+            Debug.Assert(!string.IsNullOrWhiteSpace (connectionKey), "NotificationManager CONTEXT IS NULL!");
 
             this._connectionKey = connectionKey;
         }

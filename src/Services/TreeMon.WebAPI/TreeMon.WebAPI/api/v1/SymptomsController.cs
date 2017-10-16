@@ -94,37 +94,13 @@ namespace TreeMon.Web.api.v1
             DataFilter tmpFilter = this.GetFilter(filter);
             SymptomManager symptomManager = new SymptomManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            List<Symptom> Symptoms = symptomManager.GetSymptoms(CurrentUser.AccountUUID);
+            List<dynamic> Symptoms = symptomManager.GetSymptoms(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count = 0;
 
-            if (tmpFilter != null)
-            {
-                foreach (DataScreen f in tmpFilter.Screens)
-                {
-                    if ( f == null || string.IsNullOrWhiteSpace(f.Field) || string.IsNullOrWhiteSpace(f.Field))
-                        continue;
 
-                    switch (f.Field?.ToUpper())
-                    {
-                        case "NAME":
-                            Symptoms = Symptoms.Where(w => (w.Name?.EqualsIgnoreCase(f.Value))??false).ToList();
-                            break;
-
-                        case "CATEGORY":
-                            Symptoms = Symptoms.Where(w => ( w.Category?.EqualsIgnoreCase(f.Value)??false )).ToList();
-                            break;
-                    }
-                }
-
-                count = Symptoms.Count;
-
-                Symptoms = Symptoms.Paginate<Symptom>(tmpFilter.StartIndex, tmpFilter.PageSize);
-                return ServiceResponse.OK("", Symptoms, count);
-            }
-
-            count = Symptoms.Count;
-            Symptoms = Symptoms.Paginate<Symptom>(tmpFilter?.StartIndex, tmpFilter?.PageSize);
+            Symptoms = FilterEx.FilterInput(Symptoms, tmpFilter, out count);
             return ServiceResponse.OK("", Symptoms, count);
+          
         }
 
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]

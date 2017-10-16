@@ -27,6 +27,7 @@ namespace TreeMon.Managers.Documents
             //Try looking up the setting in the database..
             AppManager am = new AppManager(this._connectionKey, "web", this._sessionKey);
             string pathToTemplate   = am.GetSetting(templateKey)?.Value;
+            
 
             if (!string.IsNullOrWhiteSpace(pathToTemplate))
             {

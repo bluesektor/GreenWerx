@@ -1,0 +1,157 @@
+﻿[
+  
+  {
+    "UUID": "VARIETY.INDICA",
+    "UUIDType": "Category",
+    "Name": "Indica",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Variety"
+  },
+  {
+    "UUID": "VARIETY.SATIVA",
+    "UUIDType": "Category",
+    "Name": "Sativa",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Variety"
+  },
+  {
+    "UUID": "VARIETY.INDICASATIVA",
+    "UUIDType": "Category",
+    "Name": "Indica Sativa",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Variety"
+  },
+  {
+    "UUID": "VARIETY.SATIVAINDICA",
+    "UUIDType": "Category",
+    "Name": "Sativa Indica",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Variety"
+  },
+  {
+    "UUID": "VARIETY.HYBRID",
+    "UUIDType": "Category",
+    "Name": "Hybrid",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Variety"
+  },
+  /*----------------------------------------- Products  */
+  {
+    "UUID": "PRODUCT.FLOWER",
+    "UUIDType": "Category",
+    "Name": "Flower",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  },
+  {
+    "UUID": "PRODUCT.BOOTH",
+    "UUIDType": "Category",
+    "Name": "Booth",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "false"
+  },
+  {
+    "UUID": "PRODUCT.HYBRIDFLOWER",
+    "UUIDType": "Category",
+    "Name": "Hybrid Flower",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  },
+  {
+    "UUID": "PRODUCT.TOPICAL",
+    "UUIDType": "Category",
+    "Name": "Topical",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  },
+  {
+    "UUID": "PRODUCT.HASH",
+    "UUIDType": "Category",
+    "Name": "Hash",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  },
+  {
+    "UUID": "PRODUCT.VAPORIZER",
+    "UUIDType": "Category",
+    "Name": "Vaporizer",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "false"
+  },
+  {
+    "UUID": "PRODUCT.BONG",
+    "UUIDType": "Category",
+    "Name": "Bong",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "false"
+  },
+  {
+    "UUID": "PRODUCT.GLASS",
+    "UUIDType": "Category",
+    "Name": "Glass",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "false"
+  },
+  {
+    "UUID": "PRODUCT.EDIBLE",
+    "UUIDType": "Category",
+    "Name": "Edible",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  },
+  {
+    "UUID": "PRODUCT.SATIVAFLOWER",
+    "UUIDType": "Category",
+    "Name": "Sativa Flower",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  },
+  {
+    "UUID": "PRODUCT.CONCENTRATE",
+    "UUIDType": "Category",
+    "Name": "Concentrate",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  },
+  {
+    "UUID": "PRODUCT.MISC",
+    "UUIDType": "Category",
+    "Name": "Misc",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "false"
+  },
+  {
+    "UUID": "PRODUCT.INDICAFLOWER",
+    "UUIDType": "Category",
+    "Name": "Indica Flower",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  },
+  {
+    "UUID": "PRODUCT.VAPEPENCARTRIDGES",
+    "UUIDType": "Category",
+    "Name": "Vap Pen Cartridges",
+    "AccountUUID": "system.default.account",
+    "CategoryType": "Product",
+    "UsesStrains": "true"
+  }
+]
+              
+  
+
+    
+       
+   

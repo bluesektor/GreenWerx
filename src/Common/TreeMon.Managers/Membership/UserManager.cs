@@ -227,7 +227,7 @@ namespace TreeMon.Managers.Membership
             if (n == null)
                 return ServiceResponse.Error("No record sent.");
 
-            n.Initialize(this._requestingUser.UUID, this._requestingUser.AccountUUID, this._requestingUser.RoleWeight);
+            n.Initialize(this._requestingUser.UUID, this._requestingUser.AccountUUID, 1);
 
             var u = (User)n;
 

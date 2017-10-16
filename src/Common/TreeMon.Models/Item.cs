@@ -109,7 +109,6 @@ namespace TreeMon.Models
         //how many units were in the product 
         public float UnitsInProduct { get; set; }
 
-
         //Download,access,trade, jars etc..
         public string UnitType { get; set; }
 

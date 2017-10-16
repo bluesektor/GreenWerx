@@ -30,12 +30,12 @@ namespace TreeMon.Utilites.Security
         public static PasswordScore CheckStrength(string password)
         {
             int score = 1;
+            if (string.IsNullOrWhiteSpace(password))
+                return PasswordScore.Blank;
 
             if (IsCommonPassword(password))
                 return PasswordScore.VeryWeak;
 
-            if (password.Length < 1)
-                return PasswordScore.Blank;
             if (password.Length < 4)
                 return PasswordScore.VeryWeak;
 
@@ -61,7 +61,7 @@ namespace TreeMon.Utilites.Security
 
             try
             {
-                string pathToPasswords = Path.Combine(EnvironmentEx.AppDataFolder, "WordLists\\CommonPasswords.txt");
+                string pathToPasswords = Path.Combine(EnvironmentEx.AppDataFolder.Replace("\\\\","\\"), "WordLists\\CommonPasswords.txt");
 
                 if (!File.Exists(pathToPasswords))
                     return true;
