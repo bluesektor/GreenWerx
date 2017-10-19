@@ -94,8 +94,9 @@ namespace TreeMon.Managers.Membership
 
                 return ServiceResponse.Error(ex.Message);
             }
+            user = ClearSensitiveData(user);
 
-            return ServiceResponse.OK();
+            return ServiceResponse.OK("", user);
         }
 
         /// <summary>

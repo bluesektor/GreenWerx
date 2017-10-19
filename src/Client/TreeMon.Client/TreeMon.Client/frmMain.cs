@@ -1,7 +1,11 @@
 ﻿using PluginInterface;
 using System;
+using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+using TreeMon.Models.App;
+using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Helpers;
 
 namespace TreeMon.Client
@@ -27,7 +31,6 @@ namespace TreeMon.Client
 
         #endregion
 
-        #region Members
         private string _appPath = string.Empty;
         private string _currentPlugin = string.Empty;
         private string _procLogFile = string.Empty;
@@ -35,7 +38,12 @@ namespace TreeMon.Client
         private string[] _programArgs;
         private SplitContainer splitContainer1;
         private Label lblStatus;
-        #endregion
+
+        private UserSession _userSession;
+        public UserSession Session { get { return _userSession; } }
+        private AppInfo _appSettings;
+        public AppInfo Settings { get { return _appSettings; } }
+
 
         public frmMain MainForm { get { return this; } }
 
@@ -48,15 +56,13 @@ namespace TreeMon.Client
 
         private void frmMain_Load(object sender, System.EventArgs e)
         {
-            string pathToInstallCommands = EnvironmentEx.AppDataFolder + "Install\\install.json";
+            string pathToInstallCommands = EnvironmentEx.AppDataFolder + "\\Install\\install.json";
 
-            if (!File.Exists(pathToInstallCommands))
+            if (File.Exists(pathToInstallCommands))
             {
                 _firstRun = true;
                 Install();
-                return;
             }
-
             Initialize();
         }
 
@@ -73,37 +79,46 @@ namespace TreeMon.Client
 
         private void Initialize()
         {
-    
-
             frmLogin login = new frmLogin();
             if (login.ShowDialog() != DialogResult.OK)
             {
                 this.Close();
                 return;
             }
-
-
-
             string result = "";
+            _userSession = login.Session;
+            if (_appSettings == null)
+                _appSettings = new AppInfo();
+            try
+            {
+                if (ConfigurationManager.AppSettings["DefaultDbConnection"] != null)
+                    _appSettings.ActiveDbConnectionKey = ConfigurationManager.AppSettings["DefaultDbConnection"].ToString();
 
-            if (string.IsNullOrEmpty(_currentPlugin))
-                result = LoadPlugins();//loads plugins in the treeview.
-            else
-            {    //if a specific plugin is passed in through command line, then only load that one.
-                result = Global.Plugins.LoadPlugin(Application.StartupPath + @"\Plugins\" + _currentPlugin + ".dll", _programArgs);
-                lblStatus.Text = result;
+                _appSettings = ClientCore.Application.GetSettings(false, _appSettings.ActiveDbConnectionKey, _userSession.AuthToken);
 
-                // if single plugin is loaded, pass args to plugin..
-                //
-                AvailablePlugin selectedPlugin = Global.Plugins.AvailablePlugins.Find(_currentPlugin);
+                if (string.IsNullOrEmpty(_currentPlugin))
+                    result = LoadPlugins();//loads plugins in the treeview.
+                else
+                {    //if a specific plugin is passed in through command line, then only load that one.
+                    result = Global.Plugins.LoadPlugin(Application.StartupPath + @"\Plugins\" + _currentPlugin + ".dll", _userSession, _appSettings);
+                    lblStatus.Text = result;
 
-                if (selectedPlugin != null)
-                {
-                    selectedPlugin.Instance.Initialize(_programArgs);//initialize the plugin.
+                    // if single plugin is loaded, pass args to plugin..
+                    //
+                    AvailablePlugin selectedPlugin = Global.Plugins.AvailablePlugins.Find(_currentPlugin);
 
-                    TreeNode newNode = new TreeNode(selectedPlugin.Instance.ShortName); //show the plugin in the host list.
-                    this.tvwPlugins.Nodes.Add(newNode);
+                    if (selectedPlugin != null)
+                    {
+                        TreeNode newNode = new TreeNode(selectedPlugin.Instance.ShortName); //show the plugin in the host list.
+                        this.tvwPlugins.Nodes.Add(newNode);
+                    }
                 }
+            }catch(Exception ex)
+            {
+                // todo add logging
+                Debug.Assert(false, ex.Message);
+                lblStatus.Text = ex.Message;
+                return;
             }
             lblStatus.Text = result;
         }
@@ -122,18 +137,41 @@ namespace TreeMon.Client
             }
 
                 //Call the find plugins routine, to search in our Plugins Folder
-                string  result = Global.Plugins.FindPlugins(pluginDirectory);
+           string  result = Global.Plugins.LoadPlugins(pluginDirectory,_userSession,_appSettings);
 
             //TODO: load application settings with plugin sort order. Add the plugins based on sort order.
-
-            //Add each plugin to the treeview
-            foreach (AvailablePlugin pluginOn in Global.Plugins.AvailablePlugins)
+            // _userSession.UserName
+            
+            string pluginOrder = ClientCore.Application.GetSetting(_userSession.UserName + "PluginOrder",false, _appSettings.ActiveDbConnectionKey, _userSession.AuthToken);
+            if (!string.IsNullOrEmpty(pluginOrder))
             {
-                TreeNode newNode = new TreeNode(pluginOn.Instance.ShortName);
-                this.tvwPlugins.Nodes.Add(newNode);
-                newNode = null;
+                string[] plugins = pluginOrder.Split(',');
+                foreach (string plugin in plugins)
+                    AddPlugin(plugin);
+            }
+            else //loop through plugins and Add each plugin to the treeview
+            {
+                foreach (AvailablePlugin pluginOn in Global.Plugins.AvailablePlugins)
+                {
+                    TreeNode newNode = new TreeNode(pluginOn.Instance.ShortName);
+                    this.tvwPlugins.Nodes.Add(newNode);
+                    newNode = null;
+                }
             }
             return result;
+        }
+
+        private void AddPlugin(string shortName)
+        {
+            foreach (AvailablePlugin pluginOn in Global.Plugins.AvailablePlugins)
+            {
+                if (pluginOn.Instance.ShortName.EqualsIgnoreCase(shortName))
+                {
+                    TreeNode newNode = new TreeNode(pluginOn.Instance.ShortName);
+                    this.tvwPlugins.Nodes.Add(newNode);
+                    newNode = null;
+                }
+            }
         }
 
         private void tvwPlugins_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
@@ -211,11 +249,6 @@ namespace TreeMon.Client
                 //selectedPlugin.Instance.MainInterface
             }
         }
-
-
-
-     
-
       
     }
 }

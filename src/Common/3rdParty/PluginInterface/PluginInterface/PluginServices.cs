@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-
+using TreeMon.Models.App;
 
 namespace PluginInterface
 {
@@ -28,47 +30,72 @@ namespace PluginInterface
         /// <summary>
         /// Searches the Application's Startup Directory for Plugins
         /// </summary>
-        public void FindPlugins()
-        {
-            FindPlugins(AppDomain.CurrentDomain.BaseDirectory);
-        }
+        //public void FindPlugins()
+        //{
+        //    //FindPlugins(AppDomain.CurrentDomain.BaseDirectory);
+        //}
+
+        
 
         /// <summary>
         /// Searches the passed Path for Plugins
         /// </summary>
         /// <param name="Path">Directory to search for Plugins in</param>
-        public string FindPlugins(string Path)
+        public List<string> FindPlugins(string Path)
         {
+            List<string> plugins = new List<string>();
             try
             {
-                //First empty the collection, we're reloading them all
-                colAvailablePlugins.Clear();
-
                 //Go through all the files in the plugin directory
                 foreach (string fileOn in Directory.GetFiles(Path))
                 {
                     FileInfo file = new FileInfo(fileOn);
 
                     //Preliminary check, must be .dll
-                    if (file.Extension.Equals(".dll"))
+                    if (!file.Extension.Equals(".dll"))
+                        continue;
+
+                    Assembly pluginAssembly = Assembly.LoadFrom(Path + "\\" +file.Name);
+
+                    //Next we'll loop through all the Types found in the assembly
+                    foreach (Type pluginType in pluginAssembly.GetTypes())
                     {
-                        //Add the 'plugin'
-                        this.AddPlugin(fileOn);
+                        if (!pluginType.IsPublic && pluginType.IsAbstract)
+                            continue;
+
+                        //Gets a type object of the interface we need the plugins to match
+                        Type typeInterface = pluginType.GetInterface("PluginInterface.IPlugin", true);
+
+                        if (typeInterface == null)
+                            continue;
+
+                        AvailablePlugin newPlugin = new AvailablePlugin();
+                        newPlugin.AssemblyPath = Path;
+                        newPlugin.Instance = (IPlugin)Activator.CreateInstance(pluginAssembly.GetType(pluginType.ToString()));
+
+                        
+                        //Set the Plugin's host to this class which inherited IPluginHost
+                        //newPlugin.Instance.Host = this;
+
+                        plugins.Add(newPlugin.Instance.ShortName);
+                        //cleanup a bit
+                        newPlugin = null;
+                        typeInterface = null; //Mr. Clean			
                     }
                 }
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                Debug.Assert(false, ex.Message);
             }
-            return "Plugins loaded.";
+            return plugins;
         }
 
         /// <summary>
         /// Searches the passed Path for Plugins
         /// </summary>
         /// <param name="Path">Directory to search for Plugins in</param>
-        public string FindPlugins(string Path, string[] pluginArgs)
+        public string LoadPlugins(string Path, UserSession session, AppInfo settings)
         {
             try
             {
@@ -84,7 +111,7 @@ namespace PluginInterface
                     if (file.Extension.Equals(".dll"))
                     {
                         //Add the 'plugin'
-                        this.AddPlugin(fileOn, pluginArgs);
+                        this.AddPlugin(fileOn, session,settings);
                     }
                 }
             }
@@ -97,7 +124,7 @@ namespace PluginInterface
 
         //This is similiar to FindPlugins(..), except it loads one/specified plugin.
         //
-        public string LoadPlugin(string Path, string[] programArgs)
+        public string LoadPlugin(string Path, UserSession session, AppInfo settings)
         {
             try
             {
@@ -109,7 +136,7 @@ namespace PluginInterface
                 //Preliminary check, must be .dll
                 if (file.Extension.Equals(".dll"))
                 {
-                    this.AddPlugin(Path, programArgs);                        //Add the 'plugin'
+                    this.AddPlugin(Path, session, settings);                        //Add the 'plugin'
                 }
             }
             catch (Exception ex)
@@ -139,7 +166,7 @@ namespace PluginInterface
             colAvailablePlugins.Clear();
         }
 
-        private void AddPlugin(string FileName)
+        private void AddPlugin(string FileName, UserSession session, AppInfo settings)
         {
             //Create a new assembly from the plugin file we're adding..
             Assembly pluginAssembly = Assembly.LoadFrom(FileName);
@@ -174,60 +201,7 @@ namespace PluginInterface
                             newPlugin.Instance.Host = this;
 
                             //Call the initialization sub of the plugin
-                            newPlugin.Instance.Initialize(null);
-
-                            //Add the new plugin to our collection here
-                            this.colAvailablePlugins.Add(newPlugin);
-
-                            //cleanup a bit
-                            newPlugin = null;
-                        }
-
-                        typeInterface = null; //Mr. Clean			
-                    }
-                }
-            }
-
-            pluginAssembly = null; //more cleanup
-        }
-
-
-        private void AddPlugin(string FileName, string[] pluginArgs)
-        {
-            //Create a new assembly from the plugin file we're adding..
-            Assembly pluginAssembly = Assembly.LoadFrom(FileName);
-
-            //Next we'll loop through all the Types found in the assembly
-            foreach (Type pluginType in pluginAssembly.GetTypes())
-            {
-                if (pluginType.IsPublic) //Only look at public types
-                {
-                    if (!pluginType.IsAbstract)  //Only look at non-abstract types
-                    {
-                        //Gets a type object of the interface we need the plugins to match
-                        Type typeInterface = pluginType.GetInterface("PluginInterface.IPlugin", true);
-
-                        //Make sure the interface we want to use actually exists
-                        if (typeInterface != null)
-                        {
-                            //Create a new available plugin since the type implements the IPlugin interface
-                            AvailablePlugin newPlugin = new AvailablePlugin();
-
-                            //Set the filename where we found it
-                            newPlugin.AssemblyPath = FileName;
-
-                            //Create a new instance and store the instance in the collection for later use
-                            //We could change this later on to not load an instance.. we have 2 options
-                            //1- Make one instance, and use it whenever we need it.. it's always there
-                            //2- Don't make an instance, and instead make an instance whenever we use it, then close it
-                            //For now we'll just make an instance of all the plugins
-                            newPlugin.Instance = (IPlugin)Activator.CreateInstance(pluginAssembly.GetType(pluginType.ToString()));
-
-                            //Set the Plugin's host to this class which inherited IPluginHost
-                            newPlugin.Instance.Host = this;
-
-                            //Call the initialization sub of the plugin
-                            //newPlugin.Instance.Initialize(pluginArgs);
+                            newPlugin.Instance.Initialize(session, settings);
 
                             //Add the new plugin to our collection here
                             this.colAvailablePlugins.Add(newPlugin);

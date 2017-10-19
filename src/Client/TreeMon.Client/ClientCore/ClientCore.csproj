@@ -4,17 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3F31858F-A408-4904-BAB1-C0E4524A53A7}</ProjectGuid>
+    <ProjectGuid>{85E91253-EB99-43FD-A849-BC71845325E1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PluginInterface</RootNamespace>
-    <AssemblyName>PluginInterface</AssemblyName>
+    <RootNamespace>ClassLibrary1</RootNamespace>
+    <AssemblyName>ClassLibrary1</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>%24/OperationPinnappleExpress/src/Common/3rdParty/PluginInterface/PluginInterface</SccProjectName>
-    <SccLocalPath>.</SccLocalPath>
-    <SccAuxPath>https://treemon.visualstudio.com</SccAuxPath>
-    <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,9 +35,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,21 +45,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AvailablePlugin.cs" />
-    <Compile Include="AvailablePlugins.cs" />
-    <Compile Include="frmFeedBack.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="IPlugin.cs" />
-    <Compile Include="IPluginHost.cs" />
-    <Compile Include="PluginServices.cs" />
+    <Compile Include="Application.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\TreeMon.Models\TreeMon.Models.csproj">
-      <Project>{11A65C6E-7398-450D-B1E8-4152D0A1F48F}</Project>
+    <ProjectReference Include="..\..\..\Common\TreeMon.Managers\TreeMon.Managers.csproj">
+      <Project>{4b594255-e277-44aa-9107-cd4bffde0f5d}</Project>
+      <Name>TreeMon.Managers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\TreeMon.Models\TreeMon.Models.csproj">
+      <Project>{11a65c6e-7398-450d-b1e8-4152d0a1f48f}</Project>
       <Name>TreeMon.Models</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -1872,7 +1873,7 @@ namespace TreeMon.Managers
             return ServiceResponse.Error();
         }
 
-
+     
         public bool SettingExists(string name, string value)
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(value))
@@ -1897,19 +1898,32 @@ namespace TreeMon.Managers
             }
         }
 
-        public Setting GetSetting(string name)
+        public Setting GetSetting(string name, bool useDatabase = true)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
+            //  if (!this.DataAccessAuthorized(s,  "GET", false))
+            //     return null;
             try
             {
-                using (var context = new TreeMonDbContext(this._connectionKey))
+                if (useDatabase)
                 {
-                    Setting s = context.GetAll<Setting>().FirstOrDefault(sw => (sw.Name?.EqualsIgnoreCase(name) ?? false));
-                    //  if (!this.DataAccessAuthorized(s,  "GET", false))
-                    //     return null;
+                    using (var context = new TreeMonDbContext(this._connectionKey))
+                    {
+                        Setting s = context.GetAll<Setting>().FirstOrDefault(sw => (sw.Name?.EqualsIgnoreCase(name) ?? false));
 
-                    return s;
+                        if (s == null)
+                        {//this is a fallback because it's defaulted to true
+                            _logger.InsertInfo("Fall back to config:" + name, "AppManager", "GetSetting");
+                            s = this.GetConfigSetting(name);
+                        }
+
+                        return s;
+                    }
+                }
+                else
+                {
+                    return this.GetConfigSetting(name);
                 }
             }
             catch (Exception ex)
@@ -1919,6 +1933,26 @@ namespace TreeMon.Managers
             }
         }
 
+        //reads from config file
+        private Setting GetConfigSetting(string name)
+        {
+            Setting s = new Setting();
+
+            if ( ConfigurationManager.AppSettings[name] != null &&
+                     //if we can't verify the user then don't let any sensitive data out.
+                     (!name.ToUpper().Contains("PASSWORD") ||
+                      !name.ToUpper().Contains("KEY") ||
+                       !name.ToUpper().Contains("USER") ||
+                        !name.ToUpper().Contains("ACCOUNT")
+                     )
+                     )
+            {
+                s.Name = name;
+                s.Value = ConfigurationManager.AppSettings[name].ToString();
+            }
+            return s;
+
+        }
 
         public List<Setting> GetSettings(string name)
         {

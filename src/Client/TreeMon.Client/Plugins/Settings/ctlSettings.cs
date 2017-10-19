@@ -1,31 +1,87 @@
 ﻿using PluginInterface;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
+using TreeMon.Managers;
+using TreeMon.Models.App;
+using static System.Windows.Forms.ListView;
+using static System.Windows.Forms.ListViewItem;
 
 namespace Settings
 {
-    public partial class ctlSettings :  UserControl, IPlugin
+    public partial class ctlSettings : UserControl, IPlugin
     {
-        private void button1_Click(object sender, EventArgs e)
-        {
-          
-        }
-
         public ctlSettings()
         {
             InitializeComponent();
+
+
+        }
+        private void btnMoveUp_Click(object sender, EventArgs e)
+        {
+            if (lstPlugins.SelectedIndices.Count == 0)
+                return;
+
+            int index = lstPlugins.SelectedIndices[0];
+
+            if (index == 0)
+                return;
+
+            ListViewItem selectedItem = lstPlugins.Items[index];
+
+            ListViewItem itemAbove = lstPlugins.Items[index - 1];
+
+            if (itemAbove == null)
+                return;
+
+            lstPlugins.Items.Remove(selectedItem);
+            lstPlugins.Items.Insert(itemAbove.Index, selectedItem);
+        }
+
+        private void btnMoveDown_Click(object sender, EventArgs e)
+        {
+            if (lstPlugins.SelectedIndices.Count == 0)
+                return;
+
+            int index = lstPlugins.SelectedIndices[0];
+
+            if (index >= lstPlugins.Items.Count - 1)
+                return;
+
+            ListViewItem selectedItem = lstPlugins.Items[index];
+
+            ListViewItem itemBelow = lstPlugins.Items[index + 1];
+
+            if (itemBelow == null)
+                return;
+
+            lstPlugins.Items.Remove(selectedItem);
+            lstPlugins.Items.Insert(itemBelow.Index + 1, selectedItem);
+        }
+
+        private void btnSaveAppearance_Click(object sender, EventArgs e)
+        {
+            IEnumerable<ListViewItem> lv = lstPlugins.Items.Cast<ListViewItem>();
+            string plugins = lv.Select(s => s.Text).Aggregate((current, next) => current + "," + next);
+
+            ClientCore.Application.SaveConfigSetting(_session.UserName + "PluginOrder", plugins);
         }
 
         #region Plugin interface properties
 
         private IPluginHost myPluginHost = null;
-      //  private string myPluginName = "Name";
+        //  private string myPluginName = "Name";
         private string myPluginAuthor = "bluesektor@hotmail.com";
         private string myPluginDescription = "descriptions";
         private string myPluginVersion = "1.0.0";
 
         private string myPluginShortName = "Settings";
 
+        private UserSession _session;
+        private AppInfo _appSettings;
 
         void PluginInterface.IPlugin.Dispose()
         { }
@@ -42,8 +98,35 @@ namespace Settings
             set { myPluginHost = value; }
         }
 
-        public void Initialize(string[] args)
-        {   //if (args == null)return; //uncomment if args are mandetory
+        public void Initialize(UserSession session, AppInfo appSettings)
+        {
+            _session = session;
+            _appSettings = appSettings;
+            string pluginDirectory = Application.StartupPath + @"\Plugins";
+
+            AppManager am = new AppManager(_appSettings.ActiveDbConnectionKey, "FORMS", _session.AuthToken);
+            string pluginOrder = am.GetSetting(_session.UserName + "PluginOrder", false)?.Value;
+            List<string> plugins = new List<string>();
+
+            if (!string.IsNullOrEmpty(pluginOrder))
+            {
+                plugins.AddRange(pluginOrder.Split(',').ToList());
+            }
+            else if (Directory.Exists(pluginDirectory))
+            {
+                PluginServices svcPlugins = new PluginServices();
+                //Call the find plugins routine, to search in our Plugins Folder
+                List<string> AvailablePlugins = svcPlugins.FindPlugins(pluginDirectory);
+                plugins.AddRange(AvailablePlugins);
+            }
+
+            foreach (string plugin in plugins)
+            {
+                lstPlugins.Items.Add(new ListViewItem(plugin));
+            }
+            lstPlugins.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+
+
         }
 
         protected void Run() //not mandatory, but good for a standard interface to main.
@@ -69,34 +152,5 @@ namespace Settings
 
         #endregion
 
-        private void openFileDialog1_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-
-        }
-
-        private void btnImportDataset_Click(object sender, EventArgs e)
-        {
-            ErrorLog = "";
-             OpenFileDialog openFileDialog1 = new OpenFileDialog();
-
-            openFileDialog1.InitialDirectory = "G:\\Dev\\Projects\\_OpenSource\\Web\\TreeMon.Web\\TreeMon.Web\\App_Data";
-            openFileDialog1.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
-            openFileDialog1.FilterIndex = 2;
-            openFileDialog1.RestoreDirectory = true;
-
-            if (openFileDialog1.ShowDialog() != DialogResult.OK)
-                return;
-
-            openFileDialog1.Multiselect = true;
-            foreach (String file in openFileDialog1.FileNames)
-            { MessageBox.Show(file); }
-
-
-            ErrorLog = "";
-        }
-
-        public string ErrorLog { get; set; }
-
-   
     }
 }

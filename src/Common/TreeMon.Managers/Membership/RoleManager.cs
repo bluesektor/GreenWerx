@@ -1230,7 +1230,28 @@ namespace TreeMon.Managers.Membership
                         string[] roleTokens = sets[roleIndex].Split('{');
                         string role = roleTokens[0].ToLower().Trim();
                         Role r = tmpRoles.FirstOrDefault(w => w.Name.ToLower() == role && w.AccountUUID == AccountUUID && w.AppType?.ToLower() == appType);
+                        if(r == null)
+                        {
+                            r = new Role()
+                            {
+                                 AccountUUID = AccountUUID,
+                                 Name = role,
+                                 DateCreated = DateTime.Now,
+                                 AppType = appType,
+                                CreatedBy = _requestingUser?.UUID,
+                                   StartDate = DateTime.Now,
+                                   EndDate = DateTime.Now,
+                                    Weight =4,
+                                     RoleWeight = 4,
+                                      RoleOperation = ">="
 
+
+                            };
+                            using (var context = new TreeMonDbContext(_dbConnectionKey))
+                            {
+                                context.Insert<Role>(r);
+                            }
+                        }
                         string[] tmpVerbs = roleTokens[1].Split(',');
                         foreach (string verb in tmpVerbs)
                         {

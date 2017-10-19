@@ -1,8 +1,9 @@
-﻿/// <summary>
+﻿
+using TreeMon.Models.App;
+/// <summary>
 /// This is for forms app only because the use of System.Windows.Forms.UserControl for the
 /// MainInterface
 /// </summary>
-
 namespace PluginInterface
 {
     public interface IPlugin
@@ -17,7 +18,9 @@ namespace PluginInterface
 
         System.Windows.Forms.UserControl MainInterface { get; }
 
-        void Initialize(string[] args);
+        //void Initialize(string[] args);
+        void Initialize(UserSession session, AppInfo appSettings );
+
         void Dispose();
 
         void ResizeControl();

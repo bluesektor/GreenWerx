@@ -96,6 +96,10 @@
       <Project>{3b4c1739-da22-4da4-bca6-99d52535112a}</Project>
       <Name>TreeMon.Utilites</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ClientCore\ClientCore.csproj">
+      <Project>{85e91253-eb99-43fd-a849-bc71845325e1}</Project>
+      <Name>ClientCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -103,8 +107,14 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>IF NOT EXIST $(SolutionDir)\$(SolutionName)\$(OutDir)\Plugins\ mkdir $(SolutionDir)\$(SolutionName)\$(OutDir)\Plugins\
+
+::mark all target files as writeable before we try to overwrite them
+FOR %25%25A IN ( $(SolutionDir)\$(SolutionName)\$(OutDir)\Plugins\*.*) DO (
+attrib -R %25%25A
+)
+
+xcopy /y $(ProjectDir)$(OutDir)$(TargetFileName) $(SolutionDir)\$(SolutionName)\$(OutDir)\Plugins\</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
