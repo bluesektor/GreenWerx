@@ -21,6 +21,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{0C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeMon.WebAPI", "src\Services\TreeMon.WebAPI\TreeMon.WebAPI\TreeMon.WebAPI.csproj", "{6747723C-E97E-461D-9936-B2A3CC230A36}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AAE6EC78-E1AC-4BB6-98A4-B27552CDC391}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		BuildAll\BuildAll.projitems*{b0952508-7600-4f3a-a39d-ce5f86c48629}*SharedItemsImports = 13
