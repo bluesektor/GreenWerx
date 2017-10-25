@@ -25,6 +25,10 @@ namespace TreeMon.Models
 
         string AccountUUID { get; set; }
 
+        string Status { get; set; }
+
+        int SortOrder { get; set;  }
+
         string SyncKey { get; set; }
 
         string SyncType{ get; set; }
@@ -38,6 +42,10 @@ namespace TreeMon.Models
         string CreatedBy { get; set; }
 
         DateTime DateCreated { get; set; }
+
+        bool Active        { get; set; }
+
+        string Image         { get; set; }
 
     }
 }

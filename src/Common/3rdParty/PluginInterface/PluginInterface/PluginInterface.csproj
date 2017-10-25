@@ -11,7 +11,7 @@
     <AssemblyName>PluginInterface</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>%24/OperationPinnappleExpress/src/Common/3rdParty/PluginInterface/PluginInterface</SccProjectName>
+    <SccProjectName>%24/OperationPinnappleExpress/Main/Common/3rdParty/PluginInterface/PluginInterface</SccProjectName>
     <SccLocalPath>.</SccLocalPath>
     <SccAuxPath>https://treemon.visualstudio.com</SccAuxPath>
     <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>

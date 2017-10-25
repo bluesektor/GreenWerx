@@ -18,7 +18,6 @@ namespace PluginInterface
 
         System.Windows.Forms.UserControl MainInterface { get; }
 
-        //void Initialize(string[] args);
         void Initialize(UserSession session, AppInfo appSettings );
 
         void Dispose();

@@ -1,8 +1,10 @@
 ﻿using PluginInterface;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using TreeMon.Models.App;
 using TreeMon.Utilites.Extensions;
@@ -35,7 +37,6 @@ namespace TreeMon.Client
         private string _currentPlugin = string.Empty;
         private string _procLogFile = string.Empty;
         private string _initFile = string.Empty;
-        private string[] _programArgs;
         private SplitContainer splitContainer1;
         private Label lblStatus;
 
@@ -141,11 +142,29 @@ namespace TreeMon.Client
 
             //TODO: load application settings with plugin sort order. Add the plugins based on sort order.
             // _userSession.UserName
+            int pluginCount = Global.Plugins.AvailablePlugins.Count;
             
             string pluginOrder = ClientCore.Application.GetSetting(_userSession.UserName + "PluginOrder",false, _appSettings.ActiveDbConnectionKey, _userSession.AuthToken);
+            List<string> plugins = new List<string>();
+            plugins.AddRange( pluginOrder.Split(','));
+
+            //if the number of plugins has changed then update the plugin setting
+            if (!string.IsNullOrEmpty(pluginOrder) && pluginCount != plugins.Count)
+            {
+                foreach (AvailablePlugin pluginOn in Global.Plugins.AvailablePlugins)
+                {
+                    if (plugins.FindIndex(w => w == pluginOn.Instance.ShortName) >= 0)
+                        continue;
+
+                    plugins.Add(pluginOn.Instance.ShortName);
+                }
+                string settingValue = plugins.Select(s => s).Aggregate((current, next) => current + "," + next);
+                ClientCore.Application.SaveConfigSetting(_userSession.UserName + "PluginOrder", settingValue);
+            }
+
             if (!string.IsNullOrEmpty(pluginOrder))
             {
-                string[] plugins = pluginOrder.Split(',');
+               
                 foreach (string plugin in plugins)
                     AddPlugin(plugin);
             }
