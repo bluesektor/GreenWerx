@@ -38,12 +38,13 @@ namespace Home
             this.tabMembers = new System.Windows.Forms.TabPage();
             this.tabLocations = new System.Windows.Forms.TabPage();
             this.tabInventory = new System.Windows.Forms.TabPage();
+            this.pnlNodeInventoryItem = new System.Windows.Forms.Panel();
             this.tabProducts = new System.Windows.Forms.TabPage();
+            this.pnlNodeProduct = new System.Windows.Forms.Panel();
             this.pnlNodeView = new System.Windows.Forms.Panel();
-            this.lstAccountMembers = new System.Windows.Forms.ListView();
-            this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl1.SuspendLayout();
-            this.tabMembers.SuspendLayout();
+            this.tabInventory.SuspendLayout();
+            this.tabProducts.SuspendLayout();
             this.SuspendLayout();
             // 
             // treeAccounts
@@ -77,16 +78,16 @@ namespace Home
             this.tabControl1.Location = new System.Drawing.Point(3, 371);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(522, 313);
+            this.tabControl1.Size = new System.Drawing.Size(746, 320);
             this.tabControl1.TabIndex = 2;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
             // tabMembers
             // 
-            this.tabMembers.Controls.Add(this.lstAccountMembers);
             this.tabMembers.Location = new System.Drawing.Point(4, 22);
             this.tabMembers.Name = "tabMembers";
             this.tabMembers.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMembers.Size = new System.Drawing.Size(514, 287);
+            this.tabMembers.Size = new System.Drawing.Size(738, 294);
             this.tabMembers.TabIndex = 1;
             this.tabMembers.Text = "Members";
             this.tabMembers.UseVisualStyleBackColor = true;
@@ -95,28 +96,50 @@ namespace Home
             // 
             this.tabLocations.Location = new System.Drawing.Point(4, 22);
             this.tabLocations.Name = "tabLocations";
-            this.tabLocations.Size = new System.Drawing.Size(300, 165);
+            this.tabLocations.Size = new System.Drawing.Size(738, 294);
             this.tabLocations.TabIndex = 2;
             this.tabLocations.Text = "Locations";
             this.tabLocations.UseVisualStyleBackColor = true;
             // 
             // tabInventory
             // 
+            this.tabInventory.Controls.Add(this.pnlNodeInventoryItem);
             this.tabInventory.Location = new System.Drawing.Point(4, 22);
             this.tabInventory.Name = "tabInventory";
-            this.tabInventory.Size = new System.Drawing.Size(300, 165);
+            this.tabInventory.Size = new System.Drawing.Size(738, 294);
             this.tabInventory.TabIndex = 3;
             this.tabInventory.Text = "Inventory";
             this.tabInventory.UseVisualStyleBackColor = true;
             // 
+            // pnlNodeInventoryItem
+            // 
+            this.pnlNodeInventoryItem.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlNodeInventoryItem.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.pnlNodeInventoryItem.Location = new System.Drawing.Point(228, 7);
+            this.pnlNodeInventoryItem.Name = "pnlNodeInventoryItem";
+            this.pnlNodeInventoryItem.Size = new System.Drawing.Size(282, 281);
+            this.pnlNodeInventoryItem.TabIndex = 17;
+            // 
             // tabProducts
             // 
+            this.tabProducts.Controls.Add(this.pnlNodeProduct);
             this.tabProducts.Location = new System.Drawing.Point(4, 22);
             this.tabProducts.Name = "tabProducts";
-            this.tabProducts.Size = new System.Drawing.Size(300, 165);
+            this.tabProducts.Size = new System.Drawing.Size(738, 294);
             this.tabProducts.TabIndex = 4;
             this.tabProducts.Text = "Products";
             this.tabProducts.UseVisualStyleBackColor = true;
+            // 
+            // pnlNodeProduct
+            // 
+            this.pnlNodeProduct.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlNodeProduct.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.pnlNodeProduct.Location = new System.Drawing.Point(228, 7);
+            this.pnlNodeProduct.Name = "pnlNodeProduct";
+            this.pnlNodeProduct.Size = new System.Drawing.Size(282, 281);
+            this.pnlNodeProduct.TabIndex = 17;
             // 
             // pnlNodeView
             // 
@@ -125,23 +148,8 @@ namespace Home
             this.pnlNodeView.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.pnlNodeView.Location = new System.Drawing.Point(130, 19);
             this.pnlNodeView.Name = "pnlNodeView";
-            this.pnlNodeView.Size = new System.Drawing.Size(392, 346);
+            this.pnlNodeView.Size = new System.Drawing.Size(619, 346);
             this.pnlNodeView.TabIndex = 3;
-            // 
-            // lstAccountMembers
-            // 
-            this.lstAccountMembers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colName});
-            this.lstAccountMembers.Location = new System.Drawing.Point(7, 7);
-            this.lstAccountMembers.Name = "lstAccountMembers";
-            this.lstAccountMembers.Size = new System.Drawing.Size(177, 274);
-            this.lstAccountMembers.TabIndex = 0;
-            this.lstAccountMembers.UseCompatibleStateImageBehavior = false;
-            this.lstAccountMembers.View = System.Windows.Forms.View.Details;
-            // 
-            // colName
-            // 
-            this.colName.Text = "Name";
             // 
             // ctlHome
             // 
@@ -152,9 +160,10 @@ namespace Home
             this.Controls.Add(this.label1);
             this.Controls.Add(this.treeAccounts);
             this.Name = "ctlHome";
-            this.Size = new System.Drawing.Size(525, 694);
+            this.Size = new System.Drawing.Size(752, 694);
             this.tabControl1.ResumeLayout(false);
-            this.tabMembers.ResumeLayout(false);
+            this.tabInventory.ResumeLayout(false);
+            this.tabProducts.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -170,7 +179,7 @@ namespace Home
         private TabPage tabInventory;
         private TabPage tabProducts;
         private Panel pnlNodeView;
-        private ListView lstAccountMembers;
-        private ColumnHeader colName;
+        private Panel pnlNodeInventoryItem;
+        private Panel pnlNodeProduct;
     }
 }

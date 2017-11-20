@@ -170,6 +170,48 @@ namespace TreeMon.Managers.Store
             return res;
         }
 
+        public List<Location> GetCountries(string accountUUID)
+        {
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                IEnumerable<Location> locations = context.GetAll<Location>()
+                                                               .Where(pw =>    (pw?.AccountUUID == accountUUID || pw?.AccountUUID == SystemFlag.Default.Account)
+                                                                               && (pw?.LocationType?.EqualsIgnoreCase("Country") ?? false)
+                                                                               && pw?.Deleted == false
+                                                                               && string.IsNullOrWhiteSpace(pw.LocationType) == false
+                                                                               ).OrderBy(o=> o.Name); 
+                return locations.ToList();
+            }
+
+        }
+        public List<Location> GetStates(string accountUUID, string countryUUID)
+        {
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                List<Location> states = context.GetAll<Location>().Where(w => w.UUParentID == countryUUID
+                                                                                  && (w.AccountUUID == accountUUID ||
+                                                                                        w.AccountUUID.EqualsIgnoreCase(SystemFlag.Default.Account)
+                                                                                         && (w?.LocationType?.EqualsIgnoreCase("State") ?? false)
+                                                                                         && w?.Deleted == false
+                                                                                  )).OrderBy(o => o.Name).ToList();
+                return states;
+            }
+
+        }
+
+        public List<Location> GetCities(string accountUUID, string stateUUID)
+        {
+            using (var context = new TreeMonDbContext(this._connectionKey)) {
+            List<Location> cities = context.GetAll<Location>().Where(w => w.UUParentID == stateUUID
+                                                                                  && (w.AccountUUID == accountUUID ||
+                                                                                        w.AccountUUID.EqualsIgnoreCase(SystemFlag.Default.Account)
+                                                                                             && (w?.LocationType?.EqualsIgnoreCase("city") ?? false)
+                                                                                         && w?.Deleted == false
+                                                                                  )).OrderBy(o => o.Name).ToList();
+                return cities;
+
+            }
+        }
 
         /// <summary>
         /// This was created for use in the bulk process..

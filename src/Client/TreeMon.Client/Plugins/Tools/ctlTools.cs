@@ -83,8 +83,9 @@ namespace Tools
             //MainInterface.
         }
 
-   
+        private void ctlTools_Load(object sender, EventArgs e)
+        {
 
-    
+        }
     }
 }

@@ -11,6 +11,39 @@ namespace ClientCore.Extensions
 {
     public static class TreeViewEx
     {
+        public delegate void LoadTreeViewDelegate(TreeView ctl, List<INode> lst, TreeNode parentNode = null);
+
+        public static void Load(this TreeView ctl, List<INode> nodes, TreeNode parentNode = null)
+        {
+            if (ctl == null || nodes == null || nodes.Count == 0)
+                return;
+
+            if (ctl.InvokeRequired)
+            {
+                ctl.Invoke(new LoadTreeViewDelegate(Load), ctl, nodes,parentNode);
+            }
+            else
+            {
+                foreach (INode node in nodes)
+                {
+                    TreeNode treeNode = new TreeNode();
+                    treeNode.Name = node.Name;
+                    treeNode.Text = node.Name;
+                    treeNode.Tag = (object)node;
+
+                    if (parentNode != null)
+                    {
+                        parentNode.Nodes.Add(treeNode);
+                        continue;
+                    }
+                    ctl.Nodes.Add(treeNode);
+                    //load the subnodes
+                    IEnumerable<INode> subNodes = nodes.Where(w => w.UUParentID == node.UUID);
+                    Load(ctl,subNodes.ToList(), treeNode);
+                }
+            }
+        }
+
         public static TreeNode AddNode(this TreeView tree, INode node)
         {
             if (node == null)

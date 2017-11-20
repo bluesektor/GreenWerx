@@ -29,11 +29,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClientCore", "ClientCore", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClientCore", "ClientCore", "{026F195C-402C-4638-A63A-30799E1CDB63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientCore", "ClientCore\ClientCore.csproj", "{85E91253-EB99-43FD-A849-BC71845325E1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashboard", "Plugins\Dashboard\Dashboard\Dashboard.csproj", "{BE2C0E1B-45AF-4AAE-97E4-14CC34156EBB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Home", "Plugins\Home\Home\Home.csproj", "{2BBF9788-2B14-41D8-A0AC-E3E838407EBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientCore", "ClientCore\ClientCore.csproj", "{85E91253-EB99-43FD-A849-BC71845325E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -153,18 +153,6 @@ Global
 		{4DF7F3D6-4DBD-4D50-BFE9-1277092586BA}.Release|x64.Build.0 = Release|Any CPU
 		{4DF7F3D6-4DBD-4D50-BFE9-1277092586BA}.Release|x86.ActiveCfg = Release|Any CPU
 		{4DF7F3D6-4DBD-4D50-BFE9-1277092586BA}.Release|x86.Build.0 = Release|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|x64.Build.0 = Debug|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|x86.Build.0 = Debug|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|x64.ActiveCfg = Release|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|x64.Build.0 = Release|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|x86.ActiveCfg = Release|Any CPU
-		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|x86.Build.0 = Release|Any CPU
 		{BE2C0E1B-45AF-4AAE-97E4-14CC34156EBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE2C0E1B-45AF-4AAE-97E4-14CC34156EBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE2C0E1B-45AF-4AAE-97E4-14CC34156EBB}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -189,6 +177,18 @@ Global
 		{2BBF9788-2B14-41D8-A0AC-E3E838407EBA}.Release|x64.Build.0 = Release|Any CPU
 		{2BBF9788-2B14-41D8-A0AC-E3E838407EBA}.Release|x86.ActiveCfg = Release|Any CPU
 		{2BBF9788-2B14-41D8-A0AC-E3E838407EBA}.Release|x86.Build.0 = Release|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|x64.Build.0 = Debug|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Debug|x86.Build.0 = Debug|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|x64.ActiveCfg = Release|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|x64.Build.0 = Release|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|x86.ActiveCfg = Release|Any CPU
+		{85E91253-EB99-43FD-A849-BC71845325E1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -202,9 +202,60 @@ Global
 		{3B4C1739-DA22-4DA4-BCA6-99D52535112A} = {123FF756-29B8-4875-9FD3-6FB5A1FEBD20}
 		{4DF7F3D6-4DBD-4D50-BFE9-1277092586BA} = {5E63B59E-4E96-4E42-83D9-6FBCCEF881C0}
 		{026F195C-402C-4638-A63A-30799E1CDB63} = {6504038B-7B5D-4243-8093-50B5C16DDF42}
-		{85E91253-EB99-43FD-A849-BC71845325E1} = {026F195C-402C-4638-A63A-30799E1CDB63}
 		{BE2C0E1B-45AF-4AAE-97E4-14CC34156EBB} = {5E63B59E-4E96-4E42-83D9-6FBCCEF881C0}
 		{2BBF9788-2B14-41D8-A0AC-E3E838407EBA} = {5E63B59E-4E96-4E42-83D9-6FBCCEF881C0}
+		{85E91253-EB99-43FD-A849-BC71845325E1} = {026F195C-402C-4638-A63A-30799E1CDB63}
 	EndGlobalSection
-
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 13
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://treemon.visualstudio.com/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = TreeMon.Client\\TreeMon.Client.csproj
+		SccProjectName1 = TreeMon.Client
+		SccLocalPath1 = TreeMon.Client
+		SccProjectUniqueName2 = Plugins\\Settings\\Settings.csproj
+		SccProjectTopLevelParentUniqueName2 = TreeMon.Client.sln
+		SccProjectName2 = Plugins/Settings
+		SccLocalPath2 = Plugins\\Settings
+		SccProjectUniqueName3 = Plugins\\Tools\\Tools.csproj
+		SccProjectTopLevelParentUniqueName3 = TreeMon.Client.sln
+		SccProjectName3 = Plugins/Tools
+		SccLocalPath3 = Plugins\\Tools
+		SccProjectUniqueName4 = ..\\..\\Common\\3rdParty\\PluginInterface\\PluginInterface\\PluginInterface.csproj
+		SccProjectName4 = ../../Common/3rdParty/PluginInterface/PluginInterface
+		SccLocalPath4 = ..\\..\\Common\\3rdParty\\PluginInterface\\PluginInterface
+		SccProjectUniqueName5 = ..\\..\\Common\\TreeMon.Models\\TreeMon.Models.csproj
+		SccProjectTopLevelParentUniqueName5 = TreeMon.Client.sln
+		SccProjectName5 = ../../Common/TreeMon.Models
+		SccLocalPath5 = ..\\..\\Common\\TreeMon.Models
+		SccProjectUniqueName6 = ..\\..\\Common\\TreeMon.Managers\\TreeMon.Managers.csproj
+		SccProjectTopLevelParentUniqueName6 = TreeMon.Client.sln
+		SccProjectName6 = ../../Common/TreeMon.Managers
+		SccLocalPath6 = ..\\..\\Common\\TreeMon.Managers
+		SccProjectUniqueName7 = ..\\..\\Common\\TreeMon.Data\\TreeMon.Data.csproj
+		SccProjectTopLevelParentUniqueName7 = TreeMon.Client.sln
+		SccProjectName7 = ../../Common/TreeMon.Data
+		SccLocalPath7 = ..\\..\\Common\\TreeMon.Data
+		SccProjectUniqueName8 = ..\\..\\Common\\TreeMon.Utilites\\TreeMon.Utilites.csproj
+		SccProjectTopLevelParentUniqueName8 = TreeMon.Client.sln
+		SccProjectName8 = ../../Common/TreeMon.Utilites
+		SccLocalPath8 = ..\\..\\Common\\TreeMon.Utilites
+		SccProjectUniqueName9 = Plugins\\Enterprise\\EnterpriseTools\\EnterpriseTools.csproj
+		SccProjectTopLevelParentUniqueName9 = TreeMon.Client.sln
+		SccProjectName9 = Plugins/Enterprise/EnterpriseTools
+		SccLocalPath9 = Plugins\\Enterprise\\EnterpriseTools
+		SccProjectUniqueName10 = Plugins\\Dashboard\\Dashboard\\Dashboard.csproj
+		SccProjectTopLevelParentUniqueName10 = TreeMon.Client.sln
+		SccProjectName10 = Plugins/Dashboard/Dashboard
+		SccLocalPath10 = Plugins\\Dashboard\\Dashboard
+		SccProjectUniqueName11 = Plugins\\Home\\Home\\Home.csproj
+		SccProjectTopLevelParentUniqueName11 = TreeMon.Client.sln
+		SccProjectName11 = Plugins/Home/Home
+		SccLocalPath11 = Plugins\\Home\\Home
+		SccProjectUniqueName12 = ClientCore\\ClientCore.csproj
+		SccProjectTopLevelParentUniqueName12 = TreeMon.Client.sln
+		SccProjectName12 = ClientCore
+		SccLocalPath12 = ClientCore
+	EndGlobalSection
 EndGlobal

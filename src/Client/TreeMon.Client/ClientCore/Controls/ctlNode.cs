@@ -15,7 +15,7 @@ namespace ClientCore.Controls
 {
     public partial class ctlNode : UserControl
     {
-       private  AccountManager _accountManager;
+        private  AccountManager _accountManager;
 
         private UserManager _userManager;
 
@@ -75,6 +75,25 @@ namespace ClientCore.Controls
             //    picBox.SizeMode = PictureBoxSizeMode.StretchImage;
             //    picBox.Image = Image.FromFile(_node.Image);
             //}
+        }
+
+        public INode Get()
+        {
+            if (_node == null)
+                return _node;
+
+            _node.Name = txtName.Text;
+            _node.Status = txtStatus.Text;
+
+            _node.SortOrder = StringEx.ConvertTo<int>(txtSortOrder.Text);
+            _node.RoleWeight = StringEx.ConvertTo<int>(txtRoleWeight.Text);
+
+            _node.Active = chkActive.Checked;
+            _node.Deleted =chkDeleted.Checked;
+            _node.Private =chkPrivate.Checked;
+
+            _node.RoleOperation = cboRoleOperation.Text;
+            return _node;
         }
 
         private void chkDeleted_CheckedChanged(object sender, EventArgs e)

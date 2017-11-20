@@ -47,6 +47,7 @@
             this.Controls.Add(this.label1);
             this.Name = "ctlTools";
             this.Size = new System.Drawing.Size(513, 277);
+            this.Load += new System.EventHandler(this.ctlTools_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

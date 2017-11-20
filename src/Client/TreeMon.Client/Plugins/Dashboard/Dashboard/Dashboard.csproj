@@ -72,13 +72,6 @@
       <Project>{3b4c1739-da22-4da4-bca6-99d52535112a}</Project>
       <Name>TreeMon.Utilites</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\ClientCore\ClientCore.csproj">
-      <Project>{85e91253-eb99-43fd-a849-bc71845325e1}</Project>
-      <Name>ClientCore</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

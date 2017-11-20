@@ -24,6 +24,8 @@ namespace Home
     {
         TreeNode _currentNode = new TreeNode();
         ctlNode _nodeControl;
+        ctlUser _userControl;
+        ctlLocation _locationControl;
 
         public ctlHome()
         {
@@ -78,35 +80,36 @@ namespace Home
             pnlNodeView.Controls.Add(_nodeControl);
             _nodeControl.Show(accounts[0]);
 
-            List<User> users =  am.GetAccountMembers(accounts[0].AccountUUID);
-            List<INode> nodes = users.ConvertAll(new Converter<User, INode>(NodeEx.ObjectToNode));
-            LoadListViewDelegate delAccounts = new LoadListViewDelegate(LoadListView);
-            delAccounts(lstAccountMembers, nodes);
+            _userControl = new ctlUser(_appSettings.ActiveDbConnectionKey, _session.AuthToken);
+            tabMembers.Controls.Add(_userControl);
+
+            //todo add controls for location, inventory, products
+            _locationControl = new ctlLocation(_appSettings.ActiveDbConnectionKey, _session.AuthToken);
+            tabLocations.Controls.Add(_locationControl);
+
+            ShowDetail();
         }
 
-       
-        public delegate void LoadListViewDelegate( ListView ctl, List<INode> lst);
-
-        public void LoadListView(ListView ctl, List<INode> nodes)
-        {
-            if (ctl == null || nodes == null || nodes.Count == 0)
-                return;
-
-            if (ctl.InvokeRequired)
+        protected void ShowDetail() {
+            // tabControl1.SelectedIndex
+          string name =  tabControl1.SelectedTab.Name;
+            switch (name)
             {
-                Invoke(new LoadListViewDelegate(LoadListView), ctl, nodes);
-            }
-            else
-            {
-                foreach (INode node in nodes)
-                {
-                    lstAccountMembers.Items.Add(new ListViewItem()
-                    {
-                         Text = node.Name,
-                         Tag = node
-                    });
-                }
-                ctl.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize); 
+                case "tabMembers":
+                    _userControl.Show(((Account)_currentNode.Tag).UUID);
+                    break;
+                case "tabLocations":
+                    _locationControl.Show(((Account)_currentNode.Tag).UUID);
+                    break;
+                case "tabInventory":
+                    break;
+                case "tabProducts":
+                    break;
+                default:
+                    _userControl.Show(((Account)_currentNode.Tag).UUID);
+                    tabControl1.SelectTab("tabMembers");
+                    break;
+                
             }
         }
 
@@ -177,6 +180,14 @@ namespace Home
         {
            
         }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ShowDetail();
+        }
+
+
+
 
 
         //private void trvObjectsClick(object sender, EventArgs e)
