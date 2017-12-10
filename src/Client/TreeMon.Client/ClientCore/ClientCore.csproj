@@ -7,8 +7,8 @@
     <ProjectGuid>{85E91253-EB99-43FD-A849-BC71845325E1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ClassLibrary1</RootNamespace>
-    <AssemblyName>ClassLibrary1</AssemblyName>
+    <RootNamespace>ClientCore</RootNamespace>
+    <AssemblyName>ClientCore</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
@@ -37,6 +37,8 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,9 +48,39 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
+    <Compile Include="Controls\ctlLocation.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ctlLocation.Designer.cs">
+      <DependentUpon>ctlLocation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ctlNode.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ctlNode.Designer.cs">
+      <DependentUpon>ctlNode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ctlUser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ctlUser.Designer.cs">
+      <DependentUpon>ctlUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\ListViewEx.cs" />
+    <Compile Include="Extensions\TreeViewEx.cs" />
+    <Compile Include="Models\MenuItemcs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Common\TreeMon.Data\TreeMon.Data.csproj">
+      <Project>{BDF06218-41FA-4808-9DAE-D027771A757F}</Project>
+      <Name>TreeMon.Data</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\Common\TreeMon.Managers\TreeMon.Managers.csproj">
       <Project>{4b594255-e277-44aa-9107-cd4bffde0f5d}</Project>
       <Name>TreeMon.Managers</Name>
@@ -57,9 +89,25 @@
       <Project>{11a65c6e-7398-450d-b1e8-4152d0a1f48f}</Project>
       <Name>TreeMon.Models</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\TreeMon.Utilites\TreeMon.Utilites.csproj">
+      <Project>{3B4C1739-DA22-4DA4-BCA6-99D52535112A}</Project>
+      <Name>TreeMon.Utilites</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <EmbeddedResource Include="Controls\ctlLocation.resx">
+      <DependentUpon>ctlLocation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ctlNode.resx">
+      <DependentUpon>ctlNode.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ctlUser.resx">
+      <DependentUpon>ctlUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

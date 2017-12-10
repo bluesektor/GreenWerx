@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ClientCore.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -6,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using TreeMon.Managers;
 using TreeMon.Models.App;
 
@@ -95,5 +97,37 @@ namespace ClientCore
             settings.AppKey = am.GetSetting("AppKey", false)?.Value;//this will comeback empty because we don't trust yet.
             return settings;
         }
+
+        //public static TreeNode BuildMenu(string pluginName)
+        //{
+        //    TreeNode root = new TreeNode();
+        //    //todo move data to settings table. make SettingsClass = "MenuItem" or "List<MenuItem>"
+        //    //   this way we can set roleweight and operation. Store it in value as json string
+        //    //
+        //    switch (pluginName)
+        //    {
+        //        case "home":
+        //            root.items.Add(new MenuItem()
+        //            {
+        //                label = "Locations",
+        //                type = "Location",
+        //                icon = "fa fa-house"
+        //            });
+
+        //            //root.items.Add(new MenuItem()
+        //            //{
+        //            //    label = "System",
+        //            //    type = "link",
+        //            //    icon = "fa-cogs",
+        //            //    items = new List<MenuItem>()
+        //            //    {
+        //            //        new MenuItem() {   label = "Settings", type = "link" }
+        //            //    }
+        //            //});
+        //            break;
+        //    }
+        //    root.items = root.items.OrderBy(o => o.SortOrder).ToList();
+        //    return root;
+        //}
     }
 }

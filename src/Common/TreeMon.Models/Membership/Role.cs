@@ -32,6 +32,8 @@ namespace TreeMon.Models.Membership
 
         }
 
+        public string Status  { get; set; }
+
         public string SyncKey { get; set; }
 
         public string SyncType { get; set; }
@@ -48,6 +50,7 @@ namespace TreeMon.Models.Membership
         [Key]
         public int Id { get; set; }
 
+        public string Image { get; set; }
 
         public bool Private { get; set; }
 

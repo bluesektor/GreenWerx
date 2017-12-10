@@ -53,6 +53,8 @@ namespace TreeMon.Models.Membership
 
         public int? ParentId { get; set; }
 
+        public string Image { get; set; }
+
         [StringLength(32)]
         public string UUID { get; set; }
         /// <summary>

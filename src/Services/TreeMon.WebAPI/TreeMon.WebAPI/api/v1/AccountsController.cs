@@ -49,19 +49,19 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [Route("api/Accounts/{accountUUID}/Users/Add")]
-        public ServiceResult AddUsersToAccount(string accountUUID)
+        public async Task<ServiceResult> AddUsersToAccount(string accountUUID)
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
             ServiceResult res;
             try
-            {
-                Task<string> content = ActionContext.Request.Content.ReadAsStringAsync();
+            { 
+                string content = await ActionContext.Request.Content.ReadAsStringAsync();
                 if (content == null)
                     return ServiceResponse.Error("No users were sent.");
 
-                string body = content.Result;
+                string body = content;
 
                 if (string.IsNullOrEmpty(body))
                     return ServiceResponse.Error("No users were sent.");

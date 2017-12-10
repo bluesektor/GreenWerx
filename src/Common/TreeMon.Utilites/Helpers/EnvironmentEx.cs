@@ -13,7 +13,7 @@ namespace TreeMon.Utilites.Helpers
         {
             get
             {
-                string tmp = AppDomain.CurrentDomain.BaseDirectory.Replace("bin\\Debug", "").Replace("bin\\Release", "");
+                string tmp = AppDomain.CurrentDomain.BaseDirectory.Replace("bin\\Debug\\", "").Replace("bin\\Release\\", "");
                 return Path.Combine(tmp, "App_Data");
             }
         }

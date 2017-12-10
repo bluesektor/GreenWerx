@@ -64,5 +64,21 @@ namespace TreeMon.Models.Geo
 
         [JsonConverter(typeof(BoolConverter))]
         public bool isDefault { get; set; }
+
+        public bool OnlineStore      { get; set; }
+
+        public bool Dispensary      { get; set; }
+
+        public bool Cultivation         { get; set; }
+
+        public bool Manufacturing       { get; set; }
+
+        public bool Lab              { get; set; }
+
+        public bool Processor       { get; set; }
+
+        public bool Retailer        { get; set; }
+
+
     }
 }

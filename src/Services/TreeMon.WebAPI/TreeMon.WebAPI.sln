@@ -95,4 +95,29 @@ Global
 		{11A65C6E-7398-450D-B1E8-4152D0A1F48F} = {FFA44B7C-24A4-493C-91C5-D723F9E4A7E4}
 		{3B4C1739-DA22-4DA4-BCA6-99D52535112A} = {FFA44B7C-24A4-493C-91C5-D723F9E4A7E4}
 	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 6
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://treemon.visualstudio.com/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = ..\\..\\Common\\TreeMon.Data\\TreeMon.Data.csproj
+		SccProjectTopLevelParentUniqueName1 = TreeMon.WebAPI.sln
+		SccProjectName1 = ../../Common/TreeMon.Data
+		SccLocalPath1 = ..\\..\\Common\\TreeMon.Data
+		SccProjectUniqueName2 = ..\\..\\Common\\TreeMon.Managers\\TreeMon.Managers.csproj
+		SccProjectTopLevelParentUniqueName2 = TreeMon.WebAPI.sln
+		SccProjectName2 = ../../Common/TreeMon.Managers
+		SccLocalPath2 = ..\\..\\Common\\TreeMon.Managers
+		SccProjectUniqueName3 = ..\\..\\Common\\TreeMon.Models\\TreeMon.Models.csproj
+		SccProjectTopLevelParentUniqueName3 = TreeMon.WebAPI.sln
+		SccProjectName3 = ../../Common/TreeMon.Models
+		SccLocalPath3 = ..\\..\\Common\\TreeMon.Models
+		SccProjectUniqueName4 = ..\\..\\Common\\TreeMon.Utilites\\TreeMon.Utilites.csproj
+		SccProjectTopLevelParentUniqueName4 = TreeMon.WebAPI.sln
+		SccProjectName4 = ../../Common/TreeMon.Utilites
+		SccLocalPath4 = ..\\..\\Common\\TreeMon.Utilites
+		SccProjectUniqueName5 = TreeMon.WebAPI\\TreeMon.WebAPI.csproj
+		SccProjectName5 = TreeMon.WebAPI
+		SccLocalPath5 = TreeMon.WebAPI
+	EndGlobalSection
 EndGlobal

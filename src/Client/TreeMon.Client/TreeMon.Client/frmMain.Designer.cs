@@ -95,7 +95,7 @@
             this.tvwPlugins.ShowLines = false;
             this.tvwPlugins.ShowPlusMinus = false;
             this.tvwPlugins.ShowRootLines = false;
-            this.tvwPlugins.Size = new System.Drawing.Size(184, 563);
+            this.tvwPlugins.Size = new System.Drawing.Size(199, 563);
             this.tvwPlugins.TabIndex = 2;
             this.tvwPlugins.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvwPlugins_AfterSelect);
             // 
@@ -107,9 +107,8 @@
             this.pnlPlugin.ForeColor = System.Drawing.SystemColors.WindowText;
             this.pnlPlugin.Location = new System.Drawing.Point(3, 3);
             this.pnlPlugin.Name = "pnlPlugin";
-            this.pnlPlugin.Size = new System.Drawing.Size(1005, 694);
+            this.pnlPlugin.Size = new System.Drawing.Size(997, 694);
             this.pnlPlugin.TabIndex = 4;
-        
             // 
             // groupBox1
             // 
@@ -122,7 +121,7 @@
             this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.groupBox1.Location = new System.Drawing.Point(3, 572);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(184, 125);
+            this.groupBox1.Size = new System.Drawing.Size(199, 125);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Plugin Information:";
@@ -132,9 +131,9 @@
             this.lblPluginDesc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblPluginDesc.Location = new System.Drawing.Point(-14, 64);
+            this.lblPluginDesc.Location = new System.Drawing.Point(11, 84);
             this.lblPluginDesc.Name = "lblPluginDesc";
-            this.lblPluginDesc.Size = new System.Drawing.Size(10, 53);
+            this.lblPluginDesc.Size = new System.Drawing.Size(177, 33);
             this.lblPluginDesc.TabIndex = 3;
             this.lblPluginDesc.Text = "   Plugin Description Goes Here... Test One Two Three, This is a Test...";
             // 
@@ -142,7 +141,7 @@
             // 
             this.lblStatus.Location = new System.Drawing.Point(1, 67);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(177, 31);
+            this.lblStatus.Size = new System.Drawing.Size(177, 17);
             this.lblStatus.TabIndex = 5;
             this.lblStatus.Text = "label1";
             // 
@@ -152,7 +151,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblPluginAuthor.Location = new System.Drawing.Point(5, 48);
             this.lblPluginAuthor.Name = "lblPluginAuthor";
-            this.lblPluginAuthor.Size = new System.Drawing.Size(168, 16);
+            this.lblPluginAuthor.Size = new System.Drawing.Size(183, 16);
             this.lblPluginAuthor.TabIndex = 2;
             this.lblPluginAuthor.Text = "Programmer: <Author\'s Name>";
             // 
@@ -162,7 +161,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblPluginVersion.Location = new System.Drawing.Point(10, 33);
             this.lblPluginVersion.Name = "lblPluginVersion";
-            this.lblPluginVersion.Size = new System.Drawing.Size(168, 16);
+            this.lblPluginVersion.Size = new System.Drawing.Size(183, 16);
             this.lblPluginVersion.TabIndex = 1;
             this.lblPluginVersion.Text = "(<Version>)";
             // 
@@ -173,7 +172,7 @@
             this.lblPluginName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPluginName.Location = new System.Drawing.Point(8, 16);
             this.lblPluginName.Name = "lblPluginName";
-            this.lblPluginName.Size = new System.Drawing.Size(168, 32);
+            this.lblPluginName.Size = new System.Drawing.Size(183, 32);
             this.lblPluginName.TabIndex = 0;
             this.lblPluginName.Text = "<Plugin Name Here>";
             // 
@@ -185,11 +184,13 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.splitContainer1.Panel1.Controls.Add(this.tvwPlugins);
             this.splitContainer1.Panel1.Controls.Add(this.groupBox1);
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.ControlLight;
             this.splitContainer1.Panel2.Controls.Add(this.pnlPlugin);
             this.splitContainer1.Size = new System.Drawing.Size(1252, 700);
             this.splitContainer1.SplitterDistance = 205;
