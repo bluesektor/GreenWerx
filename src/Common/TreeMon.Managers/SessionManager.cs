@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2017 TreeMon.org.
 //Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
 using Dapper;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ using System.Text;
 using TreeMon.Data;
 using TreeMon.Data.Logging;
 using TreeMon.Models.App;
+using TreeMon.Models.Membership;
 using TreeMon.Utilites.Extensions;
 
 namespace TreeMon.Managers
@@ -275,6 +277,12 @@ namespace TreeMon.Managers
             }
             return deletedSessions;
         }
-       
+
+        public string GetAccountUUID(string sessionKey)
+        {
+            UserSession us = GetSession(sessionKey);
+            User u = JsonConvert.DeserializeObject<User>(us.UserData);
+            return u?.AccountUUID;
+        }
     }
 }

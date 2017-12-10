@@ -58,10 +58,7 @@ namespace BioTrackTHC.V4
         public DateTime Modified { get; set; }
         public long TransactionId_Original { get; set; }
 
-    #region
-#endregion
-   
-    
+  
 
     }
 }

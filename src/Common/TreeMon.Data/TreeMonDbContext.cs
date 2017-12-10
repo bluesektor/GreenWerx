@@ -977,6 +977,7 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
+                Debug.Assert(false, ex.Message);
                 _fileLogger.InsertError(ex.Message + ex.InnerException?.ToString(), "TreeMonDbContext", "Insert:" + typeof(T).ToString());
                 return false;
             }

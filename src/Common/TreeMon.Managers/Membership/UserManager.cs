@@ -493,6 +493,9 @@ namespace TreeMon.Managers.Membership
 
             var u = (User)n;
 
+            if (u.DateCreated == DateTime.MinValue)
+                u.DateCreated = DateTime.UtcNow;
+
             if (authorize)
             {
                 if (!this.DataAccessAuthorized(n, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
