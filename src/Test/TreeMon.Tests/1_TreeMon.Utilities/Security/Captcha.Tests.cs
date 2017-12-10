@@ -9,19 +9,19 @@ namespace TreeMon.Web.Tests._1_TreeMon.Utilities.Security
     [TestClass]
     public class CaptchaTests
     {
-        [TestMethod]
-        public void Captcha_IsValidCaptcha()
-        {
-            Assert.IsTrue(Captcha.IsValidCaptcha("abc", "ABC"));
-            Assert.IsFalse(Captcha.IsValidCaptcha("abc", "xyz"));
-        }
+        //[TestMethod]
+        //public void Captcha_IsValidCaptcha()
+        //{
+        //    Assert.IsTrue(Captcha.IsValidCaptcha("abc", "ABC"));
+        //    Assert.IsFalse(Captcha.IsValidCaptcha("abc", "xyz"));
+        //}
 
-        [TestMethod]
-        public void Captcha_RandomText()
-        {
-            string code = Captcha.RandomText(5);
-            Assert.AreEqual(5, code.Length);
-        }
+        //[TestMethod]
+        //public void Captcha_RandomText()
+        //{
+        //    string code = Captcha.RandomText(5);
+        //    Assert.AreEqual(5, code.Length);
+        //}
 
     }
 }
