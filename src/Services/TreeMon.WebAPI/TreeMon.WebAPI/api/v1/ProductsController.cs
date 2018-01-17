@@ -14,6 +14,7 @@ using TreeMon.Managers.General;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Plant;
 using TreeMon.Managers.Store;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.General;
@@ -90,12 +91,12 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must provide a name for the strain.");
 
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Product p = (Product)productManager.Get(name);
+            List<Product> s = productManager.Search(name);
 
-            if (p == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Product could not be located for the name " + name);
 
-            return ServiceResponse.OK("",p);
+            return ServiceResponse.OK("",s);
         }
 
 
@@ -109,7 +110,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must provide a name for the strain.");
 
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Product p = (Product)productManager.GetBy(uuid);
+            Product p = (Product)productManager.Get(uuid);
 
             if (p == null)
                 return ServiceResponse.Error("Product could not be located for the uuid " + uuid);
@@ -136,7 +137,7 @@ namespace TreeMon.Web.api.v1
             if (type.EqualsIgnoreCase( "PRODUCT"))
             {
                 ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-                Product p = (Product)productManager.GetBy(uuid);
+                Product p = (Product)productManager.Get(uuid);
 
                 if (p == null)
                     return ServiceResponse.Error("Product could not be located for the uuid " + uuid);
@@ -150,7 +151,7 @@ namespace TreeMon.Web.api.v1
            
 
             AccountManager am = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Account a = (Account)am.GetBy(ManufacturerUUID);
+            Account a = (Account)am.Get(ManufacturerUUID);
 
             AttributeManager atm = new AttributeManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
             List<TMG.Attribute> attributes =  atm.GetAttributes(refUUID, refType, refAccount).Where(w => w.Deleted == false).ToList();
@@ -176,7 +177,7 @@ namespace TreeMon.Web.api.v1
 
             #region plant related info
             StrainManager pm = new StrainManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Strain s = (Strain)pm.GetBy(strainUUID);
+            Strain s = (Strain)pm.Get(strainUUID);
             if (s != null)
             {
                 attributes.Add(new TMG.Attribute()
@@ -247,7 +248,7 @@ namespace TreeMon.Web.api.v1
                 }
 
                CategoryManager cm = new CategoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-               Category c = (Category)cm.GetBy(s.CategoryUUID);
+               Category c = (Category)cm.Get(s.CategoryUUID);
                 if (c != null)
                 {
                     attributes.Add(new TMG.Attribute()
@@ -404,7 +405,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Product p = (Product)productManager.GetBy(productUUID);
+            Product p = (Product)productManager.Get(productUUID);
 
             if (p == null || string.IsNullOrWhiteSpace(p.UUID))
                 return ServiceResponse.Error("Invalid account was sent.");

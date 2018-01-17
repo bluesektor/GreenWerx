@@ -120,7 +120,7 @@ namespace TreeMon.Web.api.v1
             {
                 UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-                User u = (User)userManager.GetBy(uuid, true);
+                User u = (User)userManager.Get(uuid, true);
 
                 if (u == null)
                     return ServiceResponse.Error("User not found.");
@@ -138,11 +138,11 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpGet]
         [Route("api/Users/{name}")]
-        public ServiceResult Get(string name)
+        public ServiceResult Search(string name)
         {
             UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            User u = (User)userManager.Get(name, false);
+            List<User> u = userManager.Search(name, false);
 
             if (u == null)
                 return ServiceResponse.Error("User not found.");
@@ -275,7 +275,7 @@ namespace TreeMon.Web.api.v1
  
             UserManager userManager = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            User dbAcct = (User)userManager.GetBy(u.UUID, false);
+            User dbAcct = (User)userManager.Get(u.UUID, false);
 
             if (dbAcct == null)
                 return ServiceResponse.Error("User was not found.");

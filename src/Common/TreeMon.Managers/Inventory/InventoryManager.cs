@@ -99,7 +99,7 @@ namespace TreeMon.Managers.Inventory
             }
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -110,14 +110,14 @@ namespace TreeMon.Managers.Inventory
             }
         }
 
-        public INode Get(string name)
+        public List<InventoryItem> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<InventoryItem>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<InventoryItem>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -193,19 +193,19 @@ namespace TreeMon.Managers.Inventory
             var p = (InventoryItem)n;
             if (validateFirst)
             {
-                InventoryItem dbU = (InventoryItem)Get(p.Name);
+                //InventoryItem dbU = (InventoryItem)Get(p.Name);
 
-                if (dbU != null)
-                {
-                    //TODO in ui give option to show deleted items and update
-                    if (dbU.Deleted)
-                    {
-                        dbU.Deleted = false;
-                        return this.Update(n);
-                    }
+                //if (dbU != null)
+                //{
+                //    //TODO in ui give option to show deleted items and update
+                //    if (dbU.Deleted)
+                //    {
+                //        dbU.Deleted = false;
+                //        return this.Update(n);
+                //    }
                    
-                   return ServiceResponse.Error("InventoryItem already exists.");
-                }
+                //   return ServiceResponse.Error("InventoryItem already exists.");
+                //}
 
                 if (string.IsNullOrWhiteSpace(p.CreatedBy))
                     return ServiceResponse.Error("You must assign who the product was created by.");

@@ -116,9 +116,9 @@ namespace TreeMon.Web.api.v1
 
             UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            UnitOfMeasure s = (UnitOfMeasure)UnitsOfMeasureManager.Get(name);
+            List<UnitOfMeasure> s = UnitsOfMeasureManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("UnitsOfMeasure could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -135,7 +135,7 @@ namespace TreeMon.Web.api.v1
 
             UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            UnitOfMeasure s = (UnitOfMeasure)UnitsOfMeasureManager.GetBy(uuid);
+            UnitOfMeasure s = (UnitOfMeasure)UnitsOfMeasureManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("UnitsOfMeasure could not be located for the uuid " + uuid);
@@ -192,7 +192,7 @@ namespace TreeMon.Web.api.v1
 
             UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            UnitOfMeasure fa = (UnitOfMeasure)UnitsOfMeasureManager.GetBy(uuid);
+            UnitOfMeasure fa = (UnitOfMeasure)UnitsOfMeasureManager.Get(uuid);
             if (fa == null)
                 return ServiceResponse.Error("Could not find measure.");
 
@@ -223,7 +223,7 @@ namespace TreeMon.Web.api.v1
 
           
 
-            var dbS = (UnitOfMeasure)UnitsOfMeasureManager.GetBy(s.UUID);
+            var dbS = (UnitOfMeasure)UnitsOfMeasureManager.Get(s.UUID);
 
                     if (dbS == null)
                         return ServiceResponse.Error("UnitsOfMeasure was not found.");

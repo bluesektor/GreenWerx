@@ -163,7 +163,7 @@ namespace TreeMon.Utilites.Extensions
                 case "CATEGORYUUID":
                     #region original code not ported. may not be needed
                     //CategoryManager categoryManager = new CategoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-                    //Category category = categoryManager.GetBy(f.SearchTerm);
+                    //Category category = categoryManager.Get(f.SearchTerm);
                     //if (category == null)
                     //    continue;
                     //input = input.Where(w => w.Category?.EqualsIgnoreCase(category.Name.ToUpper()).ToList();
@@ -329,7 +329,7 @@ namespace TreeMon.Utilites.Extensions
                 case "CATEGORYUUID":
                     #region original code not ported. may not be needed
                     //CategoryManager categoryManager = new CategoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-                    //Category category = categoryManager.GetBy(f.SearchTerm);
+                    //Category category = categoryManager.Get(f.SearchTerm);
                     //if (category == null)
                     //    continue;
                     //input = input.Where(w => w.Category?.EqualsIgnoreCase(category.Name.ToUpper()).ToList();

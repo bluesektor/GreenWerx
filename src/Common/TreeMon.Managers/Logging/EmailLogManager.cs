@@ -44,7 +44,7 @@ namespace TreeMon.Managers
             }
 
             //get the EmailLog from the table with all the data so when its updated it still contains the same data.
-            s = (EmailLog)this.GetBy(s.UUID);
+            s = (EmailLog)this.Get(s.UUID);
             if (s == null)
                     return ServiceResponse.Error("Email log not found");
 
@@ -66,18 +66,18 @@ namespace TreeMon.Managers
             }
         }
 
-        public INode Get(string name)
+        public List<EmailLog> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<EmailLog>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<EmailLog>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;

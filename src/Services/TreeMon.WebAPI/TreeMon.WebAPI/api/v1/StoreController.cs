@@ -198,10 +198,10 @@ namespace TreeMon.WebAPI.api.v1
             cv.PriceRules = cm.GetPriceRules(cv.UUID, "shoppingcart");
 
             LocationManager lm = new LocationManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            cv.BillingAddress = (Location)lm.GetBy(cv.BillingLocationUUID);
+            cv.BillingAddress = (Location)lm.Get(cv.BillingLocationUUID);
 
             if (cv.ShippingSameAsBiling == false)
-                cv.ShippingAddress = (Location)lm.GetBy(cv.ShippingLocationUUID);
+                cv.ShippingAddress = (Location)lm.Get(cv.ShippingLocationUUID);
 
             return cv;
         }

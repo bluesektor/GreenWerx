@@ -41,7 +41,7 @@ namespace TreeMon.Models.Medical
             }
 
             //get the Anatomy from the table with all the data so when its updated it still contains the same data.
-            s =  (Anatomy)this.GetBy(s.UUID);
+            s =  (Anatomy)this.Get(s.UUID);
             if (s == null)
                 return ServiceResponse.Error("Anatomy not found");
 
@@ -54,13 +54,13 @@ namespace TreeMon.Models.Medical
             return res;
         }
 
-        public INode Get( string name)
+        public List<Anatomy> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Anatomy>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name) && sw.AccountUUID == this._requestingUser.AccountUUID) ;
+                return context.GetAll<Anatomy>().Where(sw => sw.Name.EqualsIgnoreCase(name) && sw.AccountUUID == this._requestingUser.AccountUUID).ToList();
             }
             //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -75,7 +75,7 @@ namespace TreeMon.Models.Medical
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;

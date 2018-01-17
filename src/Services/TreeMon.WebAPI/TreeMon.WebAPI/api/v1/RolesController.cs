@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using TreeMon.Managers.Membership;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Membership;
@@ -163,7 +164,7 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
 
-            Role dbRole = (Role) roleManager.GetBy(n.UUID);
+            Role dbRole = (Role) roleManager.Get(n.UUID);
 
             if (dbRole == null)
                 return ServiceResponse.Error("Invalid role.");
@@ -185,7 +186,7 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
 
-            Role dbRole = (Role)roleManager.GetBy(uuid);
+            Role dbRole = (Role)roleManager.Get(uuid);
 
             if (dbRole == null)
                 return ServiceResponse.Error("Invalid role.");
@@ -279,7 +280,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Roles/{name}")]
-        public ServiceResult Get(string name )
+        public ServiceResult Search(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
                 return ServiceResponse.Error("You must provide a name for the role.");
@@ -291,9 +292,9 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, this.GetUser(Request.Headers?.Authorization?.Parameter));
 
-            Role s = (Role)roleManager.Get(name);
+            List<Role> s = roleManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Role could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -340,7 +341,7 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
 
-            Role  role= (Role)roleManager.GetBy(uuid);
+            Role  role= (Role)roleManager.Get(uuid);
          
             return ServiceResponse.OK("", role);
         }
@@ -417,7 +418,7 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, this.GetUser(Request.Headers?.Authorization?.Parameter));
 
-            Role dbRole = (Role)roleManager.GetBy( r.UUID );
+            Role dbRole = (Role)roleManager.Get( r.UUID );
 
             if (dbRole == null)
                 return ServiceResponse.Error("Role was not found.");

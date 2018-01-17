@@ -377,7 +377,7 @@ namespace TreeMon.Managers.Membership
         }
 
 
-        public INode Get( string name)
+        public List<Role> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name) )
                 return null;
@@ -386,7 +386,7 @@ namespace TreeMon.Managers.Membership
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<Role>().FirstOrDefault(rw => (rw.Name?.EqualsIgnoreCase(name)?? false) && rw.AccountUUID == _requestingUser.AccountUUID);
+                return context.GetAll<Role>().Where(rw => (rw.Name?.EqualsIgnoreCase(name)?? false) && rw.AccountUUID == _requestingUser.AccountUUID).ToList();
             }
         }
 
@@ -404,7 +404,7 @@ namespace TreeMon.Managers.Membership
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -485,7 +485,7 @@ namespace TreeMon.Managers.Membership
 
         public ServiceResult CloneRole(string roleUUID)
         {
-            Role originalRole = (Role)this.GetBy(roleUUID);
+            Role originalRole = (Role)this.Get(roleUUID);
 
             if (originalRole == null)
                 return ServiceResponse.Error("Role could not be found.");
@@ -569,7 +569,7 @@ namespace TreeMon.Managers.Membership
         {
             ServiceResult res = ServiceResponse.OK();
 
-            Role r = (Role)this.GetBy(roleUUID);
+            Role r = (Role)this.Get(roleUUID);
             if (r == null)
                 return ServiceResponse.Error("Invalid roleUUID.");
 
@@ -730,7 +730,7 @@ namespace TreeMon.Managers.Membership
             if (UserRoleExists(u.UUID, u.AccountUUID, roleUUID))
                 return res;
 
-            Role r = (Role)GetBy(roleUUID);
+            Role r = (Role)Get(roleUUID);
             //if the role doesn't match the account then the role
             //hasn't been created for the account so the user can not be added to it.
             //
@@ -774,7 +774,7 @@ namespace TreeMon.Managers.Membership
             if (u == null)
                 return ServiceResponse.Error("User is null");
 
-            Role r = (Role)GetBy(roleUUID);
+            Role r = (Role)Get(roleUUID);
             //if the role doesn't match the account then the role
             //hasn't been created for the account so the user can not be added to it.
             //
@@ -1037,11 +1037,11 @@ namespace TreeMon.Managers.Membership
 
         public bool IsUserInRole(string userUUID, string roleName, string accountUUID)
         {
-            Role r = (Role)Get(roleName);
-            if (r == null)
+            List<Role> r = (List<Role>)Search(roleName);
+            if (r == null || r.Count == 0)
                 return false;
 
-            if (GetUsersInRole(r.UUID, accountUUID).Any(w => w.UUID == userUUID))
+            if (GetUsersInRole(r.FirstOrDefault().UUID, accountUUID).Any(w => w.UUID == userUUID))
                 return true;
 
             return false;

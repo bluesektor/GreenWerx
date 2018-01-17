@@ -141,7 +141,7 @@ namespace TreeMon.Managers.Store
             User u = null;
             InventoryManager inventoryManager = new InventoryManager(this._connectionKey, _sessionKey);
 
-            InventoryItem item = (InventoryItem)inventoryManager.GetBy(inventoryItemUUID);
+            InventoryItem item = (InventoryItem)inventoryManager.Get(inventoryItemUUID);
 
             if (item == null)
                 return ServiceResponse.Error("Product wasn't found.");
@@ -231,7 +231,7 @@ namespace TreeMon.Managers.Store
             if (cartItem == null)
                 return ServiceResponse.Error("Item not found in cart.");
 
-            InventoryItem item = (InventoryItem)inventoryManager.GetBy(cartItem.ItemUUID);
+            InventoryItem item = (InventoryItem)inventoryManager.Get(cartItem.ItemUUID);
             if (item == null)
                 return ServiceResponse.Error("Product wasn't found.");
             
@@ -299,7 +299,7 @@ namespace TreeMon.Managers.Store
             if (cartItem == null)
                 return ServiceResponse.Error("Item not found in cart.");
 
-            InventoryItem item = (InventoryItem)inventoryManager.GetBy(cartItem.ItemUUID);
+            InventoryItem item = (InventoryItem)inventoryManager.Get(cartItem.ItemUUID);
             if (item == null)
                 return ServiceResponse.Error("Product wasn't found.");
 

@@ -29,8 +29,6 @@
         private void InitializeComponent()
         {
             this.pnlNodeUser = new System.Windows.Forms.Panel();
-            this.lstAccountMembers = new System.Windows.Forms.ListView();
-            this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnSaveUser = new System.Windows.Forms.Button();
             this.txtEmail = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -48,33 +46,18 @@
             this.chkBanned = new System.Windows.Forms.CheckBox();
             this.chkApproved = new System.Windows.Forms.CheckBox();
             this.lblError = new System.Windows.Forms.Label();
+            this.pnlNodeList = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // pnlNodeUser
             // 
-            this.pnlNodeUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.pnlNodeUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlNodeUser.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.pnlNodeUser.Location = new System.Drawing.Point(187, 5);
             this.pnlNodeUser.Name = "pnlNodeUser";
             this.pnlNodeUser.Size = new System.Drawing.Size(413, 281);
             this.pnlNodeUser.TabIndex = 18;
-            // 
-            // lstAccountMembers
-            // 
-            this.lstAccountMembers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colName});
-            this.lstAccountMembers.Location = new System.Drawing.Point(4, 5);
-            this.lstAccountMembers.Name = "lstAccountMembers";
-            this.lstAccountMembers.Size = new System.Drawing.Size(177, 281);
-            this.lstAccountMembers.TabIndex = 17;
-            this.lstAccountMembers.UseCompatibleStateImageBehavior = false;
-            this.lstAccountMembers.View = System.Windows.Forms.View.Details;
-            this.lstAccountMembers.SelectedIndexChanged += new System.EventHandler(this.lstAccountMembers_SelectedIndexChanged);
-            // 
-            // colName
-            // 
-            this.colName.Text = "Name";
             // 
             // btnSaveUser
             // 
@@ -88,6 +71,7 @@
             // 
             // txtEmail
             // 
+            this.txtEmail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.txtEmail.Location = new System.Drawing.Point(606, 171);
             this.txtEmail.Name = "txtEmail";
             this.txtEmail.Size = new System.Drawing.Size(240, 20);
@@ -95,6 +79,7 @@
             // 
             // label6
             // 
+            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(606, 155);
             this.label6.Name = "label6";
@@ -104,6 +89,7 @@
             // 
             // label5
             // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(606, 198);
             this.label5.Name = "label5";
@@ -113,6 +99,7 @@
             // 
             // txtLicenseNumber
             // 
+            this.txtLicenseNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.txtLicenseNumber.Location = new System.Drawing.Point(606, 214);
             this.txtLicenseNumber.Name = "txtLicenseNumber";
             this.txtLicenseNumber.Size = new System.Drawing.Size(237, 20);
@@ -120,6 +107,7 @@
             // 
             // lblLastPasswordChangedDate
             // 
+            this.lblLastPasswordChangedDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblLastPasswordChangedDate.AutoSize = true;
             this.lblLastPasswordChangedDate.Location = new System.Drawing.Point(728, 60);
             this.lblLastPasswordChangedDate.Name = "lblLastPasswordChangedDate";
@@ -128,6 +116,7 @@
             // 
             // label4
             // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(606, 60);
             this.label4.Name = "label4";
@@ -137,6 +126,7 @@
             // 
             // lblLastLockoutDate
             // 
+            this.lblLastLockoutDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblLastLockoutDate.AutoSize = true;
             this.lblLastLockoutDate.Location = new System.Drawing.Point(701, 37);
             this.lblLastLockoutDate.Name = "lblLastLockoutDate";
@@ -145,6 +135,7 @@
             // 
             // label3
             // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(606, 37);
             this.label3.Name = "label3";
@@ -154,6 +145,7 @@
             // 
             // lblLastLoginDate
             // 
+            this.lblLastLoginDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblLastLoginDate.AutoSize = true;
             this.lblLastLoginDate.Location = new System.Drawing.Point(685, 13);
             this.lblLastLoginDate.Name = "lblLastLoginDate";
@@ -162,6 +154,7 @@
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(606, 14);
             this.label2.Name = "label2";
@@ -171,6 +164,7 @@
             // 
             // chkSiteAdmin
             // 
+            this.chkSiteAdmin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkSiteAdmin.AutoSize = true;
             this.chkSiteAdmin.Location = new System.Drawing.Point(606, 130);
             this.chkSiteAdmin.Name = "chkSiteAdmin";
@@ -181,6 +175,7 @@
             // 
             // chkLockedOut
             // 
+            this.chkLockedOut.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkLockedOut.AutoSize = true;
             this.chkLockedOut.Location = new System.Drawing.Point(696, 107);
             this.chkLockedOut.Name = "chkLockedOut";
@@ -191,6 +186,7 @@
             // 
             // chkAnonymous
             // 
+            this.chkAnonymous.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkAnonymous.AutoSize = true;
             this.chkAnonymous.Location = new System.Drawing.Point(606, 84);
             this.chkAnonymous.Name = "chkAnonymous";
@@ -201,6 +197,7 @@
             // 
             // chkBanned
             // 
+            this.chkBanned.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkBanned.AutoSize = true;
             this.chkBanned.Location = new System.Drawing.Point(606, 107);
             this.chkBanned.Name = "chkBanned";
@@ -211,6 +208,7 @@
             // 
             // chkApproved
             // 
+            this.chkApproved.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkApproved.AutoSize = true;
             this.chkApproved.Location = new System.Drawing.Point(696, 84);
             this.chkApproved.Name = "chkApproved";
@@ -223,15 +221,27 @@
             // 
             this.lblError.AutoSize = true;
             this.lblError.ForeColor = System.Drawing.Color.Red;
-            this.lblError.Location = new System.Drawing.Point(3, 289);
+            this.lblError.Location = new System.Drawing.Point(184, 289);
             this.lblError.Name = "lblError";
             this.lblError.Size = new System.Drawing.Size(0, 13);
             this.lblError.TabIndex = 35;
+            // 
+            // pnlNodeList
+            // 
+            this.pnlNodeList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlNodeList.Location = new System.Drawing.Point(3, 5);
+            this.pnlNodeList.Name = "pnlNodeList";
+            this.pnlNodeList.Size = new System.Drawing.Size(178, 281);
+            this.pnlNodeList.TabIndex = 62;
+            this.pnlNodeList.ClientSizeChanged += new System.EventHandler(this.pnlNodeList_ClientSizeChanged);
             // 
             // ctlUser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.pnlNodeList);
             this.Controls.Add(this.lblError);
             this.Controls.Add(this.btnSaveUser);
             this.Controls.Add(this.txtEmail);
@@ -250,9 +260,8 @@
             this.Controls.Add(this.chkBanned);
             this.Controls.Add(this.chkApproved);
             this.Controls.Add(this.pnlNodeUser);
-            this.Controls.Add(this.lstAccountMembers);
             this.Name = "ctlUser";
-            this.Size = new System.Drawing.Size(852, 303);
+            this.Size = new System.Drawing.Size(852, 305);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -261,8 +270,6 @@
         #endregion
 
         private System.Windows.Forms.Panel pnlNodeUser;
-        private System.Windows.Forms.ListView lstAccountMembers;
-        private System.Windows.Forms.ColumnHeader colName;
         private System.Windows.Forms.Button btnSaveUser;
         private System.Windows.Forms.TextBox txtEmail;
         private System.Windows.Forms.Label label6;
@@ -280,5 +287,6 @@
         private System.Windows.Forms.CheckBox chkBanned;
         private System.Windows.Forms.CheckBox chkApproved;
         private System.Windows.Forms.Label lblError;
+        private System.Windows.Forms.Panel pnlNodeList;
     }
 }

@@ -17,6 +17,7 @@ using TreeMon.Managers;
 using TreeMon.Managers.Equipment;
 using TreeMon.Managers.Inventory;
 using TreeMon.Managers.Store;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Geo;
@@ -67,18 +68,18 @@ namespace TreeMon.WebAPI.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Inventory/{name}")]
-        public ServiceResult Get(string name )
+        public ServiceResult Search(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
                 return ServiceResponse.Error("You must provide a name for the strain.");
 
             InventoryManager inventoryManager = new InventoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            InventoryItem p = (InventoryItem)inventoryManager.Get(name);
+            List<InventoryItem> s = inventoryManager.Search(name);
 
-            if (p == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Inventory Item could not be located for the name " + name);
 
-            return ServiceResponse.OK("", p);
+            return ServiceResponse.OK("", s);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -199,7 +200,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
             InventoryManager inventoryManager = new InventoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            InventoryItem p = (InventoryItem)inventoryManager.GetBy(inventoryItemUUID);
+            InventoryItem p = (InventoryItem)inventoryManager.Get(inventoryItemUUID);
 
             if (p == null || string.IsNullOrWhiteSpace(p.UUID))
                 return ServiceResponse.Error("Invalid account was sent.");
@@ -221,7 +222,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("Invalid location sent to server.");
 
             InventoryManager inventoryManager = new InventoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            var dbP = (InventoryItem)inventoryManager.GetBy(pv.UUID);
+            var dbP = (InventoryItem)inventoryManager.Get(pv.UUID);
 
             if (dbP == null)
                 return ServiceResponse.Error("InventoryItemwas not found.");
@@ -271,7 +272,7 @@ namespace TreeMon.WebAPI.api.v1
 
                 foreach (InventoryItem changedItem in changedItems)
                 {
-                    var databaseItem = (InventoryItem)inventoryManager.GetBy(changedItem.UUID);
+                    var databaseItem = (InventoryItem)inventoryManager.Get(changedItem.UUID);
 
                     if (string.IsNullOrWhiteSpace(changedItem.CreatedBy))
                         changedItem.CreatedBy = this.CurrentUser.UUID;
@@ -444,7 +445,7 @@ namespace TreeMon.WebAPI.api.v1
             {
                 case "ITEM":
                     InventoryManager im = new InventoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-                    InventoryItem i = (InventoryItem)im.GetBy(uuid);
+                    InventoryItem i = (InventoryItem)im.Get(uuid);
                     if(i!= null)
                     {
                         i.Image = imageURL;

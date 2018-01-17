@@ -243,3 +243,4 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/src/Common/3rdParty/Cannabis/Metrc/Metrc/

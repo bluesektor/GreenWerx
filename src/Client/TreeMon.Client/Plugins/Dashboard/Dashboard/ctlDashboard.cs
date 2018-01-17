@@ -22,8 +22,9 @@ namespace Dashboard
 
         private IPluginHost myPluginHost = null;
         //  private string myPluginName = "Name";
-        private string myPluginAuthor = "bluesektor.com";
-        private string myPluginDescription = "descriptions";
+        private string myPluginAuthor = "TreeMon.org";
+        private string myPluginDescription = "Opensource dashboard.";
+       
         private string myPluginVersion = "1.0.0";
         private string myPluginShortName = "Dashboard";
 

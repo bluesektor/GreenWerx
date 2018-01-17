@@ -82,7 +82,7 @@ namespace TreeMon.Managers.Membership
                 return null;
             //if (!this.DataAccessAuthorized(v, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-            Account v = (Account)GetBy(s.BreederUUID);
+            Account v = (Account)Get(s.BreederUUID);
 
             if (v != null)
                 return v;
@@ -204,19 +204,19 @@ namespace TreeMon.Managers.Membership
            
         }
 
-        private Account FindAccount(string uuid, string name, string AccountUUID, bool includeDefaultAccount = true)
+        private List<Account> FindAccount(string uuid, string name, string AccountUUID, bool includeDefaultAccount = true)
         {
-            Account res = null;
+            List<Account> res = null;
 
             if (string.IsNullOrWhiteSpace(uuid) && string.IsNullOrWhiteSpace(name) == false)
-                res = (Account)this.Get(name);
-            else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
-                res = (Account)GetBy(uuid);
+                res = this.Search(name);
+            //else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
+            //    res = (Account)GetBy(uuid);
             else
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    res = context.GetAll<Account>().FirstOrDefault(w => w.UUID == uuid ||( w.Name?.EqualsIgnoreCase(name)??false));
+                    res = context.GetAll<Account>().Where(w => w.UUID == uuid ||( w.Name?.EqualsIgnoreCase(name)??false)).ToList();
                 }
             }
             if (res == null)
@@ -224,27 +224,27 @@ namespace TreeMon.Managers.Membership
 
         //    if (!this.DataAccessAuthorized(res, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-            if (includeDefaultAccount && ( res.AccountUUID == AccountUUID))
+            if (includeDefaultAccount && ( res.FirstOrDefault().AccountUUID == AccountUUID))
                 return res;
 
-            if (res.AccountUUID == AccountUUID)
+            if (res.FirstOrDefault().AccountUUID == AccountUUID)
                 return res;
 
-            return null;
+            return new List<Account>();
         }
 
-        public INode Get(string name)
+        public List<Account> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Account>().FirstOrDefault(aw => aw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<Account>().Where(aw => aw.Name.EqualsIgnoreCase(name)).ToList();
             }
             //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;

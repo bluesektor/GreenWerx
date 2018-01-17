@@ -77,7 +77,7 @@ namespace TreeMon.Managers.Finance
             }
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -88,14 +88,14 @@ namespace TreeMon.Managers.Finance
             }
         }
 
-        public INode Get(string name)
+        public List<FinanceAccountTransaction> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<FinanceAccountTransaction>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<FinanceAccountTransaction>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -154,10 +154,10 @@ namespace TreeMon.Managers.Finance
 
             if (validateFirst)
             {
-                FinanceAccountTransaction dbU = (FinanceAccountTransaction)Get(p.Name);
+                //FinanceAccountTransaction dbU = (FinanceAccountTransaction)Get(p.Name);
 
-                if (dbU != null)
-                    return ServiceResponse.Error("FinanceAccountTransaction already exists.");
+                //if (dbU != null)
+                //    return ServiceResponse.Error("FinanceAccountTransaction already exists.");
 
                 if (string.IsNullOrWhiteSpace(p.CreatedBy))
                     return ServiceResponse.Error("You must assign who the product was created by.");

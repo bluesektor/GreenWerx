@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.trvLocations = new System.Windows.Forms.TreeView();
             this.pnlNodeLocation = new System.Windows.Forms.Panel();
             this.btnSave = new System.Windows.Forms.Button();
             this.lblError = new System.Windows.Forms.Label();
@@ -66,27 +65,23 @@
             this.chkVirtual = new System.Windows.Forms.CheckBox();
             this.chkisDefault = new System.Windows.Forms.CheckBox();
             this.chkOnlineStore = new System.Windows.Forms.CheckBox();
+            this.pnlNodeList = new System.Windows.Forms.Panel();
             this.SuspendLayout();
-            // 
-            // trvLocations
-            // 
-            this.trvLocations.Location = new System.Drawing.Point(4, 4);
-            this.trvLocations.Name = "trvLocations";
-            this.trvLocations.ShowRootLines = false;
-            this.trvLocations.Size = new System.Drawing.Size(159, 294);
-            this.trvLocations.TabIndex = 20;
-            this.trvLocations.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.trvLocations_NodeMouseClick);
             // 
             // pnlNodeLocation
             // 
-            this.pnlNodeLocation.Location = new System.Drawing.Point(169, 4);
+            this.pnlNodeLocation.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlNodeLocation.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.pnlNodeLocation.Location = new System.Drawing.Point(173, 12);
             this.pnlNodeLocation.Name = "pnlNodeLocation";
-            this.pnlNodeLocation.Size = new System.Drawing.Size(377, 294);
+            this.pnlNodeLocation.Size = new System.Drawing.Size(387, 362);
             this.pnlNodeLocation.TabIndex = 21;
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(878, 275);
+            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSave.Location = new System.Drawing.Point(880, 275);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 22;
@@ -105,15 +100,17 @@
             // 
             // txtAbbr
             // 
-            this.txtAbbr.Location = new System.Drawing.Point(615, 8);
+            this.txtAbbr.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtAbbr.Location = new System.Drawing.Point(617, 8);
             this.txtAbbr.Name = "txtAbbr";
             this.txtAbbr.Size = new System.Drawing.Size(121, 20);
             this.txtAbbr.TabIndex = 24;
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(577, 12);
+            this.label1.Location = new System.Drawing.Point(579, 12);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(32, 13);
             this.label1.TabIndex = 25;
@@ -121,8 +118,9 @@
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(574, 38);
+            this.label2.Location = new System.Drawing.Point(576, 38);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(35, 13);
             this.label2.TabIndex = 26;
@@ -130,47 +128,53 @@
             // 
             // txtCode
             // 
-            this.txtCode.Location = new System.Drawing.Point(615, 34);
+            this.txtCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtCode.Location = new System.Drawing.Point(617, 34);
             this.txtCode.Name = "txtCode";
             this.txtCode.Size = new System.Drawing.Size(121, 20);
             this.txtCode.TabIndex = 27;
             // 
             // label3
             // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(561, 64);
+            this.label3.Location = new System.Drawing.Point(583, 62);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(48, 13);
+            this.label3.Size = new System.Drawing.Size(28, 13);
             this.label3.TabIndex = 28;
-            this.label3.Text = "Latitude:";
+            this.label3.Text = "Lat.:";
             // 
             // txtLatitude
             // 
-            this.txtLatitude.Location = new System.Drawing.Point(615, 60);
+            this.txtLatitude.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtLatitude.Location = new System.Drawing.Point(617, 60);
             this.txtLatitude.Name = "txtLatitude";
             this.txtLatitude.Size = new System.Drawing.Size(121, 20);
             this.txtLatitude.TabIndex = 29;
             // 
             // lblLongitude
             // 
+            this.lblLongitude.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblLongitude.AutoSize = true;
-            this.lblLongitude.Location = new System.Drawing.Point(552, 90);
+            this.lblLongitude.Location = new System.Drawing.Point(574, 89);
             this.lblLongitude.Name = "lblLongitude";
-            this.lblLongitude.Size = new System.Drawing.Size(57, 13);
+            this.lblLongitude.Size = new System.Drawing.Size(37, 13);
             this.lblLongitude.TabIndex = 30;
-            this.lblLongitude.Text = "Longitude:";
+            this.lblLongitude.Text = "Long.:";
             // 
             // txtLongitude
             // 
-            this.txtLongitude.Location = new System.Drawing.Point(615, 86);
+            this.txtLongitude.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtLongitude.Location = new System.Drawing.Point(617, 86);
             this.txtLongitude.Name = "txtLongitude";
             this.txtLongitude.Size = new System.Drawing.Size(121, 20);
             this.txtLongitude.TabIndex = 31;
             // 
             // label4
             // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(766, 11);
+            this.label4.Location = new System.Drawing.Point(768, 11);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(60, 13);
             this.label4.TabIndex = 32;
@@ -178,15 +182,17 @@
             // 
             // txtFirstName
             // 
-            this.txtFirstName.Location = new System.Drawing.Point(832, 7);
+            this.txtFirstName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFirstName.Location = new System.Drawing.Point(834, 7);
             this.txtFirstName.Name = "txtFirstName";
             this.txtFirstName.Size = new System.Drawing.Size(121, 20);
             this.txtFirstName.TabIndex = 33;
             // 
             // label5
             // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(765, 37);
+            this.label5.Location = new System.Drawing.Point(767, 37);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(61, 13);
             this.label5.TabIndex = 34;
@@ -194,15 +200,17 @@
             // 
             // txtLastName
             // 
-            this.txtLastName.Location = new System.Drawing.Point(832, 33);
+            this.txtLastName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtLastName.Location = new System.Drawing.Point(834, 33);
             this.txtLastName.Name = "txtLastName";
             this.txtLastName.Size = new System.Drawing.Size(121, 20);
             this.txtLastName.TabIndex = 35;
             // 
             // label6
             // 
+            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(778, 63);
+            this.label6.Location = new System.Drawing.Point(780, 63);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(48, 13);
             this.label6.TabIndex = 36;
@@ -210,22 +218,25 @@
             // 
             // txtAddress1
             // 
-            this.txtAddress1.Location = new System.Drawing.Point(832, 59);
+            this.txtAddress1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtAddress1.Location = new System.Drawing.Point(834, 59);
             this.txtAddress1.Name = "txtAddress1";
             this.txtAddress1.Size = new System.Drawing.Size(121, 20);
             this.txtAddress1.TabIndex = 37;
             // 
             // txtAddress2
             // 
-            this.txtAddress2.Location = new System.Drawing.Point(832, 85);
+            this.txtAddress2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtAddress2.Location = new System.Drawing.Point(834, 85);
             this.txtAddress2.Name = "txtAddress2";
             this.txtAddress2.Size = new System.Drawing.Size(121, 20);
             this.txtAddress2.TabIndex = 39;
             // 
             // label7
             // 
+            this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(750, 89);
+            this.label7.Location = new System.Drawing.Point(752, 89);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(76, 13);
             this.label7.TabIndex = 38;
@@ -233,8 +244,9 @@
             // 
             // label8
             // 
+            this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(799, 169);
+            this.label8.Location = new System.Drawing.Point(801, 169);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(27, 13);
             this.label8.TabIndex = 40;
@@ -242,8 +254,9 @@
             // 
             // label9
             // 
+            this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(791, 142);
+            this.label9.Location = new System.Drawing.Point(793, 142);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(35, 13);
             this.label9.TabIndex = 42;
@@ -251,8 +264,9 @@
             // 
             // cboCity
             // 
+            this.cboCity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cboCity.FormattingEnabled = true;
-            this.cboCity.Location = new System.Drawing.Point(832, 165);
+            this.cboCity.Location = new System.Drawing.Point(834, 165);
             this.cboCity.Name = "cboCity";
             this.cboCity.Size = new System.Drawing.Size(121, 21);
             this.cboCity.TabIndex = 43;
@@ -260,8 +274,9 @@
             // 
             // cboState
             // 
+            this.cboState.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cboState.FormattingEnabled = true;
-            this.cboState.Location = new System.Drawing.Point(832, 138);
+            this.cboState.Location = new System.Drawing.Point(834, 138);
             this.cboState.Name = "cboState";
             this.cboState.Size = new System.Drawing.Size(121, 21);
             this.cboState.TabIndex = 44;
@@ -269,8 +284,9 @@
             // 
             // label11
             // 
+            this.label11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(759, 196);
+            this.label11.Location = new System.Drawing.Point(761, 196);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(67, 13);
             this.label11.TabIndex = 47;
@@ -278,15 +294,17 @@
             // 
             // txtPostal
             // 
-            this.txtPostal.Location = new System.Drawing.Point(832, 192);
+            this.txtPostal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtPostal.Location = new System.Drawing.Point(834, 192);
             this.txtPostal.Name = "txtPostal";
             this.txtPostal.Size = new System.Drawing.Size(121, 20);
             this.txtPostal.TabIndex = 48;
             // 
             // cboCountry
             // 
+            this.cboCountry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cboCountry.FormattingEnabled = true;
-            this.cboCountry.Location = new System.Drawing.Point(832, 111);
+            this.cboCountry.Location = new System.Drawing.Point(834, 111);
             this.cboCountry.Name = "cboCountry";
             this.cboCountry.Size = new System.Drawing.Size(121, 21);
             this.cboCountry.TabIndex = 50;
@@ -294,8 +312,9 @@
             // 
             // label10
             // 
+            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(780, 115);
+            this.label10.Location = new System.Drawing.Point(782, 115);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(46, 13);
             this.label10.TabIndex = 49;
@@ -303,8 +322,9 @@
             // 
             // chkIsBillingAddress
             // 
+            this.chkIsBillingAddress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkIsBillingAddress.AutoSize = true;
-            this.chkIsBillingAddress.Location = new System.Drawing.Point(832, 221);
+            this.chkIsBillingAddress.Location = new System.Drawing.Point(834, 221);
             this.chkIsBillingAddress.Name = "chkIsBillingAddress";
             this.chkIsBillingAddress.Size = new System.Drawing.Size(94, 17);
             this.chkIsBillingAddress.TabIndex = 51;
@@ -313,8 +333,9 @@
             // 
             // chkDispensary
             // 
+            this.chkDispensary.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkDispensary.AutoSize = true;
-            this.chkDispensary.Location = new System.Drawing.Point(564, 126);
+            this.chkDispensary.Location = new System.Drawing.Point(566, 126);
             this.chkDispensary.Name = "chkDispensary";
             this.chkDispensary.Size = new System.Drawing.Size(78, 17);
             this.chkDispensary.TabIndex = 52;
@@ -323,8 +344,9 @@
             // 
             // chkCultivation
             // 
+            this.chkCultivation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkCultivation.AutoSize = true;
-            this.chkCultivation.Location = new System.Drawing.Point(664, 126);
+            this.chkCultivation.Location = new System.Drawing.Point(666, 126);
             this.chkCultivation.Name = "chkCultivation";
             this.chkCultivation.Size = new System.Drawing.Size(95, 17);
             this.chkCultivation.TabIndex = 53;
@@ -334,8 +356,9 @@
             // 
             // chkManufacturing
             // 
+            this.chkManufacturing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkManufacturing.AutoSize = true;
-            this.chkManufacturing.Location = new System.Drawing.Point(564, 149);
+            this.chkManufacturing.Location = new System.Drawing.Point(566, 149);
             this.chkManufacturing.Name = "chkManufacturing";
             this.chkManufacturing.Size = new System.Drawing.Size(94, 17);
             this.chkManufacturing.TabIndex = 54;
@@ -344,8 +367,9 @@
             // 
             // chkLab
             // 
+            this.chkLab.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkLab.AutoSize = true;
-            this.chkLab.Location = new System.Drawing.Point(664, 149);
+            this.chkLab.Location = new System.Drawing.Point(666, 149);
             this.chkLab.Name = "chkLab";
             this.chkLab.Size = new System.Drawing.Size(44, 17);
             this.chkLab.TabIndex = 55;
@@ -354,8 +378,9 @@
             // 
             // chkProcessor
             // 
+            this.chkProcessor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkProcessor.AutoSize = true;
-            this.chkProcessor.Location = new System.Drawing.Point(564, 172);
+            this.chkProcessor.Location = new System.Drawing.Point(566, 172);
             this.chkProcessor.Name = "chkProcessor";
             this.chkProcessor.Size = new System.Drawing.Size(78, 17);
             this.chkProcessor.TabIndex = 56;
@@ -364,8 +389,9 @@
             // 
             // chkRetailer
             // 
+            this.chkRetailer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkRetailer.AutoSize = true;
-            this.chkRetailer.Location = new System.Drawing.Point(664, 172);
+            this.chkRetailer.Location = new System.Drawing.Point(666, 172);
             this.chkRetailer.Name = "chkRetailer";
             this.chkRetailer.Size = new System.Drawing.Size(53, 17);
             this.chkRetailer.TabIndex = 57;
@@ -374,8 +400,9 @@
             // 
             // chkVirtual
             // 
+            this.chkVirtual.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkVirtual.AutoSize = true;
-            this.chkVirtual.Location = new System.Drawing.Point(564, 221);
+            this.chkVirtual.Location = new System.Drawing.Point(566, 221);
             this.chkVirtual.Name = "chkVirtual";
             this.chkVirtual.Size = new System.Drawing.Size(55, 17);
             this.chkVirtual.TabIndex = 58;
@@ -384,8 +411,9 @@
             // 
             // chkisDefault
             // 
+            this.chkisDefault.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkisDefault.AutoSize = true;
-            this.chkisDefault.Location = new System.Drawing.Point(664, 221);
+            this.chkisDefault.Location = new System.Drawing.Point(666, 221);
             this.chkisDefault.Name = "chkisDefault";
             this.chkisDefault.Size = new System.Drawing.Size(60, 17);
             this.chkisDefault.TabIndex = 59;
@@ -394,18 +422,33 @@
             // 
             // chkOnlineStore
             // 
+            this.chkOnlineStore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkOnlineStore.AutoSize = true;
-            this.chkOnlineStore.Location = new System.Drawing.Point(564, 244);
+            this.chkOnlineStore.Location = new System.Drawing.Point(566, 244);
             this.chkOnlineStore.Name = "chkOnlineStore";
             this.chkOnlineStore.Size = new System.Drawing.Size(84, 17);
             this.chkOnlineStore.TabIndex = 60;
             this.chkOnlineStore.Text = "Online Store";
             this.chkOnlineStore.UseVisualStyleBackColor = true;
             // 
+            // pnlNodeList
+            // 
+            this.pnlNodeList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlNodeList.Location = new System.Drawing.Point(3, 8);
+            this.pnlNodeList.Name = "pnlNodeList";
+            this.pnlNodeList.Size = new System.Drawing.Size(161, 366);
+            this.pnlNodeList.TabIndex = 63;
+            this.pnlNodeList.ClientSizeChanged += new System.EventHandler(this.pnlNodeList_ClientSizeChanged);
+            // 
             // ctlLocation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
+            this.BackColor = System.Drawing.SystemColors.Control;
+            this.Controls.Add(this.pnlNodeList);
             this.Controls.Add(this.chkOnlineStore);
             this.Controls.Add(this.chkisDefault);
             this.Controls.Add(this.chkVirtual);
@@ -443,9 +486,8 @@
             this.Controls.Add(this.lblError);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.pnlNodeLocation);
-            this.Controls.Add(this.trvLocations);
             this.Name = "ctlLocation";
-            this.Size = new System.Drawing.Size(959, 308);
+            this.Size = new System.Drawing.Size(961, 408);
             this.Load += new System.EventHandler(this.ctlLocation_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -453,7 +495,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.TreeView trvLocations;
         private System.Windows.Forms.Panel pnlNodeLocation;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Label lblError;
@@ -491,5 +532,6 @@
         private System.Windows.Forms.CheckBox chkVirtual;
         private System.Windows.Forms.CheckBox chkisDefault;
         private System.Windows.Forms.CheckBox chkOnlineStore;
+        private System.Windows.Forms.Panel pnlNodeList;
     }
 }

@@ -13,7 +13,7 @@ using System.Web.Http;
 using TreeMon.Data.Logging;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Store;
-
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Flags;
@@ -129,8 +129,8 @@ namespace TreeMon.Web.api.v1
         public ServiceResult Get(string name)
         {
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Account a = (Account)accountManager.Get(name);
-            if (a == null)
+            List<Account> a = accountManager.Search(name);
+            if (a == null || a.Count == 0)
                 return ServiceResponse.Error("Invalid name.");
 
             return ServiceResponse.OK("", a);
@@ -141,7 +141,7 @@ namespace TreeMon.Web.api.v1
         public ServiceResult GetBy(string uuid)
         {
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Account a = (Account) accountManager.GetBy(uuid);
+            Account a = (Account) accountManager.Get(uuid);
             if (a == null)
                 return ServiceResponse.Error("Invalid id.");
 
@@ -296,10 +296,10 @@ namespace TreeMon.Web.api.v1
             {
                 accountName = userName.Split('/')[0];
                 userName = userName.Split('/')[1];
-                user = (User)userManager.Get(userName, false);
+                user = userManager.Search(userName, false).FirstOrDefault();
                 if (user == null)
                     return ServiceResponse.Error("Invalid username or password.");
-                string accountUUID = accountManager.Get(accountName)?.UUID;
+                string accountUUID = accountManager.Search(accountName)?.FirstOrDefault()?.UUID;
 
                 if(string.IsNullOrWhiteSpace(accountUUID))
                     return ServiceResponse.Error("Invalid account name " + accountName );
@@ -314,7 +314,7 @@ namespace TreeMon.Web.api.v1
             }
             else
             {
-                user = (User)userManager.Get(userName,false);
+                user =  userManager.Search(userName,false).FirstOrDefault();
                 if (user == null)
                     return ServiceResponse.Error("Invalid username or password.");
             }
@@ -379,6 +379,7 @@ namespace TreeMon.Web.api.v1
 
             string userName = credentials.UserName;
             string accountName = "";
+            List<User> users = new List<TreeMon.Models.Membership.User>();
             User user = null;
 
             if (userName.Contains("/"))
@@ -386,14 +387,17 @@ namespace TreeMon.Web.api.v1
                 accountName = userName.Split('/')[0];
                 userName = userName.Split('/')[1];
 
-                user = (User)userManager.Get(userName,false);
-                if (user == null)
+                users = userManager.Search(userName,false);
+                if (users == null || users.Count == 0)
                     return ServiceResponse.Error("Invalid username or password.");
 
-                string accountUUID = accountManager.Get(accountName)?.UUID;
+                user = users.FirstOrDefault();
+
+                string accountUUID = accountManager.Search(accountName)?.FirstOrDefault()?.UUID;
 
                 if (!accountManager.IsUserInAccount(accountUUID, user.UUID))
                     return ServiceResponse.Error("You are not a member of the account.");
+
 
                 if(user.AccountUUID != accountUUID)
                 {
@@ -403,7 +407,7 @@ namespace TreeMon.Web.api.v1
             }
             else
             {
-                user = (User)userManager.Get(userName);
+                user =  userManager.Search(userName)?.FirstOrDefault();
                 if (user == null)
                     return ServiceResponse.Error("Invalid username or password.");
             }
@@ -472,7 +476,7 @@ namespace TreeMon.Web.api.v1
 
             //IMPORTANT!!! when you know an update is going to be used on the user internally, 
             //DO NOT CLEAR THE SENSITIVE DATA! It will make the password blank! 
-            User u = (User)userManager.GetBy(us.UserUUID, false);
+            User u = (User)userManager.Get(us.UserUUID, false);
 
             if (u == null)
                 return ServiceResponse.OK();
@@ -692,7 +696,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("No record sent.");
 
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            var dbAcct = (Account)accountManager.GetBy(account.UUID);
+            var dbAcct = (Account)accountManager.Get(account.UUID);
 
             if (dbAcct == null)
                 return ServiceResponse.Error("Invalid account id.");
@@ -749,7 +753,7 @@ namespace TreeMon.Web.api.v1
 
                 sessionToken = Request.Headers?.Authorization?.Parameter;
                 u = GetUser(sessionToken);//since the user session doesn't contain the password, wi have to pull it.
-                u = (User)userManager.GetBy(u.UUID, false);
+                u = (User)userManager.Get(u.UUID, false);
             }
 
             if (u == null)
@@ -814,7 +818,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("Invalid user id.");
 
             UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            User user =   (User)userManager.GetBy(userUUID);
+            User user =   (User)userManager.Get(userUUID);
 
             if (user == null)
                 return ServiceResponse.Error("User not found!");

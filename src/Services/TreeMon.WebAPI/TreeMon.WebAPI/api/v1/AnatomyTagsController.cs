@@ -72,7 +72,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must provide a name for the AnatomyTags.");
 
             AnatomyManager AnatomyTagsManager = new AnatomyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            AnatomyTag s = (AnatomyTag) AnatomyTagsManager.GetBy(uuid);
+            AnatomyTag s = (AnatomyTag) AnatomyTagsManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("AnatomyTags could not be located for the uuid " + uuid);
@@ -140,7 +140,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("Invalid AnatomyTags sent to server.");
 
             AnatomyManager AnatomyTagsManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            var dbS = (AnatomyTag) AnatomyTagsManager.GetBy(n.UUID);
+            var dbS = (AnatomyTag) AnatomyTagsManager.Get(n.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("AnatomyTags was not found.");

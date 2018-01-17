@@ -81,7 +81,7 @@ namespace TreeMon.Managers.Finance
             }
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -92,14 +92,14 @@ namespace TreeMon.Managers.Finance
             }
         }
 
-        public INode Get(string name)
+        public List<Currency> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Currency>().FirstOrDefault(sw => (sw.Name?.Trim()?.EqualsIgnoreCase(name?.Trim()) ?? false));
+                return context.GetAll<Currency>().Where(sw => (sw.Name?.Trim()?.EqualsIgnoreCase(name?.Trim()) ?? false)).ToList();
             }
         }
 
@@ -161,10 +161,10 @@ namespace TreeMon.Managers.Finance
 
             if (validateFirst)
             {
-                Currency dbU = (Currency) Get(p.Name);
+                //Currency dbU = (Currency) Get(p.Name);
 
-                if (dbU != null)
-                    return ServiceResponse.Error("Currency already exists.");
+                //if (dbU != null)
+                //    return ServiceResponse.Error("Currency already exists.");
 
                 if (string.IsNullOrWhiteSpace(p.CreatedBy))
                     return ServiceResponse.Error("You must assign who the product was created by.");

@@ -50,7 +50,7 @@ namespace TreeMon.Managers.Store
                 }
 
                 //get the Order from the table with all the data so when its updated it still contains the same data.
-                s = (Order)this.GetBy(s.UUID);
+                s = (Order)this.Get(s.UUID);
                 if (s == null)
                     return ServiceResponse.Error("Could not find order.");
 
@@ -62,7 +62,7 @@ namespace TreeMon.Managers.Store
             }
         }
 
-        public INode Get( string name)
+        public List<Order> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
@@ -71,7 +71,7 @@ namespace TreeMon.Managers.Store
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-               return context.GetAll<Order>().FirstOrDefault(w => w.Name.EqualsIgnoreCase(name) && w.AccountUUID == _requestingUser?.AccountUUID);
+                return context.GetAll<Order>().Where(w => w.Name.EqualsIgnoreCase(name) && w.AccountUUID == _requestingUser?.AccountUUID).ToList();
             }
         }
 
@@ -85,7 +85,7 @@ namespace TreeMon.Managers.Store
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;

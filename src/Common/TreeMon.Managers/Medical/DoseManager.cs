@@ -42,7 +42,7 @@ namespace TreeMon.Managers
             }
 
             //get the Dose from the table with all the data so when its updated it still contains the same data.
-            s = (DoseLog)this.GetBy(s.UUID);
+            s = (DoseLog)this.Get(s.UUID);
             if (s == null)
                 return ServiceResponse.Error("Dose not found");
             s.Deleted = true;
@@ -54,13 +54,13 @@ namespace TreeMon.Managers
             return res;
         }
 
-        public INode Get( string name)
+        public List<DoseLog> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<DoseLog>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<DoseLog>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
             //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -75,7 +75,7 @@ namespace TreeMon.Managers
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;

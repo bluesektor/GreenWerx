@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers.Store;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Store;
@@ -30,7 +31,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("Invalid Order sent to server.");
 
            
-            if (!string.IsNullOrWhiteSpace(n.UUID) && this.GetBy(n.UUID).Code == 200)
+            if (!string.IsNullOrWhiteSpace(n.UUID) && this.Get(n.UUID).Code == 200)
             {
                 return this.Update(n);
             }
@@ -52,9 +53,9 @@ namespace TreeMon.WebAPI.api.v1
 
             OrderManager orderManager = new OrderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Order s = (Order) orderManager.Get(name);
+            List<Order> s = orderManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Order could not be located for the name " + name);
 
             return ServiceResponse.OK("", s);
@@ -71,7 +72,7 @@ namespace TreeMon.WebAPI.api.v1
 
             OrderManager orderManager = new OrderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Order s = (Order)orderManager.GetBy(uuid);
+            Order s = (Order)orderManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("Order could not be located for the uuid " + uuid);
@@ -128,7 +129,7 @@ namespace TreeMon.WebAPI.api.v1
 
             OrderManager orderManager = new OrderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Order fa = (Order)orderManager.GetBy(uuid);
+            Order fa = (Order)orderManager.Get(uuid);
             if (fa == null)
                 return ServiceResponse.Error("Could not find strain.");
 
@@ -147,7 +148,7 @@ namespace TreeMon.WebAPI.api.v1
 
             OrderManager orderManager = new OrderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (Order)orderManager.GetBy(n.UUID);
+            var dbS = (Order)orderManager.Get(n.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Order was not found.");

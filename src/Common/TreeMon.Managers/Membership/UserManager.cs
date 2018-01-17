@@ -318,20 +318,20 @@ namespace TreeMon.Managers.Membership
             return ServiceResponse.OK();
         }
 
-        public INode Get(string name)
+        public List<User> Search(string name)
         {
-            return this.Get(name, true);
+            return this.Search(name, true);
         }
 
-        public INode Get( string userName, bool clearSensitiveData)
+        public List<User> Search( string userName, bool clearSensitiveData)
         {
             //   if (!this.DataAccessAuthorized(u, "GET", false)) return null; //todo fix this so log it or something
 
-            User u;
+            List<User> u;
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                u = context.GetAll<User>().FirstOrDefault(uw => ( uw.Name?.EqualsIgnoreCase(userName)?? false));
+                u = context.GetAll<User>().Where(uw => ( uw.Name?.EqualsIgnoreCase(userName)?? false)).ToList();
             }
             if (clearSensitiveData)
             {
@@ -392,12 +392,12 @@ namespace TreeMon.Managers.Membership
             }
         }
 
-        public INode GetBy(string UUID)
+        public INode Get(string UUID)
         {
-            return this.GetBy(UUID, true);
+            return this.Get(UUID, true);
         }
 
-        public INode GetBy(string UUID, bool clearSensitiveData = true)
+        public INode Get(string UUID, bool clearSensitiveData = true)
         {
             // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))

@@ -45,7 +45,7 @@ namespace TreeMon.Managers.General
             }
 
             //get the Category from the table with all the data so when its updated it still contains the same data.
-            s = (Category)this.GetBy(s.UUID);
+            s = (Category)this.Get(s.UUID);
             if (s == null)
                 return ServiceResponse.Error("Symptom not found");
             s.Deleted = true;
@@ -57,13 +57,13 @@ namespace TreeMon.Managers.General
             return res;
         }
 
-        public INode Get(string name)
+        public List<Category> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Category>().FirstOrDefault(w => (w.Name?.EqualsIgnoreCase(name) ?? false)  && w.AccountUUID == this._requestingUser.AccountUUID);
+                return context.GetAll<Category>().Where(w => (w.Name?.EqualsIgnoreCase(name) ?? false)  && w.AccountUUID == this._requestingUser.AccountUUID).ToList();
             }
             //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -113,7 +113,7 @@ namespace TreeMon.Managers.General
             //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;

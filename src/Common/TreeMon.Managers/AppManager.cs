@@ -1457,7 +1457,7 @@ namespace TreeMon.Managers
                 {
                     case "ACCOUNT":
                         AccountManager accountManager = new AccountManager(this._connectionKey, SessionKey);
-                        Account a = (Account)accountManager.GetBy(n.UUID);
+                        Account a = (Account)accountManager.Get(n.UUID);
                         if (a == null)
                             return ServiceResponse.Error("Account was not found.");
 
@@ -1471,7 +1471,7 @@ namespace TreeMon.Managers
 
                     case "ANATOMY":
                         AnatomyManager AnatomyManager = new AnatomyManager(this._connectionKey, SessionKey);
-                        Anatomy anatomy = (Anatomy) AnatomyManager.GetBy(n.UUID);
+                        Anatomy anatomy = (Anatomy) AnatomyManager.Get(n.UUID);
                         if (anatomy == null)
                             return ServiceResponse.Error("Anatomy was not found.");
 
@@ -1495,7 +1495,7 @@ namespace TreeMon.Managers
                         break;
                     case "CATEGORY":
                         CategoryManager categoryManager = new CategoryManager(this._connectionKey, SessionKey);
-                        Category category = (Category)categoryManager.GetBy(n.UUID);
+                        Category category = (Category)categoryManager.Get(n.UUID);
                         if (category == null)
                             return ServiceResponse.Error("Category was not found.");
                         category.UUID = Guid.NewGuid().ToString("N");
@@ -1506,7 +1506,7 @@ namespace TreeMon.Managers
                         break;
                     case "CURRENCY":
                         CurrencyManager financeManager = new CurrencyManager(this._connectionKey, SessionKey);
-                        Currency currency = (Currency)financeManager.GetBy(n.UUID);
+                        Currency currency = (Currency)financeManager.Get(n.UUID);
                         if (currency == null)
                             return ServiceResponse.Error("Currency was not found.");
 
@@ -1518,7 +1518,7 @@ namespace TreeMon.Managers
                         break;
                     case "PRODUCT":
                         ProductManager productManager = new ProductManager(this._connectionKey, SessionKey);
-                        Product product = (Product)productManager.GetBy(n.UUID);
+                        Product product = (Product)productManager.Get(n.UUID);
                         if (product == null)
                             return ServiceResponse.Error("Product was not found.");
                         product.UUID = Guid.NewGuid().ToString("N");
@@ -1529,7 +1529,7 @@ namespace TreeMon.Managers
                         break;
                     case "STRAIN":
                         StrainManager strainManager = new StrainManager(this._connectionKey, SessionKey);
-                        Strain strain = (Strain)strainManager.GetBy(n.UUID);
+                        Strain strain = (Strain)strainManager.Get(n.UUID);
                         if (strain == null)
                             return ServiceResponse.Error("Product was not found.");
 
@@ -1541,7 +1541,7 @@ namespace TreeMon.Managers
                         break;
                     case "VENDOR":
                         VendorManager VendorManager = new VendorManager(this._connectionKey, SessionKey);
-                        Vendor Vendor = (Vendor)VendorManager.GetBy(n.UUID);
+                        Vendor Vendor = (Vendor)VendorManager.Get(n.UUID);
                         if (Vendor == null)
                             return ServiceResponse.Error("Product was not found.");
                         Vendor.UUID = Guid.NewGuid().ToString("N");
@@ -1976,7 +1976,7 @@ namespace TreeMon.Managers
             }
         }
 
-        public Setting GetBy(string UUID)
+        public Setting Get(string UUID)
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
@@ -2032,7 +2032,7 @@ namespace TreeMon.Managers
             if ( this.Installing == false && !this.DataAccessAuthorized(n,  "",false))
                     return ServiceResponse.Error("Unauthorized access.");
 
-            Setting dbs = GetBy(n.UUID);
+            Setting dbs = Get(n.UUID);
             if (dbs == null)
                 return ServiceResponse.Error("Update setting couldn't find:" + n.Name );
 

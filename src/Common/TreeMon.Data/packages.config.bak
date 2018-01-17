@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2017 TreeMon.org.
+Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+-->
+<packages>
+  <package id="Dapper" version="1.50.2" targetFramework="net452" />
+  <package id="Dapper.SimpleCRUD" version="1.13.0" targetFramework="net452" />
+  <package id="DapperExtensions" version="1.5.0" targetFramework="net452" />
+  <package id="EntityFramework" version="6.1.3" targetFramework="net452" />
+  <package id="morelinq" version="2.8.0" targetFramework="net452" />
+  <package id="System.ValueTuple" version="4.4.0" targetFramework="net452" />
+</packages>

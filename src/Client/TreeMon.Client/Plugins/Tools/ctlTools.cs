@@ -23,8 +23,8 @@ namespace Tools
 
         private IPluginHost myPluginHost = null;
         //  private string myPluginName = "Name";
-        private string myPluginAuthor = "bluesektor.com";
-        private string myPluginDescription = "descriptions";
+        private string myPluginAuthor = "TreeMon.org";
+        private string myPluginDescription = "Opensource tools.";
         private string myPluginVersion = "1.0.0";
         private string myPluginShortName = "Tools";
 

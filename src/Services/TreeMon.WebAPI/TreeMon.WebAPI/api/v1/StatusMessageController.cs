@@ -77,7 +77,7 @@ namespace TreeMon.Web.api.v1
 
             StatusMessageManager StatusMessageManager = new StatusMessageManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            StatusMessage s = (StatusMessage)StatusMessageManager.GetBy(uuid);
+            StatusMessage s = (StatusMessage)StatusMessageManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("StatusMessage could not be located for the uuid " + uuid);
@@ -153,7 +153,7 @@ namespace TreeMon.Web.api.v1
 
             StatusMessageManager StatusMessageManager = new StatusMessageManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (StatusMessage) StatusMessageManager.GetBy(s.UUID);
+            var dbS = (StatusMessage) StatusMessageManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("StatusMessage was not found.");

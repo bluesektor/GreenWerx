@@ -38,10 +38,10 @@ namespace TreeMon.Managers.Plant
             }
             //since the user can type a new strain in the uuid field, search the db to make sure
             //         
-            Strain s = FindStrain(p.StrainUUID, p.StrainUUID, p.AccountUUID);
+            List<Strain> s = FindStrain(p.StrainUUID, p.StrainUUID, p.AccountUUID);
 
-            if (s != null)
-                return s;
+            if (s != null||s.Count > 0)
+                return s.FirstOrDefault();
 
             string variety = DetectVariety(p.CategoryUUID);
 
@@ -106,7 +106,7 @@ namespace TreeMon.Managers.Plant
                 }
 
                 //get the strain from the table with all the data so when its updated it still contains the same data.
-                s = this.GetBy(s.UUID);
+                s = this.Get(s.UUID);
                 if (s == null)
                     ServiceResponse.Error("Strain not found.");
                 s.Deleted = true;
@@ -116,14 +116,14 @@ namespace TreeMon.Managers.Plant
             return res;
         }
 
-        public INode Get( string name)
+        public List<Strain> Search(string name)
         {
             //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Strain>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<Strain>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -143,7 +143,7 @@ namespace TreeMon.Managers.Plant
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -164,29 +164,29 @@ namespace TreeMon.Managers.Plant
         }
 
 
-        private Strain FindStrain(string uuid, string name, string AccountUUID, bool includeDefaultAccount = true)
+        private List<Strain> FindStrain(string uuid, string name, string AccountUUID, bool includeDefaultAccount = true)
         {
-            Strain res = null;
+            List<Strain> res = null;
 
             if (string.IsNullOrWhiteSpace(uuid) && string.IsNullOrWhiteSpace(name) == false)
-                res = (Strain)this.Get(name);
-            else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
-                res = (Strain)this.GetBy(uuid);
+                res = this.Search(name);
+            //else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
+            //    res = (Strain)this.Get(uuid);
             else
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    res = context.GetAll<Strain>().FirstOrDefault(w => w.UUID == uuid || (w.Name?.EqualsIgnoreCase(name) ?? false));
+                    res = context.GetAll<Strain>().Where(w => w.UUID == uuid || (w.Name?.EqualsIgnoreCase(name) ?? false)).ToList();
                 }
             }
 
             if (res == null)
                 return res;
 
-            if (includeDefaultAccount && (res.AccountUUID == AccountUUID))
+            if (includeDefaultAccount && (res.FirstOrDefault().AccountUUID == AccountUUID))
                 return res;
 
-            if (res.AccountUUID == AccountUUID)
+            if (res.FirstOrDefault().AccountUUID == AccountUUID)
                 return res;
 
             return null;

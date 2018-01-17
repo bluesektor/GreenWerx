@@ -130,7 +130,7 @@ namespace TreeMon.Web.api.v1
         public ServiceResult GetBy(string uuid)
         {
             AppManager am = new AppManager(Globals.DBConnectionKey, "web", Request.Headers?.Authorization?.Parameter);
-            Setting s = am.GetBy(uuid);
+            Setting s = am.Get(uuid);
             if (s == null)
                 return ServiceResponse.Error("Settings by could not find:" +  uuid  );
             return ServiceResponse.OK("", JsonConvert.SerializeObject(s));
@@ -228,7 +228,7 @@ namespace TreeMon.Web.api.v1
             AppManager AppManager = new AppManager(Globals.DBConnectionKey,"web", Request.Headers?.Authorization?.Parameter);
             
 
-            var dbS = (Setting)AppManager.GetBy(form.UUID);
+            var dbS = (Setting)AppManager.Get(form.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Setting was not found.");

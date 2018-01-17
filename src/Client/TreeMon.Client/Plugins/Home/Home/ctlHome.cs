@@ -17,27 +17,32 @@ using Newtonsoft.Json;
 using AutoMapper;
 using ClientCore.Controls;
 using TreeMon.Utilites.Extensions;
+using ClientCore.Models;
+using TreeMon.Managers;
 
 namespace Home
 {
-    public partial class ctlHome: UserControl, IPlugin
+    public partial class ctlHome: UserControl, IPlugin,IUserControl
     {
-        TreeNode _currentNode = new TreeNode();
         ctlNode _nodeControl;
+        ctlNodeTree _nodeTree;
         ctlUser _userControl;
         ctlLocation _locationControl;
+        ctlInventory _inventoryControl;
+        ctlProduct _productControl;
 
         public ctlHome()
         {
             InitializeComponent();
+        
         }
 
         #region Plugin interface properties
 
         private IPluginHost myPluginHost = null;
         //  private string myPluginName = "Name";
-        private string myPluginAuthor = "bluesektor.com";
-        private string myPluginDescription = "descriptions";
+        private string myPluginAuthor = "TreeMon.org";
+        private string myPluginDescription = "Opensource cannabis system.";
         private string myPluginVersion = "1.0.0";
         private string myPluginShortName = "Home";
 
@@ -64,22 +69,22 @@ namespace Home
             _session = session;
             _appSettings = appSettings;
 
-            this.treeAccounts.Nodes.Clear();
             AccountManager am = new AccountManager(this._appSettings.ActiveDbConnectionKey, _session.AuthToken);
             User u = JsonConvert.DeserializeObject<User>(_session.UserData);
             List<Account> accounts = am.GetUsersAccounts(u.UUID);
 
-            LoadTreeViewDelegate delLoadTree = new LoadTreeViewDelegate(this.LoadTreeView);
-            delLoadTree(accounts);
-            treeAccounts.SelectedNode = this.treeAccounts.Nodes[0];
-            _currentNode = treeAccounts.SelectedNode;
-            _currentNode.BackColor = Color.LightSteelBlue;
+            List<INode> nodes = accounts.ConvertAll(new Converter<Account, INode>(NodeEx.ObjectToNode));
+            _nodeTree = new ctlNodeTree(_appSettings.ActiveDbConnectionKey, _session.AuthToken, this);
+            _nodeTree.TreeNodesAferSelect += _nodeTree_TreeNodesAferSelect;
+            pnlNodeList.Controls.Add(_nodeTree);
 
-            _nodeControl = new ctlNode(_appSettings.ActiveDbConnectionKey, _session.AuthToken);
+            _nodeTree.Init(nodes, "", null);
+
+           _nodeControl = new ctlNode(_appSettings.ActiveDbConnectionKey, _session.AuthToken);
 
             pnlNodeView.Controls.Add(_nodeControl);
             _nodeControl.Show(accounts[0]);
-
+          
             _userControl = new ctlUser(_appSettings.ActiveDbConnectionKey, _session.AuthToken);
             tabMembers.Controls.Add(_userControl);
 
@@ -87,51 +92,41 @@ namespace Home
             _locationControl = new ctlLocation(_appSettings.ActiveDbConnectionKey, _session.AuthToken);
             tabLocations.Controls.Add(_locationControl);
 
+            _inventoryControl = new ctlInventory(_appSettings.ActiveDbConnectionKey, _session.AuthToken);
+            tabInventory.Controls.Add(_inventoryControl);
+
+            _productControl = new ctlProduct(_appSettings.ActiveDbConnectionKey, _session.AuthToken);
+            tabProducts.Controls.Add(_productControl);
+
             ShowDetail();
         }
 
         protected void ShowDetail() {
-            // tabControl1.SelectedIndex
-          string name =  tabControl1.SelectedTab.Name;
+
+            if (_nodeTree == null|| _nodeTree.SelectedTreeNode == null || _nodeTree.SelectedTreeNode.Tag == null)
+                return;
+
+            string name =  tabControl1.SelectedTab.Name;
             switch (name)
             {
-                case "tabMembers":
-                    _userControl.Show(((Account)_currentNode.Tag).UUID);
+                case "tabMembers"://todo bookmark latest. when updating its still showing users from other account
+                    _userControl.Show(((Account)_nodeTree.SelectedTreeNode.Tag).UUID);
                     break;
                 case "tabLocations":
-                    _locationControl.Show(((Account)_currentNode.Tag).UUID);
+                    _locationControl.Show(((Account)_nodeTree.SelectedTreeNode.Tag).UUID);
                     break;
                 case "tabInventory":
+                    _inventoryControl.Show(((Account)_nodeTree.SelectedTreeNode.Tag).UUID);
                     break;
                 case "tabProducts":
+                    _productControl.Show(((Account)_nodeTree.SelectedTreeNode.Tag).UUID);
                     break;
                 default:
-                    _userControl.Show(((Account)_currentNode.Tag).UUID);
+                    _userControl.Show(((Account)_nodeTree.SelectedTreeNode.Tag).UUID);
                     tabControl1.SelectTab("tabMembers");
                     break;
-                
             }
         }
-
-        public delegate void LoadTreeViewDelegate(List<Account> nodes);
-        public void LoadTreeView(List<Account> nodes)
-        {
-            if (treeAccounts.InvokeRequired)
-            {
-                Invoke(new LoadTreeViewDelegate(LoadTreeView), nodes);
-            }
-            else
-            {
-                foreach (INode n in nodes)
-                {
-                    this.treeAccounts.AddNode(n);
-                    List<Account> subNodes = nodes.Where(w => w.UUParentID == n.UUID).ToList();
-                    LoadTreeView(subNodes);
-                }
-
-            }
-        }
-
 
         protected void Run() //not mandatory, but good for a standard interface to main.
         { }
@@ -155,30 +150,21 @@ namespace Home
 
         #endregion
 
-        private void treeAccounts_AfterSelect(object sender, TreeViewEventArgs e)
+       
+        private void _nodeTree_TreeNodesAferSelect(object sender, System.EventArgs e)
         {
-
-            if (e.Node == null)
+            if (e == null)
                 return;
+            TreeViewEventArgs arg = (TreeViewEventArgs)e;
 
-            if (_currentNode == null)
+            if (((INode)_nodeTree.SelectedTreeNode.Tag).UUID != ((INode)arg.Node.Tag).UUID)
             {
-                _currentNode = e.Node;
-                _currentNode.BackColor = Color.AliceBlue;
+                _nodeTree.SelectedTreeNode.BackColor = Color.Transparent;
+                _nodeTree.SelectedTreeNode.BackColor = Color.AliceBlue;
             }
 
-            if (((INode)_currentNode.Tag).UUID != ((INode)e.Node.Tag).UUID) { 
-                _currentNode.BackColor = Color.Transparent;
-                _currentNode = treeAccounts.SelectedNode;
-                _currentNode.BackColor = Color.AliceBlue;
-            }
-
-            _nodeControl.Show( (INode) e.Node.Tag );
-        }
-
-        private void treeAccounts_Click(object sender, EventArgs e)
-        {
-           
+            _nodeControl.Show((INode)arg.Node.Tag);
+            ShowDetail();//propagate to lower windows.
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
@@ -186,124 +172,90 @@ namespace Home
             ShowDetail();
         }
 
+        public void Save(INode n)
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<INode, Account>();
+            });
+
+            SessionManager sm = new SessionManager(this._appSettings.ActiveDbConnectionKey);
+            
+
+            if (string.IsNullOrWhiteSpace(n.AccountUUID))
+            {
+                n.AccountUUID = sm.GetAccountUUID(this._session.AuthToken);
+            }
+            IMapper mapper = config.CreateMapper();
+            Account account = mapper.Map<INode, Account>(n);
+            AccountManager um = new AccountManager(this._appSettings.ActiveDbConnectionKey, this._session.AuthToken);
+            ServiceResult res;
+
+            
+            if (string.IsNullOrWhiteSpace(account.UUID))
+            {
+
+                User u = JsonConvert.DeserializeObject<User>(_session.UserData);
+                res = um.Insert(account, false);
+                um.AddUserToAccount(account.UUID, u.UUID, u);
+            }
+            else
+                res = um.Update(account);
 
 
+            if (res.Code != 200)
+                MessageBox.Show(res.Message, "Error!");
 
+            _nodeTree.AddToTree(n);
+        }
 
-        //private void trvObjectsClick(object sender, EventArgs e)
-        //{
-        //    //the clicked node is the previouse node (i.e. just before  the newly clicked node is
-        //    //assigned.
-        //    //get current from control.
-        //    //       ObjectEx curDisplay = this.ctlObjectManager.GetCurrentObject();
+        public void Delete(INode n)
+        {
+            if (n == null)
+                return;
 
-        //    //this is an attempt to fix the select bug
-        //    //if you select a trv node, then select a property from the control
-        //    //then go back and select the same node again, the ctl display still shows the
-        //    //property data.
-        //    if (_currentNode.Tag == null)
-        //        return;
+            AccountManager am = new AccountManager(this._appSettings.ActiveDbConnectionKey, this._session.AuthToken);
 
-        //    ObjectEx curNode = (ObjectEx)_currentNode.Tag;
+            am.Delete(n);
+            _nodeTree.DeleteFromTree(n);
+            List<Account> subAccounts = am.GetAccounts(n.AccountUUID).Where(x => x.UUParentID == n.UUID).ToList();
 
+            foreach (Account a in subAccounts)
+            {
+                am.Delete(a);
+                _nodeTree.DeleteFromTree(a);
+                Delete(a);
+            }
+        }
 
-        //    //if (curDisplay == null || curNode == null)
-        //    //    return;
+        private void tabLocations_ClientSizeChanged(object sender, EventArgs e)
+        {
+            _locationControl.Dock = DockStyle.Fill;
+        }
 
-        //    //if (curNode.ID == curDisplay.ID && this.ctlObjectManager.ShowClass == "property")
-        //    //{
-        //    //    DisplayNode(_currentNode);
-        //    //}
+        private void tabInventory_ClientSizeChanged(object sender, EventArgs e)
+        {
+            _inventoryControl.Dock = DockStyle.Fill;
+        }
 
-        //}
+        private void tabMembers_ClientSizeChanged(object sender, EventArgs e)
+        {
+            _userControl.Dock = DockStyle.Fill;
+        }
 
+        private void tabProducts_ClientSizeChanged(object sender, EventArgs e)
+        {
+            _productControl.Dock = DockStyle.Fill;
+        }
 
-        //private TreeNode CreateRootNode()
-        //{
-        //ObjectEx root = new ObjectEx("root");
-        //root.Title = "ROOT";
-        //root.ID = NumericsHelper.GenerateId();
-        //TreeNode mainNode = new TreeNode();
-        //mainNode.Name = "ROOT";
-        //mainNode.Text = "Profiles";
-        //mainNode.Tag = (object)root;
-        //this.trvProfilesData.Nodes.Add(mainNode);
-        //return mainNode;
-        //}
+        private void pnlNodeView_ClientSizeChanged(object sender, EventArgs e)
+        {
+            _nodeControl.Dock = DockStyle.Fill;
+        }
 
-        //private TreeNode CreateRootNode(string projectName)
-        //{
-        //    ObjectEx root = new ObjectEx("root");
-        //    root.Title = "ROOT";
-        //    root.ID = NumericsHelper.GenerateId();
-        //    TreeNode mainNode = new TreeNode();
-        //    mainNode.Name = "ROOT";
-        //    mainNode.Text = projectName;
-        //    mainNode.Tag = (object)root;
-        //    this.trvProfilesData.Nodes.Add(mainNode);
-        //    return mainNode;
-        //}
-
-
-        //private void AddNodes(ObjectEx p, ref TreeNode parentNode)
-        //{
-        //    if (p == null)
-        //        return;
-
-        //    TreeNode node = new TreeNode();
-        //    node.Text = p.Title;
-        //    node.Name = p.Title;
-        //    node.Tag = (object)p;
-        //    parentNode.Nodes.Add(node);
-
-        //    foreach (ObjectEx property in p.Nodes)
-        //    {
-        //        AddNode(property, ref node);
-        //    }
-        //}
-
-        ////recursively add nodes...
-        ////
-        //private void AddNode(ObjectEx properties, ref TreeNode parentNode)
-        //{
-        //    if (properties == null)
-        //        return;
-
-        //    TreeNode node = new TreeNode();
-        //    node.Text = properties.Title;
-        //    node.Name = properties.Title;
-        //    node.Tag = (object)properties;
-        //    parentNode.Nodes.Add(node);
-
-        //    if (properties.Nodes.Count > 0)
-        //    {
-        //        foreach (ObjectEx property in properties.Nodes)
-        //        {
-        //            AddNode(property, ref node);
-        //        }
-        //    }
-        //}
-
-        //private ObjectEx GetProfileForNode(TreeNode node)
-        //{
-        //    if (string.IsNullOrEmpty(node.Text))
-        //    {
-        //        //MessageBox.Show("You must select a node.");
-        //        return null;
-        //    }
-
-        //    ObjectEx cur = (ObjectEx)node.Tag;
-        //    if (cur.ParentID == -1 || node.Parent == null)
-        //        return cur;
-
-        //    ObjectEx parent = (ObjectEx)node.Parent.Tag;
-        //    if (parent == null)
-        //        return cur;
-
-        //    if (cur.ParentID == parent.ID && parent.ParentID == -1)
-        //        return parent;
-        //    else
-        //        return GetProfileForNode(node.Parent);//recurse up the tree.
-        //}
+        private void pnlNodeList_ClientSizeChanged(object sender, EventArgs e)
+        {
+            _nodeTree.Dock = DockStyle.Fill;
+        }
     }
 }

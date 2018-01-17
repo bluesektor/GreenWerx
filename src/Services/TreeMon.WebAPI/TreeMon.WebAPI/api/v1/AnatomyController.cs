@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Medical;
@@ -52,10 +53,10 @@ namespace TreeMon.Web.api.v1
                     return ServiceResponse.Error("You must provide a name for the Anatomy.");
 
             AnatomyManager anatomyManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            Anatomy s = (Anatomy) anatomyManager.Get(name );
+            List<Anatomy> s = anatomyManager.Search(name);
 
-                if (s == null)
-                    return ServiceResponse.Error("Anatomy could not be located for the name " + name);
+            if (s == null || s.Count == 0)
+                return ServiceResponse.Error("Anatomy could not be located for the name " + name);
 
                 return ServiceResponse.OK("",s);
             }
@@ -112,7 +113,7 @@ namespace TreeMon.Web.api.v1
                     return ServiceResponse.Error("Invalid Anatomy sent to server.");
 
             AnatomyManager anatomyManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            var dbS = (Anatomy)anatomyManager.GetBy(s.UUID);
+            var dbS = (Anatomy)anatomyManager.Get(s.UUID);
 
                 if (dbS == null)
                     return ServiceResponse.Error("Anatomy was not found.");

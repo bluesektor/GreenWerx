@@ -9,6 +9,7 @@ using System.Web.Http;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers;
 using TreeMon.Managers.Event;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Event;
@@ -145,9 +146,9 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            Reminder s = (Reminder)reminderManager.Get(name);
+            List<Reminder> s = reminderManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Reminder could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -164,7 +165,7 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Reminder s = (Reminder)reminderManager.GetBy(uuid);
+            Reminder s = (Reminder)reminderManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("Reminder could not be located for the uuid " + uuid);
@@ -232,7 +233,7 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (Reminder) reminderManager.GetBy(s.UUID);
+            var dbS = (Reminder) reminderManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Reminder was not found.");

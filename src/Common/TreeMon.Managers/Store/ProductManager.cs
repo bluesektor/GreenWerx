@@ -132,7 +132,7 @@ namespace TreeMon.Managers.Store
             }
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return new Product();
@@ -144,14 +144,14 @@ namespace TreeMon.Managers.Store
             }
         }
 
-        public INode Get( string name)
+        public List<Product> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Product>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<Product>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -250,9 +250,9 @@ namespace TreeMon.Managers.Store
 
             if (validateFirst)
             {
-                Product dbU = (Product)Get(p.Name);
+                List<Product> dbU = Search(p.Name);
 
-                if (dbU != null)
+                if (dbU != null || dbU.Count > 0 )
                     return ServiceResponse.Error("Product already exists.");
 
                 if(string.IsNullOrWhiteSpace(p.CreatedBy))

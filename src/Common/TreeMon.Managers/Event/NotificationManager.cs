@@ -40,7 +40,7 @@ namespace TreeMon.Managers.Event
             }
 
             //get the Notification from the table with all the data so when its updated it still contains the same data.
-            s = (Notification) this.GetBy(s.UUID);
+            s = (Notification) this.Get(s.UUID);
             if (s == null)
                 return ServiceResponse.Error("Symptom not found");
             s.Deleted = true;
@@ -52,13 +52,13 @@ namespace TreeMon.Managers.Event
             return res;
         }
 
-        public INode Get(string name)
+        public List<Notification> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Notification>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<Notification>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
             //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -73,7 +73,7 @@ namespace TreeMon.Managers.Event
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;

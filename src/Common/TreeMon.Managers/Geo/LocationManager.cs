@@ -36,6 +36,8 @@ namespace TreeMon.Managers.Store
 
             if (!this.DataAccessAuthorized(n, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
 
+            if (n.GetType().Name != "Location")
+                Debug.Assert(false, "TODO FIX THIS IT SHOULDN'T BE ANOTHER TYPE");
             var p = (Location)n;
 
             try
@@ -89,7 +91,7 @@ namespace TreeMon.Managers.Store
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Location>().ToList();
 
-                return context.GetAll<Location>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<Location>().Where(pw => pw.AccountUUID == accountUUID && pw.Deleted == false).ToList();
             }
         }
 
@@ -114,7 +116,7 @@ namespace TreeMon.Managers.Store
             return geoTypes;
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -125,7 +127,7 @@ namespace TreeMon.Managers.Store
             }
         }
 
-        public INode Get(string name)
+        public List<Location> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
@@ -133,7 +135,7 @@ namespace TreeMon.Managers.Store
             {
                 //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
                 if (context.GetAll<Location>()?.Any() ?? false)
-                    return context.GetAll<Location>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                    return context.GetAll<Location>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
                 else
                     return null;
             }
@@ -229,13 +231,13 @@ namespace TreeMon.Managers.Store
             var p = (Location)n;
             if (validateFirst)
             {
-                Location dbU = Get(p.Name) as Location;
+                //Location dbU = Get(p.Name) as Location;
 
-                if (dbU != null)
-                {
-                    if (p.AccountUUID == this._requestingUser.AccountUUID)
-                        return ServiceResponse.Error("Location already exists.");
-                }
+                //if (dbU != null)
+                //{
+                //    if (p.AccountUUID == this._requestingUser.AccountUUID)
+                //        return ServiceResponse.Error("Location already exists.");
+                //}
 
                 if (string.IsNullOrWhiteSpace(p.CreatedBy))
                     return ServiceResponse.Error("You must assign who the Location was created by.");

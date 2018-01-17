@@ -45,7 +45,7 @@ namespace TreeMon.Managers
                 }
 
                 //get the UnitOfMeasure from the table with all the data so when its updated it still contains the same data.
-                s = (UnitOfMeasure)this.GetBy(s.UUID);
+                s = (UnitOfMeasure)this.Get(s.UUID);
                 if (s == null)
                     return ServiceResponse.Error("Measure not found.");
 
@@ -57,13 +57,13 @@ namespace TreeMon.Managers
             }
         }
 
-        public INode Get( string name)
+        public List<UnitOfMeasure> Search(string name)
                 {
                     if (string.IsNullOrWhiteSpace(name))
                         return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<UnitOfMeasure>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<UnitOfMeasure>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
                 }
 
@@ -83,7 +83,7 @@ namespace TreeMon.Managers
             }
         }
         
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -98,9 +98,9 @@ namespace TreeMon.Managers
             UnitOfMeasure res = null;
 
             if (string.IsNullOrWhiteSpace(uuid) && string.IsNullOrWhiteSpace(name) == false)
-                res = (UnitOfMeasure)this.Get(name);
-            else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
-                res = (UnitOfMeasure)this.GetBy(uuid);
+                res = this.Search(name).FirstOrDefault();
+            //else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
+            //    res.Add((UnitOfMeasure)this.Get(uuid));
             else
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))

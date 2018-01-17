@@ -68,9 +68,9 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccount s = (FinanceAccount)FinanceAccountManager.Get(name);
+            List<FinanceAccount> s = FinanceAccountManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("FinanceAccount could not be located for the name " + name);
 
             return ServiceResponse.OK("", s);
@@ -88,7 +88,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccount s = (FinanceAccount)FinanceAccountManager.GetBy(uuid);
+            FinanceAccount s = (FinanceAccount)FinanceAccountManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("FinanceAccount could not be located for the uuid " + uuid);
@@ -150,7 +150,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccount fa = (FinanceAccount)FinanceAccountManager.GetBy(uuid);
+            FinanceAccount fa = (FinanceAccount)FinanceAccountManager.Get(uuid);
             if (fa == null)
                 return ServiceResponse.Error("Could not find finance account.");
 
@@ -168,7 +168,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccount fa = (FinanceAccount)FinanceAccountManager.GetBy(n.UUID);
+            FinanceAccount fa = (FinanceAccount)FinanceAccountManager.Get(n.UUID);
             if (fa == null)
                 return ServiceResponse.Error("Could not find finance account.");
 
@@ -198,7 +198,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (FinanceAccount)FinanceAccountManager.GetBy(s.UUID);
+            var dbS = (FinanceAccount)FinanceAccountManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("FinanceAccount was not found.");
@@ -341,7 +341,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("Invalid id.");
 
             PriceManager fm = new PriceManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            PriceRule c = (PriceRule ) fm.GetBy(uuid);
+            PriceRule c = (PriceRule ) fm.Get(uuid);
             if (c == null)
                 return ServiceResponse.Error("Invalid uuid");
 
@@ -371,7 +371,7 @@ namespace TreeMon.WebAPI.api.v1
 
             PriceManager financeManager = new PriceManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (PriceRule)financeManager.GetBy(fat.UUID);
+            var dbS = (PriceRule)financeManager.Get(fat.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("PriceRule was not found.");
@@ -451,9 +451,9 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountTransactionsManager financeManager = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccountTransaction s = (FinanceAccountTransaction)financeManager.Get(name);
+            List<FinanceAccountTransaction> s = financeManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("FinanceAccountTransaction could not be located for the name " + name);
 
             return ServiceResponse.OK("", s);
@@ -509,7 +509,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("Invalid id.");
 
             FinanceAccountTransactionsManager fm = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            FinanceAccountTransaction c = (FinanceAccountTransaction)fm.GetBy(uuid);
+            FinanceAccountTransaction c = (FinanceAccountTransaction)fm.Get(uuid);
             if (c == null)
                 return ServiceResponse.Error("Invalid uuid");
 
@@ -539,7 +539,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountTransactionsManager financeManager = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (FinanceAccountTransaction)financeManager.GetBy(fat.UUID);
+            var dbS = (FinanceAccountTransaction)financeManager.Get(fat.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("FinanceAccountTransaction was not found.");
@@ -628,9 +628,9 @@ namespace TreeMon.WebAPI.api.v1
 
             CurrencyManager financeManager = new CurrencyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Currency s = (Currency)financeManager.Get(name);
+            List<Currency> s = financeManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Currency could not be located for the name " + name);
 
             return ServiceResponse.OK("", s);
@@ -726,7 +726,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("Invalid id.");
 
             CurrencyManager fm = new CurrencyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Currency c = (Currency)fm.GetBy(currencyUUID);
+            Currency c = (Currency)fm.Get(currencyUUID);
             if (c == null)
                 return ServiceResponse.Error("Invalid uuid");
 
@@ -756,7 +756,7 @@ namespace TreeMon.WebAPI.api.v1
 
             CurrencyManager financeManager = new CurrencyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (Currency)financeManager.GetBy(form.UUID);
+            var dbS = (Currency)financeManager.Get(form.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Currency was not found.");

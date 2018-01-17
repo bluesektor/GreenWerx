@@ -42,7 +42,7 @@ namespace TreeMon.Managers.Medical
             }
 
             //get the SideAffect from the table with all the data so when its updated it still contains the same data.
-            s = (SideAffect)this.GetBy(s.UUID);
+            s = (SideAffect)this.Get(s.UUID);
             if (s == null)
                 return ServiceResponse.Error("Side affect not found");
             s.Deleted = true;
@@ -54,13 +54,13 @@ namespace TreeMon.Managers.Medical
             return res;
         }
 
-        public INode Get( string name)
+        public List<SideAffect> Search( string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<SideAffect>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<SideAffect>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
             //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -100,7 +100,7 @@ namespace TreeMon.Managers.Medical
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
 {
     if (string.IsNullOrWhiteSpace(uuid))
         return null;

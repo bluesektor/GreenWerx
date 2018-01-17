@@ -7,7 +7,7 @@ using System.Web.Http;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers;
 using TreeMon.Managers.Store;
-
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Geo;
@@ -69,12 +69,13 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("You must provide a name for the strain.");
 
             LocationManager locationManager = new LocationManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Location p = (Location) locationManager.Get(name);
 
-            if (p == null)
+            List<Location> s = locationManager.Search(name);
+
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Location could not be located for the name " + name);
 
-            return ServiceResponse.OK("", p);
+            return ServiceResponse.OK("", s);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -224,7 +225,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
             LocationManager locationManager = new LocationManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Location p = (Location)locationManager.GetBy(locationUUID);
+            Location p = (Location)locationManager.Get(locationUUID);
 
             if (p == null || string.IsNullOrWhiteSpace(p.UUID))
                 return ServiceResponse.Error("Invalid account was sent.");

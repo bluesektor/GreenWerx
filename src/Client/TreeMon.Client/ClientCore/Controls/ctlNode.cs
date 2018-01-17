@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using TreeMon.Models;
 using TreeMon.Managers.Membership;
 using TreeMon.Utilites.Extensions;
+using TreeMon.Models.Store;
 
 namespace ClientCore.Controls
 {
@@ -39,6 +40,8 @@ namespace ClientCore.Controls
 
         public void Show(INode n)
         {
+            _node = null;
+
             if (n == null)
                 return;
 
@@ -53,7 +56,7 @@ namespace ClientCore.Controls
             chkDeleted.Checked = _node.Deleted;
             chkPrivate.Checked = _node.Private;
 
-            lblCreatedBy.Text = _userManager.GetBy(_node.CreatedBy)?.Name;
+            lblCreatedBy.Text = _userManager.Get(_node.CreatedBy)?.Name;
             lblDateCreated.Text = _node.DateCreated.ToShortDateString();
 
             for(int i = 0; i < cboRoleOperation.Items.Count; i++)
@@ -68,7 +71,7 @@ namespace ClientCore.Controls
                     break;
                 }
             }
-            lblAccount.Text = _accountManager.GetBy(_node.AccountUUID)?.Name;
+            lblAccount.Text = _accountManager.Get(_node.AccountUUID)?.Name;
         
             //if (File.Exists(_node.Image))
             //{
@@ -80,7 +83,11 @@ namespace ClientCore.Controls
         public INode Get()
         {
             if (_node == null)
-                return _node;
+            {
+                _node = new Node();
+               
+                //return _node;
+            }
 
             _node.Name = txtName.Text;
             _node.Status = txtStatus.Text;

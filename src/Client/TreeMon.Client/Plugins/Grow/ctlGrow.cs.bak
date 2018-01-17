@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using ClientCore.Controls;
+
+//rooms 
+//inventory - plants, pots etc
+//-  batch
+// stage
+//https://hobbyking.com/en_us/turnigy-thrust-stand.html
+//https://www.rcbenchmark.com/dynamometer-series-1520/
+//Add a 1000 uF low-ESR 25v capacitor across your main battery lead.
+namespace Grow
+{
+    public partial class ctlGrow : UserControl
+    {
+        ctlNodeTree _nodeTree;
+
+        public ctlGrow()
+        {
+            InitializeComponent();
+            //_nodeControl = new ctlNode(_connectionKey, _sessionKey);
+            //pnlNodeGrowLocations.Controls.Add(_nodeControl);
+        }
+    }
+}

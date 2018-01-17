@@ -104,7 +104,7 @@ namespace TreeMon.Managers.Store
             }
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -115,7 +115,7 @@ namespace TreeMon.Managers.Store
             }
         }
 
-        public INode Get( string name)
+        public List<Vendor> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
@@ -123,7 +123,7 @@ namespace TreeMon.Managers.Store
             {
                 //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
 
-                return context.GetAll<Vendor>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<Vendor>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -186,7 +186,7 @@ namespace TreeMon.Managers.Store
 
             if (validateFirst)
             {
-                Vendor dbU = (Vendor)Get(p.Name);
+                //Vendor dbU = (Vendor)Get(p.Name);
 
 
                 if(string.IsNullOrWhiteSpace(p.CreatedBy))

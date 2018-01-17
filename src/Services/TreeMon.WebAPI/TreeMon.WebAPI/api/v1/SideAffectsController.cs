@@ -49,24 +49,24 @@ namespace TreeMon.Web.api.v1
             return SideAffectManager.Insert(n, true);
         }
 
-        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
-        [HttpPost]
-        [HttpGet]
-        [Route("api/SideAffect/{name}")]
-        public ServiceResult Get( string name )
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return ServiceResponse.Error("You must provide a name for the SideAffect.");
+        //[ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
+        //[HttpPost]
+        //[HttpGet]
+        //[Route("api/SideAffect/{name}")]
+        //public ServiceResult Get( string name )
+        //{
+        //    if (string.IsNullOrWhiteSpace(name))
+        //        return ServiceResponse.Error("You must provide a name for the SideAffect.");
 
-            SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
+        //    SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            SideAffect s = (SideAffect)SideAffectManager.Get(name);
+        //    List<SideAffect> s = (List<SideAffect>)SideAffectManager.Search(name);
 
-            if (s == null)
-                return ServiceResponse.Error("SideAffect could not be located for the name " + name);
+        //    if (s == null)
+        //        return ServiceResponse.Error("SideAffect could not be located for the name " + name);
 
-            return ServiceResponse.OK("",s);
-        }
+        //    return ServiceResponse.OK("",s);
+        //}
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpPost]
@@ -79,7 +79,7 @@ namespace TreeMon.Web.api.v1
 
             SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            SideAffect s = (SideAffect)SideAffectManager.GetBy(uuid);
+            SideAffect s = (SideAffect)SideAffectManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("SideAffect could not be located for the uuid " + uuid);
@@ -176,7 +176,7 @@ namespace TreeMon.Web.api.v1
 
             SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (SideAffect) SideAffectManager.GetBy(s.UUID);
+            var dbS = (SideAffect) SideAffectManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("SideAffect was not found.");

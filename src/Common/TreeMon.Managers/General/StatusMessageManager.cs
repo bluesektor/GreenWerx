@@ -49,13 +49,13 @@ namespace TreeMon.Managers.General
             return ServiceResponse.OK();
         }
 
-        public INode Get(string status)
+        public List<StatusMessage> Search(string status)
         {
             if (string.IsNullOrWhiteSpace(status))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<StatusMessage>().FirstOrDefault(sw => sw.Status.EqualsIgnoreCase(status));
+                return context.GetAll<StatusMessage>().Where(sw => sw.Status.EqualsIgnoreCase(status)).ToList();
             }
         }
 
@@ -82,7 +82,7 @@ namespace TreeMon.Managers.General
             return status;
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
