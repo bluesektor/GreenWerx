@@ -19,7 +19,7 @@ using TreeMon.Utilites.Extensions;
 
 namespace TreeMon.Managers.Membership
 {
-    public class RoleManager:ICrud //Can't derive from BaseManager
+    public class RoleManager : ICrud //Can't derive from BaseManager
     {
 
         private readonly SystemLogger _logger = null;
@@ -32,14 +32,14 @@ namespace TreeMon.Managers.Membership
         {
             _dbConnectionKey = connectionKey;
             _logger = new SystemLogger(_dbConnectionKey);
-           
+
         }
 
         public RoleManager(string connectionKey, User requestingUser)
         {
             _dbConnectionKey = connectionKey;
             _logger = new SystemLogger(_dbConnectionKey);
-            _requestingUser =requestingUser;
+            _requestingUser = requestingUser;
         }
 
         public RoleManager(string connectionKey, List<string> siteAdmins, User requestingUser)
@@ -50,7 +50,7 @@ namespace TreeMon.Managers.Membership
             _siteAdmins = siteAdmins;
         }
 
-        private RoleManager( ){ }
+        private RoleManager() { }
 
         public string CreateKey(string name, string action, string appType, string accountUUID)
         {
@@ -201,20 +201,20 @@ namespace TreeMon.Managers.Membership
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                allAccountPermissions = context.GetAll<Permission>().Where( w =>  w.AccountUUID == accountUUID && w.Deleted == false ).DistinctBy(d => d.Name).ToList();
+                allAccountPermissions = context.GetAll<Permission>().Where(w => w.AccountUUID == accountUUID && w.Deleted == false).DistinctBy(d => d.Name).ToList();
             }
 
             //Selected permissions for role.
             List<Permission> rolePermissions = GetPermissionsForRole(roleUUID, accountUUID);
 
-            if (rolePermissions == null || !rolePermissions.Any() )
+            if (rolePermissions == null || !rolePermissions.Any())
                 return allAccountPermissions;//none are selected so return all.
 
             List<Permission> availablePermissions = new List<Permission>();
 
             foreach (Permission accountPermission in allAccountPermissions) {
 
-                if( !rolePermissions.Any(w => w.UUID == accountPermission.UUID))
+                if (!rolePermissions.Any(w => w.UUID == accountPermission.UUID))
                     availablePermissions.Add(accountPermission);
             }
 
@@ -257,7 +257,7 @@ namespace TreeMon.Managers.Membership
         {
             ServiceResult res = ServiceResponse.OK();
 
-            if (n == null )
+            if (n == null)
                 return ServiceResponse.Error("No record sent.");
 
             if (!this.DataAccessAuthorized(n, _requestingUser, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
@@ -276,33 +276,33 @@ namespace TreeMon.Managers.Membership
                 using (var transactionScope = new TransactionScope())
                 using (var context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                 
-                        try
+
+                    try
+                    {
+                        if (context.Delete<Role>(r) == 0)
                         {
-                            if(context.Delete<Role>(r) == 0)
-                            {
-                                res.Message += "Failed to delete role " + r.Name + Environment.NewLine;
-                            }
+                            res.Message += "Failed to delete role " + r.Name + Environment.NewLine;
+                        }
 
-                            foreach (RolePermission rp in rolePermissions)
-                            {
-                               if(context.Delete<RolePermission>(rp) == 0)
-                                    res.Message += "Failed to delete role permission" + rp.UUID + Environment.NewLine;
-                            }
+                        foreach (RolePermission rp in rolePermissions)
+                        {
+                            if (context.Delete<RolePermission>(rp) == 0)
+                                res.Message += "Failed to delete role permission" + rp.UUID + Environment.NewLine;
+                        }
 
-                            foreach (UserRole ur in usersInRole)
-                            {
-                               if(context.Delete<UserRole>(ur) == 0)
-                                    res.Message += "Failed to delete role user role" + ur.Name + Environment.NewLine;
-                            }
+                        foreach (UserRole ur in usersInRole)
+                        {
+                            if (context.Delete<UserRole>(ur) == 0)
+                                res.Message += "Failed to delete role user role" + ur.Name + Environment.NewLine;
+                        }
 
                         transactionScope.Complete();
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.InsertError(ex.Message, "RoleManager", MethodInfo.GetCurrentMethod().Name);
-                            return ServiceResponse.Error("Exception occured while deleting this record.");
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.InsertError(ex.Message, "RoleManager", MethodInfo.GetCurrentMethod().Name);
+                        return ServiceResponse.Error("Exception occured while deleting this record.");
+                    }
                 }
             }
             else //mark as deleted
@@ -310,35 +310,35 @@ namespace TreeMon.Managers.Membership
                 using (var transactionScope = new TransactionScope())
                 using (var context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                        try
+                    try
+                    {
+                        r.Deleted = true;
+
+                        if (context.Update<Role>(r) == 0)
+                            return ServiceResponse.Error(r.Name + " failed to delete. ");
+
+                        //foreach(RolePermission rp in rolePermissions)
+                        //{
+                        //    rp.Deleted = true; //backlog there is no deleted flag for RolePermission
+                        // context.Update<RolePermission>(rp);
+                        //}
+                        foreach (UserRole ur in usersInRole)
                         {
-                            r.Deleted = true;
-
-                            if (context.Update<Role>(r) == 0)
-                                return ServiceResponse.Error(r.Name + " failed to delete. ");
-
-                            //foreach(RolePermission rp in rolePermissions)
-                            //{
-                            //    rp.Deleted = true; //backlog there is no deleted flag for RolePermission
-                            // context.Update<RolePermission>(rp);
-                            //}
-                            foreach (UserRole ur in usersInRole)
-                            {
-                                ur.Deleted = true;
-                                if(context.Update<UserRole>(ur) == 0)
-                                    res.Message += "Failed to delete role user role" + ur.Name + Environment.NewLine;
-                            }
+                            ur.Deleted = true;
+                            if (context.Update<UserRole>(ur) == 0)
+                                res.Message += "Failed to delete role user role" + ur.Name + Environment.NewLine;
+                        }
                         transactionScope.Complete();
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.InsertError(ex.Message, "RoleManager", MethodInfo.GetCurrentMethod().Name);
-                            return ServiceResponse.Error("Exception occured while deleting this record.");
-                        }
                     }
+                    catch (Exception ex)
+                    {
+                        _logger.InsertError(ex.Message, "RoleManager", MethodInfo.GetCurrentMethod().Name);
+                        return ServiceResponse.Error("Exception occured while deleting this record.");
+                    }
+                }
 
             }
-           if(!string.IsNullOrWhiteSpace(res.Message))
+            if (!string.IsNullOrWhiteSpace(res.Message))
             {
                 res.Code = 500;
                 res.Status = "ERROR";
@@ -379,14 +379,14 @@ namespace TreeMon.Managers.Membership
 
         public List<Role> Search(string name)
         {
-            if (string.IsNullOrWhiteSpace(name) )
+            if (string.IsNullOrWhiteSpace(name))
                 return null;
 
             // if (!_runningInstall && !this.DataAccessAuthorized(r, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<Role>().Where(rw => (rw.Name?.EqualsIgnoreCase(name)?? false) && rw.AccountUUID == _requestingUser.AccountUUID).ToList();
+                return context.GetAll<Role>().Where(rw => (rw.Name?.EqualsIgnoreCase(name) ?? false) && rw.AccountUUID == _requestingUser.AccountUUID).ToList();
             }
         }
 
@@ -505,7 +505,7 @@ namespace TreeMon.Managers.Membership
 
             using (var transactionScope = new TransactionScope())
             using (var dbContext = new TreeMonDbContext(_dbConnectionKey))
-            { 
+            {
                 //backlog revisit this transaction. Using the member context to make it work seems off.
                 try
                 {
@@ -597,7 +597,7 @@ namespace TreeMon.Managers.Membership
 
         public ServiceResult AddRolePermission(RolePermission rp)
         {
-             if (!_runningInstall && !this.DataAccessAuthorized(rp, _requestingUser, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
+            if (!_runningInstall && !this.DataAccessAuthorized(rp, _requestingUser, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             ServiceResult res = ServiceResponse.OK();
             if (RolePermissionExists(rp.RoleUUID, rp.AccountUUID, rp.PermissionUUID))
@@ -607,7 +607,7 @@ namespace TreeMon.Managers.Membership
             {
                 rp.DateCreated = DateTime.UtcNow;
                 rp.CreatedBy = _requestingUser.UUID;
-                if( !context.Insert<RolePermission>(rp) )
+                if (!context.Insert<RolePermission>(rp))
                     return ServiceResponse.Error("Failed to add. ");
             }
             return res;
@@ -620,7 +620,7 @@ namespace TreeMon.Managers.Membership
             {
                 if (!_runningInstall && !this.DataAccessAuthorized(p, _requestingUser, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-                ServiceResult delRes =  DeleteRolePermission(new RolePermission() { PermissionUUID = p.UUID, RoleUUID = roleUUID, AccountUUID = p.AccountUUID });
+                ServiceResult delRes = DeleteRolePermission(new RolePermission() { PermissionUUID = p.UUID, RoleUUID = roleUUID, AccountUUID = p.AccountUUID });
                 if (delRes.Code != 200)
                 {
                     res.Message += delRes.Message + Environment.NewLine;
@@ -641,7 +641,7 @@ namespace TreeMon.Managers.Membership
             if (!RolePermissionExists(rp.RoleUUID, rp.AccountUUID, rp.PermissionUUID))
                 return ServiceResponse.Error("Record not found.");
 
-             if (!_runningInstall && !this.DataAccessAuthorized(rp, _requestingUser, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
+            if (!_runningInstall && !this.DataAccessAuthorized(rp, _requestingUser, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             try
             {
@@ -651,7 +651,7 @@ namespace TreeMon.Managers.Membership
                 parameters.Add("@ACCOUNTUUID", rp.AccountUUID);
                 using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                    if( context.Delete<RolePermission>("WHERE PermissionUUID=@PERMISSIONUUID AND RoleUUID=@ROLEUUID AND AccountUUID=@ACCOUNTUUID", parameters) == 0)
+                    if (context.Delete<RolePermission>("WHERE PermissionUUID=@PERMISSIONUUID AND RoleUUID=@ROLEUUID AND AccountUUID=@ACCOUNTUUID", parameters) == 0)
                         return ServiceResponse.Error("Failed to delete. ");
                 }
                 //SQLITE
@@ -701,12 +701,12 @@ namespace TreeMon.Managers.Membership
 
         #region UserRole  TODO refactor into icrud class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        public ServiceResult AddUsersToRole( string roleUUID, List<User> urs, User requestingUser)
+        public ServiceResult AddUsersToRole(string roleUUID, List<User> urs, User requestingUser)
         {
             ServiceResult res = ServiceResponse.OK();
             foreach (User u in urs)
             {
-                ServiceResult addRes = AddUserToRole(roleUUID, u , requestingUser);
+                ServiceResult addRes = AddUserToRole(roleUUID, u, requestingUser);
                 if (addRes.Code != 200)
                 {
                     res.Message += addRes.Message + Environment.NewLine;
@@ -741,9 +741,9 @@ namespace TreeMon.Managers.Membership
 
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                UserRole ur = new UserRole() { AccountUUID = r.AccountUUID, Active = true, CreatedBy =requestingUser.UUID, DateCreated = DateTime.UtcNow,
-                 UserUUID = u.UUID, RoleUUID = r.UUID, RoleOperation = r.RoleOperation, RoleWeight = r.RoleWeight};
-                if( !context.Insert<UserRole>(ur))
+                UserRole ur = new UserRole() { AccountUUID = r.AccountUUID, Active = true, CreatedBy = requestingUser.UUID, DateCreated = DateTime.UtcNow,
+                    UserUUID = u.UUID, RoleUUID = r.UUID, RoleOperation = r.RoleOperation, RoleWeight = r.RoleWeight };
+                if (!context.Insert<UserRole>(ur))
                     return ServiceResponse.Error(u.Name + " failed to add. ");
             }
             return res;
@@ -752,10 +752,10 @@ namespace TreeMon.Managers.Membership
         public ServiceResult DeleteUsersFromRole(string roleUUID, List<User> users, User requestingUser)
         {
             ServiceResult res = ServiceResponse.OK();
-            
+
             foreach (User user in users)
             {
-                ServiceResult  delRes = DeleteUserFromRole(roleUUID, user, requestingUser);
+                ServiceResult delRes = DeleteUserFromRole(roleUUID, user, requestingUser);
                 if (delRes.Code != 200)
                 {
                     res.Message += delRes.Message + Environment.NewLine;
@@ -770,7 +770,7 @@ namespace TreeMon.Managers.Membership
         public ServiceResult DeleteUserFromRole(string roleUUID, User u, User requestingUser)
         {
             ServiceResult res = ServiceResponse.OK();
-            
+
             if (u == null)
                 return ServiceResponse.Error("User is null");
 
@@ -791,7 +791,7 @@ namespace TreeMon.Managers.Membership
                 parameters.Add("@ACCOUNTUUID", r.AccountUUID);
                 using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                     if( context.Delete<UserRole>("WHERE UserUUID=@USERUUID AND RoleUUID=@ROLEUUID AND AccountUUID=@ACCOUNTUUID", parameters) == 0)
+                    if (context.Delete<UserRole>("WHERE UserUUID=@USERUUID AND RoleUUID=@ROLEUUID AND AccountUUID=@ACCOUNTUUID", parameters) == 0)
                         return ServiceResponse.Error(u.Name + " failed to remove from role. ");
                 }
                 //SQLITE
@@ -809,16 +809,41 @@ namespace TreeMon.Managers.Membership
             return res;
         }
 
-        #endregion
+        public List<Role> GetRolesForUser(string userUUID, string accountUUID)
+        {
+            try
+            {
+                using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
+                {
+                    List<Role> userRoles = context.GetAll<Role>().Where(w => w.AccountUUID == accountUUID && w.Deleted == false)
+                                                    .Join(context.GetAll<UserRole>().Where(w => w.UserUUID == userUUID && w.AccountUUID == accountUUID && w.Deleted == false),
+                                                        role => role.UUID,
+                                                        userRole => userRole.RoleUUID,
+                                                        (role, userRole) => new { role, userRole }
+                                                    ).Select(s => s.role).ToList();
+                    return userRoles;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.InsertError(ex.Message, "RoleManager", "GetRolesForUser");
+                Debug.Assert(false, ex.Message);
+               
+            }
+            return new List<Role>();
+        }
 
-        #region User and User authorization
 
-        /// <summary>
-        /// return users assigned to a role
-        /// </summary>
-        /// <param name="uuid"></param>
-        /// <returns></returns>
-        public List<User> GetUsersInRole(string roleUUID, string accountUUID)
+    #endregion
+
+    #region User and User authorization
+
+    /// <summary>
+    /// return users assigned to a role
+    /// </summary>
+    /// <param name="uuid"></param>
+    /// <returns></returns>
+    public List<User> GetUsersInRole(string roleUUID, string accountUUID)
         {
             List<User> members;
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))

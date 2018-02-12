@@ -19,10 +19,10 @@ namespace TreeMon.Web.Tests._templates
     [TestClass]
     public class AppManager_Tests
     {
-        // private string connectionKey = "MSSQL_TEST";
-        private string connectionKey = "MSSQL";
+        // //private string connectionKey = "MSSQL_TEST";
+        //private string connectionKey = "MSSQL";
         //AppTypes are web, forms, mobil(for mobile phone app, not mobile theme).
-        private string appType = "web";
+       // private string appType = "web";
 
 
         //[TestMethod]

@@ -26,7 +26,7 @@ namespace TreeMon.Web.Tests.API.V1
     {
         private string connectionKey = "MSSQL_TEST";
         private string _ownerAuthToken = "";
-        private string _captcha = "TESTCAPTCHA";
+       // private string _captcha = "TESTCAPTCHA";
 
         [TestInitialize]
         public void TestSetup()

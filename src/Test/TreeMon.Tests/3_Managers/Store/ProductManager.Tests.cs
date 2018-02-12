@@ -14,7 +14,7 @@ namespace TreeMon.Web.Tests._templates
     [TestClass]
     public class ProductManager_Tests
     {
-        private string connectionKey = "MSSQL_TEST";
+        //private string connectionKey = "MSSQL_TEST";
 
         public string SystemFlags { get; private set; }
 

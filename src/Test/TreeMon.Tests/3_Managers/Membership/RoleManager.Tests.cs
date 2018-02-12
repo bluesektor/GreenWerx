@@ -16,7 +16,7 @@ namespace TreeMon.Web.Tests._templates
     [TestClass]
     public class RoleManager_Tests
     {
-        private string connectionKey = "MSSQL_TEST";
+        //private string connectionKey = "MSSQL_TEST";
 
         //List<User> _users = new List<User>();
 

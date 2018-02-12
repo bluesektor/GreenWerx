@@ -7,6 +7,8 @@ using TreeMon.Models.App;
 using System.Collections.Generic;
 using TreeMon.Managers;
 using System.Linq;
+using TreeMon.Models.Membership;
+using TreeMon.Managers.Membership;
 
 namespace TreeMon.Web.Tests._templates
 {
@@ -14,6 +16,18 @@ namespace TreeMon.Web.Tests._templates
     public class SessionManager_Tests
     {
         private string connectionKey = "MSSQL_TEST";
+
+        [TestMethod]
+        public void SessionManager_GenerateToken_JWT()
+        {
+            string userName = Guid.NewGuid().ToString("N");
+            User u =  TestHelper.GenerateTestUser(userName);
+            SessionManager m = new SessionManager(connectionKey);
+            string jwt = m.CreateJwt("jwt", u, "unitTest.Treemon.org");
+
+            Assert.IsNotNull(jwt);
+            //https://jwt.io/
+        }
 
         //[TestMethod]
         //public void SessionManager_SaveSession()
@@ -245,6 +259,6 @@ namespace TreeMon.Web.Tests._templates
         //}
 
 
-        
+
     }
 }

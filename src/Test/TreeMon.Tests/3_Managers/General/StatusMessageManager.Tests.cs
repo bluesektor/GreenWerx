@@ -20,7 +20,7 @@ namespace TreeMon.Web.Tests.Managers.General
     [TestClass]
     public class StatusMessageManagerTests
     {
-        private string connectionKey = "MSSQL_TEST";
+        ////private string connectionKey = "MSSQL_TEST";
 
         //[TestMethod]
         //public void StatusMessageManager_Insert() {

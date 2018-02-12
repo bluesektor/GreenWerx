@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using TreeMon.Data;
 using TreeMon.Data.Logging;
+using TreeMon.Managers.Membership;
 using TreeMon.Models.App;
 using TreeMon.Models.Membership;
 using TreeMon.Utilites.Extensions;
@@ -22,7 +23,9 @@ namespace TreeMon.Managers
         readonly SystemLogger _logger;
         readonly string _connectionKey;
 
-       
+        readonly AppManager _app;
+        readonly UserManager _userManager;
+
         public int SessionLength { get; set; }
 
         public SessionManager(string connectionKey)
@@ -31,6 +34,8 @@ namespace TreeMon.Managers
             _logger = new SystemLogger(connectionKey);
 
             SessionLength = GetSessionLength();
+            _app = new AppManager(_connectionKey, "web", "");
+            _userManager = new UserManager(_connectionKey, "");
         }
 
         private int GetSessionLength()
@@ -64,7 +69,11 @@ namespace TreeMon.Managers
             UserSession us = new UserSession();
             us.IsPersistent = persistSession;
             us.Issued = DateTime.UtcNow;
-            us.AuthToken = GenerateToken(ipAddress);
+            User u = string.IsNullOrWhiteSpace(userData) ? (User)_userManager.Get(userUUID) : JsonConvert.DeserializeObject<User>(userData);
+            string secret = _app.GetSetting("AppKey")?.Value;
+            string issuer = _app.GetSetting("SiteDomain")?.Value;
+
+            us.AuthToken = CreateJwt(secret, u, issuer);
             us.UserData = userData;
             us.UserUUID = userUUID;
             return SaveSession(us);
@@ -83,9 +92,11 @@ namespace TreeMon.Managers
                 return us;
 
             if (string.IsNullOrWhiteSpace(us.AuthToken))
-            {   
-                Debug.Assert(false, "AUTHTOKEN IS NULL");
-                us.AuthToken = GenerateToken(us.UserUUID);
+            {
+                string secret = _app.GetSetting("AppKey")?.Value;
+                string issuer = _app.GetSetting("SiteDomain")?.Value;
+                User u = string.IsNullOrWhiteSpace(us.UserData) ? (User)_userManager.Get(us.UserUUID) : JsonConvert.DeserializeObject<User>(us.UserData);
+                us.AuthToken = CreateJwt(secret,u , issuer);
             }
             if (us.SessionLength != SessionLength)
                 us.SessionLength = this.SessionLength;
@@ -110,22 +121,70 @@ namespace TreeMon.Managers
             }
         }
 
-        /// <summary>
-        ///  Function to generate unique token based on provided srcValue
-        ///  Uses ToSafeString to return only alphanum string.
-        /// </summary>
-        /// <param name="ipAddress"></param>
-        /// <returns></returns>
-        public string GenerateToken(string ipAddress )
+        public string CreateJwt(string secretKey, User user, string issuer)
         {
-            string token = "";
+            if (user == null)
+                return string.Empty;
 
-            using (SHA512 sha = new SHA512Managed())
-            {
-                token =  Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(ipAddress + DateTime.Now.ToLongTimeString())));
-                token = token.ToSafeString(true);
-            }
+            var payload = new JwtClaims();
+            payload.aud = user.UUID + "." + user.AccountUUID;
+            payload.iss = issuer;
+            payload.jti = Guid.NewGuid().ToString();
+
+            RoleManager roleManager = new RoleManager(this._connectionKey);
+            List<Role> userRoles = roleManager.GetRolesForUser(user.UUID, user.AccountUUID);
+
+            if(userRoles != null && userRoles.Count > 0)
+                payload.roleWeights = userRoles.Select(s => s.Weight.ToString()).Aggregate((current, next) => current  + "," + next);
+            
+            string token = JWT.JsonWebToken.Encode(payload, secretKey, JWT.JwtHashAlgorithm.HS256);
+
             return token;
+
+            #region Unsecured jwt example
+            //var hmac = new HMACSHA256();
+            //var header = "{ \"alg\": \"HS256\",  \"typ\": \"JWT\"  }";
+            ////Some PayLoad that contain information about the  customer
+            //var payload = "{ \"userUUID\": \"" + userUUID + "\",  \"scope\": \"http://test.com\"  }";
+            //var secToken = hmac.ComputeHash(Encoding.UTF8.GetBytes(header + payload));
+            //// Token to String so you can use it in your client
+
+            //Debug.Assert(false, "TODO NEED TO REMOVE THE END PADDING = OR == ");
+            //var tokenString = Convert.ToBase64String(Encoding.UTF8.GetBytes(header)) + "." +
+            //                    Convert.ToBase64String(Encoding.UTF8.GetBytes(payload)) + "." +
+            //                    Convert.ToBase64String(secToken);
+
+            //return tokenString;
+            #endregion
+        }
+
+
+        /// <summary>
+        /// TODO unit test this.
+        /// </summary>
+        /// <param name="jwt"></param>
+        /// <param name="secretKey"></param>
+        /// <returns></returns>
+        public bool IsValidJwt(string jwt, string secretKey)
+        {
+            if (string.IsNullOrWhiteSpace(jwt))
+                return false;
+
+            try
+            {
+                string jsonPayload = JWT.JsonWebToken.Decode(jwt, secretKey); // JWT.SignatureVerificationException
+                JwtClaims claims = JsonConvert.DeserializeObject<JwtClaims>(jsonPayload);
+
+                if (claims.iss != _app.GetSetting("SiteDomain")?.Value)
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.Message);
+                return false;
+            }
+            return true;
+          
         }
 
         /// <summary>

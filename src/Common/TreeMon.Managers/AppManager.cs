@@ -201,7 +201,7 @@ namespace TreeMon.Managers
 
                 foreach (dynamic p in products)
                 {
-                    dynamic account = context.GetAll<Account>().Where(w => w.Name.ToSafeString(true)?.ToUpper() == p.SafeName).FirstOrDefault();
+                    dynamic account = context.GetAll<Account>().FirstOrDefault(w => w.Name.ToSafeString(true)?.ToUpper() == p.SafeName);
 
                     if (account != null)
                     {

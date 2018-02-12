@@ -8,7 +8,7 @@ namespace TreeMon.Web.Tests.API.V1
     [TestClass]
     public class AccountController_View_Tests   //todo re-implement
     {
-        private string connectionKey = "MSSQL_TEST";
+        //private string connectionKey = "MSSQL_TEST";
 
         //[TestMethod]
         //public void AccountController_View_ChangePassword()

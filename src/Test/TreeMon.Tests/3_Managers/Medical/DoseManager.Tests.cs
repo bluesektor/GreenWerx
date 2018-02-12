@@ -13,7 +13,7 @@ namespace TreeMon.Web.Tests._templates
     [TestClass]
     public class DoseManager_Tests
     {
-        private string connectionKey = "MSSQL_TEST";
+        ////private string connectionKey = "MSSQL_TEST";
 
         //[TestMethod]
         //public void DoseManager_Insert_DoseLog()

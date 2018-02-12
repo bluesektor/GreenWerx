@@ -404,8 +404,8 @@ namespace TreeMon.Managers.Membership
             {
                 if (clearSensitiveData)
                     return ClearSensitiveData(context.GetAll<User>().Where(uw => uw.UUID == UUID).FirstOrDefault());
-
-                return context.GetAll<User>().FirstOrDefault(uw => uw.UUID == UUID);
+                INode n = context.GetAll<User>().FirstOrDefault(uw => uw.UUID == UUID);
+                return n;
             }
         }
 

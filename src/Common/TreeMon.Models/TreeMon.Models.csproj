@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Command.cs" />
+    <Compile Include="App\JwtClaims.cs" />
     <Compile Include="Datasets\DataPoint.cs" />
     <Compile Include="Datasets\DataQuery.cs" />
     <Compile Include="Datasets\DataScreen.cs" />

@@ -115,9 +115,6 @@ namespace TreeMon.Web.Filters
             if (us == null || us.UserData == null)
             {
                 _sessionsManager.DeleteSession(tokenValue);
-                string ipAddress = _network.GetClientIpAddress(actionContext.Request);
-                tokenValue = _sessionsManager.GenerateToken(ipAddress);
-                _sessionsManager.DeleteSession(tokenValue);
                 actionContext.Response = new HttpResponseMessage(HttpStatusCode.Unauthorized) { ReasonPhrase = "Invalid session data." };
                 base.OnActionExecuting(actionContext);
                 return;

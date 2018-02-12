@@ -18,7 +18,7 @@ namespace TreeMon.Web.Tests._templates
     [TestClass]
     public class UserManager_Tests
     {
-        private string connectionKey = "MSSQL_TEST";
+        //private string connectionKey = "MSSQL_TEST";
 
         //[TestMethod]
         //public void UserManager_SendEmailValidationAsync()

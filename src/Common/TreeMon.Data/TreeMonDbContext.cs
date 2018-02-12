@@ -108,17 +108,10 @@ namespace TreeMon.Data
                     else if (ConnectionSettings.ProviderName.ToUpper().Contains("MYSQL"))
                     {
                         _providerType = "MYSQL";
-                       // Database.Connection.Disposed += new EventHandler(DisposedEvent);
-                        //SetSqlGenerator(MySql.Data.Entity.MySqlProviderInvariantName.ProviderName, new MySql.Data.Entity.MySqlMigrationSqlGenerator());
-                        //SetHistoryContextFactory(MySql.Data.Entity.MySqlProviderInvariantName.ProviderName, (connection, schema) => new MySql.Data.Entity.MySqlHistoryContext(connection, schema));
-                        //class decorator 
-                        //[DbConfigurationType(typeof(MySql.Data.Entity.MySqlEFConfiguration))]
-                        //public class DataAccessBase<T> : DbContext where T : class
                     }
                     else if (ConnectionSettings.ProviderName.ToUpper().Contains("SQLCLIENT"))
                     {
                         _providerType = "MSSQL";
-                      //  Database.Connection.Disposed += new EventHandler(DisposedEvent);
                     }
                 }
             }
@@ -969,11 +962,9 @@ namespace TreeMon.Data
         public bool Insert<T>(T entity) where T : class
         {
             try {
-               var test =  base.Set<T>().Add(entity);
-
+                base.Set<T>().Add(entity);
                 int res = SaveChanges();
                 return res > 0 ? true : false;
-
             }
             catch (Exception ex)
             {
@@ -987,8 +978,7 @@ namespace TreeMon.Data
         {
             try
             {
-             
-                var test = base.Set<T>().Add(entity);
+                base.Set<T>().Add(entity);
             }
             catch (Exception ex)
             {
@@ -1000,7 +990,7 @@ namespace TreeMon.Data
         {
             try
             {
-                var test = base.Set<T>().AddRange(entities);
+                base.Set<T>().AddRange(entities);
             }
             catch (Exception ex)
             {
@@ -1035,7 +1025,6 @@ namespace TreeMon.Data
                         this.Database.Connection.ConnectionString = connectionString;
                         Database.SetInitializer<TreeMonDbContext>(new CreateDatabaseIfNotExists<TreeMonDbContext>());
                         Database.Initialize(true);
-                       // this.Insert<LogEntry>(new LogEntry() { LogDate = DateTime.UtcNow, Level = SystemFlag.Level.Info, Source = "TreeMonDbContext.Initialize", Type = "LogEntry" });
                         SystemLogger sl = new SystemLogger(this.ConnectionKey, false);
                         sl.Insert(new LogEntry() { LogDate = DateTime.UtcNow, Level = SystemFlag.Level.Info, Source = "TreeMonDbContext.Initialize", Type = "LogEntry" });
                     }

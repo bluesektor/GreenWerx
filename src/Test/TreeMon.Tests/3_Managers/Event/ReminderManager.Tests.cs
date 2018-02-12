@@ -12,7 +12,7 @@ namespace TreeMon.Web.Tests.Managers.Event
     [TestClass]
     public  class ReminderManagerTests
     {
-        //private string connectionKey = "MSSQL_TEST";
+        ////private string connectionKey = "MSSQL_TEST";
         //[TestMethod]
         //public void ReminderManager_Insert()
         //{
