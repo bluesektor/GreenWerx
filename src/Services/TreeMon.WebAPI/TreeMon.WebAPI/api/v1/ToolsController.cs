@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -100,21 +101,6 @@ namespace TreeMon.Web.api.v1
             return app.SearchTables(values.ToArray() );
         }
 
-        //[ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
-        //[HttpGet]
-        //[Route("api/App/Proc/Status")]
-        //public ServiceResult GetProcessStatus(string procId)
-        //{
-        //    if (CurrentUser == null)
-        //        return ServiceResponse.Error("You must be logged in to access this function.");
-
-        //    if (!CurrentUser.SiteAdmin)
-        //        return ServiceResponse.Error("You are not authorized to use this function.");
-
-        //    return ServiceResponse.OK(processId);
-        //}
-
-
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpGet]
         [Route("api/Tools/Database/Backup")]
@@ -155,7 +141,7 @@ namespace TreeMon.Web.api.v1
                 string file = formData[0].FileName;
 
                 AppManager app = new AppManager(Globals.DBConnectionKey, "web", Request.Headers?.Authorization?.Parameter);
-                res = await app.RestoreDatabase(file, Globals.Application.AppSetting("DBBackupKey")); //await app.RestoreDatabase();
+                res = await app.RestoreDatabase(file, Globals.Application.AppSetting("DBBackupKey"));  
 
                 ClearTempFiles();
              
@@ -220,14 +206,10 @@ namespace TreeMon.Web.api.v1
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
-            string statusMessage = "";
+            StringBuilder statusMessage = new StringBuilder();
 
             try
             {
-                //Stream s =  HttpContext.Current.Request.GetBufferlessInputStream(true);
-
-
-
                 if (!Request.Content.IsMimeMultipartContent())
                 {                // Check if the request contains multipart/form-data.
                     return ServiceResponse.Error("Unsupported media type.");
@@ -271,7 +253,7 @@ namespace TreeMon.Web.api.v1
                             
                     }
 
-                    statusMessage += app.ImportFile(type, file.LocalFileName, fileName, network.GetClientIpAddress(this.Request),validate,validateGlobally).Message + Environment.NewLine;
+                    statusMessage.AppendLine( app.ImportFile(type, file.LocalFileName, fileName, network.GetClientIpAddress(this.Request),validate,validateGlobally).Message );
                 }
             }
             catch (Exception ex)
@@ -280,7 +262,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error(ex.Message);
             }
 
-            return ServiceResponse.OK(statusMessage);
+            return ServiceResponse.OK(statusMessage.ToString());
         }
 
         private void ClearTempFiles()
@@ -307,117 +289,117 @@ namespace TreeMon.Web.api.v1
         [Route("api/Tools/TestCode")]
         public ServiceResult Test()
         {
-            string authToken = Request.Headers?.Authorization?.Parameter;
+            ///string authToken = Request.Headers?.Authorization?.Parameter;
 
-            //AppManager am = new AppManager(Globals.DBConnectionKey, "web", authToken);
-            //am.TestCode();
+            ////AppManager am = new AppManager(Globals.DBConnectionKey, "web", authToken);
+            ////am.TestCode();
 
-            //Globals.Application.UseDatabaseConfig = false;
-            //string encryptionKey = Globals.Application.AppSetting("AppKey");
+            ////Globals.Application.UseDatabaseConfig = false;
+            ////string encryptionKey = Globals.Application.AppSetting("AppKey");
 
-            //if (string.IsNullOrWhiteSpace(encryptionKey))
-            //    return ServiceResponse.Error("Unable to get AppKey from .config.");
+            ////if (string.IsNullOrWhiteSpace(encryptionKey))
+            ////    return ServiceResponse.Error("Unable to get AppKey from .config.");
 
-            //ServiceResult  res = Globals.Application.ImportWebConfigToDatabase(authToken, encryptionKey, true);
-            //if (res.Code != 200)
-            //    return res;
-            //if (PasswordHash.IsCommonPassword("maTurE"))
-            //    return ServiceResponse.Error();
+            ////ServiceResult  res = Globals.Application.ImportWebConfigToDatabase(authToken, encryptionKey, true);
+            ////if (res.Code != 200)
+            ////    return res;
+            ////if (PasswordHash.IsCommonPassword("maTurE"))
+            ////    return ServiceResponse.Error();
 
-            //if (string.IsNullOrWhiteSpace(authToken))
-            //    return new ServiceResult() { Code = 500, Status = "ERROR", Message = "You must login to view this page." };
+            ////if (string.IsNullOrWhiteSpace(authToken))
+            ////    return new ServiceResult() { Code = 500, Status = "ERROR", Message = "You must login to view this page." };
 
-            //User u = Get(authToken);
+            ////User u = Get(authToken);
 
-            ////Test inserting default roles
-            //RoleManager rm = new RoleManager(Globals.DBConnectionKey, u);
-            //ServiceResult res = rm.InsertDefaults(u.AccountUUID, "web");
-            //if (res.Code != 200)
-            //    return res;
+            //////Test inserting default roles
+            ////RoleManager rm = new RoleManager(Globals.DBConnectionKey, u);
+            ////ServiceResult res = rm.InsertDefaults(u.AccountUUID, "web");
+            ////if (res.Code != 200)
+            ////    return res;
 
-            ////Test seeding the database
-            //  AppManager am = new AppManager(Globals.DBConnectionKey, "web", authToken);
-            //string directory = EnvironmentEx.AppDataFolder;
-            // am.SeedDatabase(Path.Combine(directory, "Install\\SeedData\\"), u.AccountUUID);
+            //////Test seeding the database
+            ////  AppManager am = new AppManager(Globals.DBConnectionKey, "web", authToken);
+            ////string directory = EnvironmentEx.AppDataFolder;
+            //// am.SeedDatabase(Path.Combine(directory, "Install\\SeedData\\"), u.AccountUUID);
 
             #region location import
-            //LocationManager lm = new LocationManager(Globals.DBConnectionKey, authToken);
-            //string pathToFile = Path.Combine(directory, "DBBackups\\geolocations.csv");
-            //if (!File.Exists(pathToFile))
-            //    return ServiceResponse.Error("File not found");
+            ////LocationManager lm = new LocationManager(Globals.DBConnectionKey, authToken);
+            ////string pathToFile = Path.Combine(directory, "DBBackups\\geolocations.csv");
+            ////if (!File.Exists(pathToFile))
+            ////    return ServiceResponse.Error("File not found");
 
-            //string[] fileLines = File.ReadAllLines(pathToFile);
+            ////string[] fileLines = File.ReadAllLines(pathToFile);
 
-            //foreach (string fileLine in fileLines)
-            //{
-            //    if (string.IsNullOrWhiteSpace(fileLine))
-            //        continue;
+            ////foreach (string fileLine in fileLines)
+            ////{
+            ////    if (string.IsNullOrWhiteSpace(fileLine))
+            ////        continue;
 
-            //    string[] locationTokens = fileLine.Split(',');
+            ////    string[] locationTokens = fileLine.Split(',');
 
-            //    if (locationTokens.Count() < 9)
-            //        continue;
+            ////    if (locationTokens.Count() < 9)
+            ////        continue;
 
-            //    int locationID = StringEx.ConvertTo<int>(locationTokens[0]);
-            //    Location l = new Location();
-            //    l.UUID = Guid.NewGuid().ToString("N");
-            //    l.UUIDType = "Location";
-            //    l.AccountUUID = SystemFlag.Default.Account;
-            //    l.DateCreated = DateTime.UtcNow;
-            //    l.CreatedBy = CurrentUser.UUID;
-            //    l.RoleWeight = 1;
-            //    l.RoleOperation= ">=";
-            //    l.RootId = locationID;
-            //    l.ParentId = StringEx.ConvertTo<int>( locationTokens[1]);
-            //    l.Name = locationTokens[2];
-            //    l.Code = locationTokens[3];
-            //    l.LocationType = locationTokens[4];
-            //    l.Latitude = StringEx.ConvertTo<float>( locationTokens[5]);
-            //    l.Longitude = StringEx.ConvertTo<float>(locationTokens[6]);
-            //    l.TimeZoneUUID = StringEx.ConvertTo<int>(locationTokens[7]);
-            //    l.CurrencyUUID = StringEx.ConvertTo<int>(locationTokens[8]);
+            ////    int locationID = StringEx.ConvertTo<int>(locationTokens[0]);
+            ////    Location l = new Location();
+            ////    l.UUID = Guid.NewGuid().ToString("N");
+            ////    l.UUIDType = "Location";
+            ////    l.AccountUUID = SystemFlag.Default.Account;
+            ////    l.DateCreated = DateTime.UtcNow;
+            ////    l.CreatedBy = CurrentUser.UUID;
+            ////    l.RoleWeight = 1;
+            ////    l.RoleOperation= ">=";
+            ////    l.RootId = locationID;
+            ////    l.ParentId = StringEx.ConvertTo<int>( locationTokens[1]);
+            ////    l.Name = locationTokens[2];
+            ////    l.Code = locationTokens[3];
+            ////    l.LocationType = locationTokens[4];
+            ////    l.Latitude = StringEx.ConvertTo<float>( locationTokens[5]);
+            ////    l.Longitude = StringEx.ConvertTo<float>(locationTokens[6]);
+            ////    l.TimeZoneUUID = StringEx.ConvertTo<int>(locationTokens[7]);
+            ////    l.CurrencyUUID = StringEx.ConvertTo<int>(locationTokens[8]);
 
-            //    if (lm.Insert(l, false).Code != 200)
-            //        Debug.Assert(false, "shit");
-            //}
+            ////    if (lm.Insert(l, false).Code != 200)
+            ////        Debug.Assert(false, "shit");
+            ////}
 
-            //List<Location> locations = lm.GetLocations(SystemFlag.Default.Account);
+            ////List<Location> locations = lm.GetLocations(SystemFlag.Default.Account);
 
-            //foreach(Location l in locations)
-            //{
-            //    List<Location> childLocations = locations.Where(w => w.ParentId == l.RootId).ToList();
+            ////foreach(Location l in locations)
+            ////{
+            ////    List<Location> childLocations = locations.Where(w => w.ParentId == l.RootId).ToList();
 
-            //    foreach(Location child in childLocations)
-            //    {
-            //        child.UUParentID = l.UUID;
-            //        child.UUParentIDType = l.State;
+            ////    foreach(Location child in childLocations)
+            ////    {
+            ////        child.UUParentID = l.UUID;
+            ////        child.UUParentIDType = l.State;
 
-            //       if(  lm.Updatechild).Code != 200)
-            //            Debug.Assert(false, "shit 2");
-            //    }
-            //}
+            ////       if(  lm.Updatechild).Code != 200)
+            ////            Debug.Assert(false, "shit 2");
+            ////    }
+            ////}
             #endregion
 
             #region Equipment test code
-            //EquipmentManager equipmentManager = new EquipmentManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+            ////EquipmentManager equipmentManager = new EquipmentManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            //List<dynamic> equipment = (List<dynamic>)equipmentManager.GetAll("BALLAST").Cast<dynamic>().ToList();
+            ////List<dynamic> equipment = (List<dynamic>)equipmentManager.GetAll("BALLAST").Cast<dynamic>().ToList();
 
-            //equipment.AddRange((List<dynamic>)equipmentManager.GetAll("BULB").Cast<dynamic>().ToList());
-            //equipment.AddRange((List<dynamic>)equipmentManager.GetAll("CUSTOM").Cast<dynamic>().ToList());
-            //equipment.AddRange((List<dynamic>)equipmentManager.GetAll("FAN").Cast<dynamic>().ToList());
-            //equipment.AddRange((List<dynamic>)equipmentManager.GetAll("FILTER").Cast<dynamic>().ToList());
-            //equipment.AddRange((List<dynamic>)equipmentManager.GetAll("PUMP").Cast<dynamic>().ToList());
-            //equipment.AddRange((List<dynamic>)equipmentManager.GetAll("VEHICLE").Cast<dynamic>().ToList());
+            ////equipment.AddRange((List<dynamic>)equipmentManager.GetAll("BULB").Cast<dynamic>().ToList());
+            ////equipment.AddRange((List<dynamic>)equipmentManager.GetAll("CUSTOM").Cast<dynamic>().ToList());
+            ////equipment.AddRange((List<dynamic>)equipmentManager.GetAll("FAN").Cast<dynamic>().ToList());
+            ////equipment.AddRange((List<dynamic>)equipmentManager.GetAll("FILTER").Cast<dynamic>().ToList());
+            ////equipment.AddRange((List<dynamic>)equipmentManager.GetAll("PUMP").Cast<dynamic>().ToList());
+            ////equipment.AddRange((List<dynamic>)equipmentManager.GetAll("VEHICLE").Cast<dynamic>().ToList());
 
-            //foreach(dynamic d in equipment)
-            //{
-            //    d.AccountUUID = this.CurrentUser.AccountUUID;
-            //    d.CreatedBy = this.CurrentUser.UUID;
-            //    d.UUID = Guid.NewGuid().ToString("N");
-            //    equipmentManager.Update(d);
+            ////foreach(dynamic d in equipment)
+            ////{
+            ////    d.AccountUUID = this.CurrentUser.AccountUUID;
+            ////    d.CreatedBy = this.CurrentUser.UUID;
+            ////    d.UUID = Guid.NewGuid().ToString("N");
+            ////    equipmentManager.Update(d);
 
-            //}
+            ////}
 
             #endregion
 

@@ -25,7 +25,6 @@ namespace TreeMon.Web.Filters
 
     public class ApiAuthorizationRequiredAttribute : ActionFilterAttribute
     {
-        readonly private NetworkHelper _network = new NetworkHelper();
         private SessionManager _sessionsManager = null;
         readonly private RoleManager _roleManager = null;
 
@@ -55,7 +54,7 @@ namespace TreeMon.Web.Filters
 
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
-            SystemLogger log = new SystemLogger(Globals.DBConnectionKey);
+         
 
             if (actionContext == null || Globals.Application?.Status == "INSTALLING")
             {
@@ -87,8 +86,6 @@ namespace TreeMon.Web.Filters
                 roleManager.CreatePermission(name, actionContext.Request.Method.Method, uriPath, "api");
             }
 
-            UserSession us = new UserSession();
-
             if(this.RoleWeight == 0)
             {   //no need to check permissions 
                 base.OnActionExecuting(actionContext);
@@ -110,7 +107,7 @@ namespace TreeMon.Web.Filters
                 return;
             }
 
-            us = _sessionsManager.GetSession(tokenValue, false);
+            UserSession us = _sessionsManager.GetSession(tokenValue, false);
 
             if (us == null || us.UserData == null)
             {
@@ -134,7 +131,6 @@ namespace TreeMon.Web.Filters
             // if not a site owner and we have a role, check their priviledge!
             if (!currentUser.SiteAdmin  && _roleManager.UserInAuthorizedRole(currentUser,this.RoleWeight,   this.Operator) == false )
             {
-
                 if (!_roleManager.IsUserRequestAuthorized(currentUser.UUID, currentUser.AccountUUID, actionContext.Request.RequestUri.AbsolutePath.ToString()))
                 {
                     actionContext.Response = new HttpResponseMessage(HttpStatusCode.Unauthorized) { ReasonPhrase = "You are not authorized for this action." }; ;

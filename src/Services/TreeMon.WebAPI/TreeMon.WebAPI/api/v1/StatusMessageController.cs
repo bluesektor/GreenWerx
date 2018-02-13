@@ -44,7 +44,7 @@ namespace TreeMon.Web.api.v1
 
             StatusMessageManager StatusMessageManager = new StatusMessageManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            return StatusMessageManager.Insert(n, true);
+            return StatusMessageManager.Insert(n);
             }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]

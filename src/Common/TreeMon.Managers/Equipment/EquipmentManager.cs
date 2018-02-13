@@ -41,7 +41,6 @@ namespace TreeMon.Managers.Equipment
                     res.AddRange(context.GetAll<TreeMon.Models.Plant.Plant>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
                     res.AddRange(context.GetAll<Ballast>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
                     res.AddRange(context.GetAll<Bulb>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
-                    //    res.AddRange( context.GetAll<Custom>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
                     res.AddRange(context.GetAll<Fan>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
                     res.AddRange(context.GetAll<Filter>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
                     res.AddRange(context.GetAll<Pump>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
@@ -74,9 +73,7 @@ namespace TreeMon.Managers.Equipment
                     case "BULB":
                         res = context.GetAll<Bulb>().Cast<dynamic>().ToList();
                         break;
-                    case "CUSTOM":
-                    //    res = context.GetAll<Custom>().Cast<dynamic>().ToList();
-                        break;
+               
                     case "FAN":
                         res = context.GetAll<Fan>().Cast<dynamic>().ToList();
                         break;

@@ -41,20 +41,20 @@ namespace TreeMon.Web.api.v1
                 n.DateCreated = DateTime.UtcNow;
 
             AnatomyManager AnatomyTagsManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            return AnatomyTagsManager.Insert(n, true);
+            return AnatomyTagsManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpPost]
         [HttpGet]
         [Route("api/AnatomyTag/{name}")]
-        public ServiceResult Get(string name )
+        public ServiceResult Search(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
                 return ServiceResponse.Error("You must provide a name for the AnatomyTags.");
 
             AnatomyManager AnatomyTagsManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            AnatomyTag s = AnatomyTagsManager.GetAnatomyTag(name);
+            List<AnatomyTag> s = AnatomyTagsManager.GetAnatomyTags(name);
 
             if (s == null)
                 return ServiceResponse.Error("AnatomyTags could not be located for the name " + name);

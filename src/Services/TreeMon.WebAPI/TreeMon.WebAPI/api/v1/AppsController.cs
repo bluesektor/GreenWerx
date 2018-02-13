@@ -35,7 +35,7 @@ namespace TreeMon.Web.api.v1
 {
     public class AppsController : ApiBaseController 
     {
-        SystemLogger _logger = null;
+        readonly  SystemLogger _logger = null;
 
         public AppsController()
         {
@@ -300,8 +300,8 @@ namespace TreeMon.Web.api.v1
             if ( Globals.Application.SaveConfigSetting("DefaultDbConnection", appSettings.ActiveDbProvider) == false)
                 return ServiceResponse.Error("Failed to save .config setting DefaultDbConnection for provider:" + appSettings.ActiveDbProvider);
 
-            //if (!string.IsNullOrWhiteSpace(appSettings.ActiveDatabase))
-            //    appSettings.ActiveDbPassword = Cipher.Crypt(appSettings.AppKey, appSettings.ActiveDbPassword, true);
+            ////if (!string.IsNullOrWhiteSpace(appSettings.ActiveDatabase))
+            ////    appSettings.ActiveDbPassword = Cipher.Crypt(appSettings.AppKey, appSettings.ActiveDbPassword, true);
 
             return am.CreateDatabase(appSettings, connectionString);
         }
@@ -365,21 +365,6 @@ namespace TreeMon.Web.api.v1
 
             if (!wa.SaveConfigSetting("EmailStoreTemplateOrderStatusReceived", "App_Data\\Templates\\Store\\EmailOrderReceived.html"))
                 return ServiceResponse.Error("Failed to save EmailStoreTemplateOrderStatusReceived:App_Data\\Templates\\Store\\EmailOrderReceived.html");
-
-            #region depricate
-            ////Razor versioning. Backlog: depricate when remaining razor tags are removed.
-            //if (string.IsNullOrWhiteSpace(AppSetting("webpages:Version")))
-            //    SaveConfigSetting("webpages:Version", "3.0.0.0");
-
-            //if (string.IsNullOrWhiteSpace(AppSetting("webpages:Enabled")))
-            //    SaveConfigSetting("webpages:Enabled", "false");
-
-            //if (string.IsNullOrWhiteSpace(AppSetting("vs:EnableBrowserLink")))
-            //    SaveConfigSetting("vs:EnableBrowserLink", "false");
-
-            //if (string.IsNullOrWhiteSpace(AppSetting("UnobtrusiveJavaScriptEnabled")))
-            //    SaveConfigSetting("UnobtrusiveJavaScriptEnabled", "true");
-            #endregion
 
             return ServiceResponse.OK("", appSettings);
         }
@@ -696,20 +681,6 @@ namespace TreeMon.Web.api.v1
           return res;
         }
 
-        //[ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
-        //[HttpPost]
-        //[HttpPatch]
-        //[Route("api/Apps/Settings/Update")]
-        //public ServiceResult UpdateSetting(Setting setting)
-        //{
-        //    if(setting == null )
-        //        return ServiceResponse.Error("Invalid data sent to server.");
-        //    if(string.IsNullOrWhiteSpace(setting.UUID))
-        //        return ServiceResponse.Error("Invalid setting id.");
-        //    AppManager am = new AppManager(Globals.DBConnectionKey, "web", Request.Headers?.Authorization?.Parameter);
-        //    return am.Update(setting, Globals.Application.AppSetting("AppKey"));
-        //}
-
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpGet]
         [Route("api/Apps/SettingSource")]
@@ -914,11 +885,11 @@ namespace TreeMon.Web.api.v1
                         icon = "fa-cogs",
                         items = new List<MenuItem>()
                         {
-                            //new MenuItem() {   href = "/coupons", label = "Coupons", type = "link" },
+                            ////new MenuItem() {   href = "/coupons", label = "Coupons", type = "link" },
                             new MenuItem() {   href = "/store/departments", label = "Departments", type = "link" },
                             new MenuItem() {   href = "/store/orders", label = "Orders", type = "link" },
-                            //new MenuItem() {   href = "/shipping", label = "Shipping", type = "link" },
-                              //,new MenuItem() {   href = "/vendors", label = "vendors", type = "link" }
+                            ////new MenuItem() {   href = "/shipping", label = "Shipping", type = "link" },
+                              ////,new MenuItem() {   href = "/vendors", label = "vendors", type = "link" }
                             new MenuItem() {   href = "/store/payoptions", label = "Payment Options", type = "link" }
                           
                         }
@@ -1002,7 +973,7 @@ namespace TreeMon.Web.api.v1
                     break;
             }
             db.SideMenuItems = db.SideMenuItems.OrderBy(o => o.label).ToList();
-            //db.TopMenuItems = db.TopMenuItems.OrderBy(o => o.label).ToList();
+            ////db.TopMenuItems = db.TopMenuItems.OrderBy(o => o.label).ToList();
         }
 
 

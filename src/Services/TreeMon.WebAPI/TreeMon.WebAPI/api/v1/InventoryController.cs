@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using TreeMon.Data.Logging;
@@ -61,7 +62,7 @@ namespace TreeMon.WebAPI.api.v1
           
 
             InventoryManager inventoryManager = new InventoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            return inventoryManager.Insert(n, true);
+            return inventoryManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -253,8 +254,7 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult UpdateInventory()
         {
             ServiceResult res = ServiceResponse.OK();
-            string root = EnvironmentEx.AppDataFolder;
-
+            StringBuilder msg = new StringBuilder();
             try
             {
                 Task<string> content = ActionContext.Request.Content.ReadAsStringAsync();
@@ -292,7 +292,7 @@ namespace TreeMon.WebAPI.api.v1
                         if(sr.Code != 200)
                         {
                             res.Code = 500;
-                            res.Message += sr.Message + Environment.NewLine;
+                            msg.AppendLine( sr.Message );
                         }
                         continue;
                     }
@@ -321,34 +321,19 @@ namespace TreeMon.WebAPI.api.v1
                     if (sru.Code != 200)
                     {
                         res.Code = 500;
-                        res.Message += sru.Message + Environment.NewLine;
+                        msg.AppendLine(sru.Message );
                     }
                 }
             }
             catch (Exception ex)
             {
+                msg.AppendLine(ex.Message);
                 Debug.Assert(false, ex.Message);
             }
+            res.Message = msg.ToString();
             return res;
         }
-
-
-        //[HttpPost]
-        //[Route("/api/upload")]
-        //public async Task Upload(IFormFile file)
-        //{
-        //    if (file == null) throw new Exception("File is null");
-        //    if (file.Length == 0) throw new Exception("File is empty");
-
-        //    using (Stream stream = file.OpenReadStream())
-        //    {
-        //        using (var binaryReader = new BinaryReader(stream))
-        //        {
-        //            var fileContent = binaryReader.ReadBytes((int)file.Length);
-        //         //   await _uploadService.AddFile(fileContent, file.FileName, file.ContentType);
-        //        }
-        //    }
-        //}
+      
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpPost]
         [Route("api/File/Upload/{UUID}/{type}")]
@@ -361,21 +346,21 @@ namespace TreeMon.WebAPI.api.v1
                     return ServiceResponse.Error("You must be logged in to upload.");
 
                 #region non async
-                //var httpRequest = HttpContext.Current.Request;
-                //if (httpRequest.Files.Count < 1)
-                //{
-                //    return ServiceResponse.Error("Bad request");
-                //}
+                ////var httpRequest = HttpContext.Current.Request;
+                ////if (httpRequest.Files.Count < 1)
+                ////{
+                ////    return ServiceResponse.Error("Bad request");
+                ////}
 
-                //foreach (string file in httpRequest.Files)
-                //{
-                //    var postedFile = httpRequest.Files[file];
-                //    var filePath = HttpContext.Current.Server.MapPath("~/" + postedFile.FileName);
-                //    postedFile.SaveAs(filePath);
+                ////foreach (string file in httpRequest.Files)
+                ////{
+                ////    var postedFile = httpRequest.Files[file];
+                ////    var filePath = HttpContext.Current.Server.MapPath("~/" + postedFile.FileName);
+                ////    postedFile.SaveAs(filePath);
 
-                //}
+                ////}
 
-                //return ServiceResponse.OK();
+                ////return ServiceResponse.OK();
                     #endregion
 
                 HttpRequestMessage request = this.Request;
@@ -398,7 +383,7 @@ namespace TreeMon.WebAPI.api.v1
                             throw new HttpResponseException(HttpStatusCode.InternalServerError);
                         }
                         string fileName = "";
-                        List<string> kvp =  o.Result.Contents.First().Headers.Where(w => w.Key == "Content-Disposition").First().Value.ToList()[0].Split(';').ToList();
+                        List<string> kvp =  o.Result.Contents.First().Headers.First(w => w.Key == "Content-Disposition").Value.ToList()[0].Split(';').ToList();
                         foreach(string value in kvp)
                         {
                             if(value.Trim().StartsWith("filename"))

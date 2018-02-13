@@ -60,24 +60,24 @@ namespace TreeMon.Utilites.Extensions
             //todo the roleweight need to be defined, but for now if a basic user is logged in
             //they should be in RoleWeight 1 or 2. Roleweight 4 and above should start getting into admin range.
             //todo we can check the data's role weight and operator here also.
-            //if (filter.UserRoleWeight < 4)
-            //{
-            //    res = res.Select(s => new
-            //    {
-            //        Name = s.Name,
-            //        UUID = s.UUID
-            //    }).Cast<dynamic>().ToList();
-            //}
+            ////if (filter.UserRoleWeight < 4)
+            ////{
+            ////    res = res.Select(s => new
+            ////    {
+            ////        Name = s.Name,
+            ////        UUID = s.UUID
+            ////    }).Cast<dynamic>().ToList();
+            ////}
 
             return res;
         }
 
-        //public static List<dynamic> FilterQueryable(IQueryable<dynamic> input, string screens)
-        //{
-        //    Debug.Assert(false, "NOT IMPLEMENTED. yet");
-        //    //input = input.Where(w => w?.UUID != screen.Value).ToList();
-        //    return new List<dynamic>();
-        //}
+        ////public static List<dynamic> FilterQueryable(IQueryable<dynamic> input, string screens)
+        ////{
+        ////    Debug.Assert(false, "NOT IMPLEMENTED. yet");
+        ////    //input = input.Where(w => w?.UUID != screen.Value).ToList();
+        ////    return new List<dynamic>();
+        ////}
 
         public static List<dynamic> DistinctBy(List<dynamic> input, DataScreen screen)
         {
@@ -162,11 +162,11 @@ namespace TreeMon.Utilites.Extensions
                 //Units Of Measure
                 case "CATEGORYUUID":
                     #region original code not ported. may not be needed
-                    //CategoryManager categoryManager = new CategoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-                    //Category category = categoryManager.Get(f.SearchTerm);
-                    //if (category == null)
-                    //    continue;
-                    //input = input.Where(w => w.Category?.EqualsIgnoreCase(category.Name.ToUpper()).ToList();
+                    ////CategoryManager categoryManager = new CategoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+                    ////Category category = categoryManager.Get(f.SearchTerm);
+                    ////if (category == null)
+                    ////    continue;
+                    ////input = input.Where(w => w.Category?.EqualsIgnoreCase(category.Name.ToUpper()).ToList();
                     #endregion
                     Debug.Assert(false, "Verify the search term is category and not uuid");
                     input = input.DistinctBy(d => d.BreederType).ToList();
@@ -328,13 +328,13 @@ namespace TreeMon.Utilites.Extensions
                 //Units Of Measure
                 case "CATEGORYUUID":
                     #region original code not ported. may not be needed
-                    //CategoryManager categoryManager = new CategoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-                    //Category category = categoryManager.Get(f.SearchTerm);
-                    //if (category == null)
-                    //    continue;
-                    //input = input.Where(w => w.Category?.EqualsIgnoreCase(category.Name.ToUpper()).ToList();
+                    ////CategoryManager categoryManager = new CategoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+                    ////Category category = categoryManager.Get(f.SearchTerm);
+                    ////if (category == null)
+                    ////    continue;
+                    ////input = input.Where(w => w.Category?.EqualsIgnoreCase(category.Name.ToUpper()).ToList();
                     #endregion
-                    Debug.Assert(false, "Verify the search term is category and not uuid");
+                    Debug.Assert(false, "todo Verify the search term is category and not uuid");
                     if (orderbyDesc)
                         input = input.OrderByDescending(d => d.CategoryUUID).ToList();
                     else
@@ -626,16 +626,16 @@ namespace TreeMon.Utilites.Extensions
             return input.Skip(page * pageSize).Take(pageSize).ToList();
         }
 
-        //public static IEnumerable<TSource> DistinctBy<TSource, TKey>   (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
-        //{
-        //    HashSet<TKey> seenKeys = new HashSet<TKey>();
-        //    foreach (TSource element in source)
-        //    {
-        //        if (seenKeys.Add(keySelector(element)))
-        //        {
-        //            yield return element;
-        //        }
-        //    }
-        //}
+        ////public static IEnumerable<TSource> DistinctBy<TSource, TKey>   (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        ////{
+        ////    HashSet<TKey> seenKeys = new HashSet<TKey>();
+        ////    foreach (TSource element in source)
+        ////    {
+        ////        if (seenKeys.Add(keySelector(element)))
+        ////        {
+        ////            yield return element;
+        ////        }
+        ////    }
+        ////}
     }
 }

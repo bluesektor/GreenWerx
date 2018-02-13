@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Transactions;
 using TreeMon.Data;
 using TreeMon.Data.Logging;
@@ -94,7 +95,7 @@ namespace TreeMon.Managers.Membership
         /// <returns></returns>
         public ServiceResult CreatePermission(string name, string action, string request, string appType, string AccountUUID = SystemFlag.Default.Account, int weight = 0)
         {
-            // if (!_runningInstall &&  !this.DataAccessAuthorized(p, _requestingUser,"POST", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!_runningInstall &&  !this.DataAccessAuthorized(p, _requestingUser,"POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             name = StringEx.ReplaceIncluding("?", "", name, "");
             request = StringEx.ReplaceIncluding("?", "", request, "");
@@ -160,7 +161,7 @@ namespace TreeMon.Managers.Membership
 
         public List<Permission> GetPermissionsForRole(string roleUUID, string accountUUID)
         {
-            // if (!_runningInstall && !this.DataAccessAuthorized(r, _requestingUser,"GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!_runningInstall && !this.DataAccessAuthorized(r, _requestingUser,"GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             List<Permission> members;
 
@@ -183,7 +184,7 @@ namespace TreeMon.Managers.Membership
 
         public List<Permission> GetAccountPermissions(string accountUUID)
         {
-            //if (!_runningInstall && !this.DataAccessAuthorized(permissions,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ////if (!_runningInstall && !this.DataAccessAuthorized(permissions,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             List<Permission> permissions;
 
@@ -256,7 +257,7 @@ namespace TreeMon.Managers.Membership
         public ServiceResult Delete(INode n, bool purge = false)
         {
             ServiceResult res = ServiceResponse.OK();
-
+            StringBuilder msg = new StringBuilder();
             if (n == null)
                 return ServiceResponse.Error("No record sent.");
 
@@ -281,19 +282,19 @@ namespace TreeMon.Managers.Membership
                     {
                         if (context.Delete<Role>(r) == 0)
                         {
-                            res.Message += "Failed to delete role " + r.Name + Environment.NewLine;
+                            msg.AppendLine("Failed to delete role " + r.Name );
                         }
 
                         foreach (RolePermission rp in rolePermissions)
                         {
                             if (context.Delete<RolePermission>(rp) == 0)
-                                res.Message += "Failed to delete role permission" + rp.UUID + Environment.NewLine;
+                                msg.AppendLine("Failed to delete role permission" + rp.UUID );
                         }
 
                         foreach (UserRole ur in usersInRole)
                         {
                             if (context.Delete<UserRole>(ur) == 0)
-                                res.Message += "Failed to delete role user role" + ur.Name + Environment.NewLine;
+                                msg.AppendLine( "Failed to delete role user role" + ur.Name );
                         }
 
                         transactionScope.Complete();
@@ -317,16 +318,11 @@ namespace TreeMon.Managers.Membership
                         if (context.Update<Role>(r) == 0)
                             return ServiceResponse.Error(r.Name + " failed to delete. ");
 
-                        //foreach(RolePermission rp in rolePermissions)
-                        //{
-                        //    rp.Deleted = true; //backlog there is no deleted flag for RolePermission
-                        // context.Update<RolePermission>(rp);
-                        //}
                         foreach (UserRole ur in usersInRole)
                         {
                             ur.Deleted = true;
                             if (context.Update<UserRole>(ur) == 0)
-                                res.Message += "Failed to delete role user role" + ur.Name + Environment.NewLine;
+                                msg.AppendLine( "Failed to delete role user role" + ur.Name );
                         }
                         transactionScope.Complete();
                     }
@@ -338,8 +334,9 @@ namespace TreeMon.Managers.Membership
                 }
 
             }
-            if (!string.IsNullOrWhiteSpace(res.Message))
+            if (msg.Length > 0)
             {
+                res.Message = msg.ToString();
                 res.Code = 500;
                 res.Status = "ERROR";
             }
@@ -368,7 +365,7 @@ namespace TreeMon.Managers.Membership
 
         public List<Role> GetRoles()
         {
-            // if (!_runningInstall && !this.DataAccessAuthorized(r, _requestingUser,"GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!_runningInstall && !this.DataAccessAuthorized(r, _requestingUser,"GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
@@ -380,9 +377,9 @@ namespace TreeMon.Managers.Membership
         public List<Role> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Role>();
 
-            // if (!_runningInstall && !this.DataAccessAuthorized(r, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!_runningInstall && !this.DataAccessAuthorized(r, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
@@ -395,7 +392,7 @@ namespace TreeMon.Managers.Membership
             if (string.IsNullOrWhiteSpace(name))
                 return null;
 
-            // if (!_runningInstall && !this.DataAccessAuthorized(r, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!_runningInstall && !this.DataAccessAuthorized(r, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
@@ -409,7 +406,7 @@ namespace TreeMon.Managers.Membership
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
 
-            // if (!_runningInstall && !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!_runningInstall && !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
@@ -422,7 +419,7 @@ namespace TreeMon.Managers.Membership
         {
             List<Role> roles;
 
-            // if (!_runningInstall && !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!_runningInstall && !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
                 roles = context.GetAll<Role>().Where(rw => rw.AccountUUID == accountUUID && rw.Deleted == false).OrderBy(ob => ob.Name).ToList();
@@ -437,7 +434,7 @@ namespace TreeMon.Managers.Membership
         /// <param name="r"></param>
         /// <param name="ipAddress"></param>
         /// <returns></returns>
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!_runningInstall && !this.DataAccessAuthorized(n, _requestingUser, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -448,13 +445,12 @@ namespace TreeMon.Managers.Membership
             Role dbU;
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                if (validateFirst)
-                {
+           
                     dbU = context.GetAll<Role>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(r.Name) && wu.AccountUUID == r.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Role already exists.");
-                }
+                
 
                 context.Insert<Role>(r);
             }
@@ -568,7 +564,7 @@ namespace TreeMon.Managers.Membership
         public ServiceResult AddPermisssionsToRole(string roleUUID, List<Permission> rps, User requestingUser)
         {
             ServiceResult res = ServiceResponse.OK();
-
+            StringBuilder msg = new StringBuilder();
             Role r = (Role)this.Get(roleUUID);
             if (r == null)
                 return ServiceResponse.Error("Invalid roleUUID.");
@@ -587,11 +583,12 @@ namespace TreeMon.Managers.Membership
                 ServiceResult addRes = AddRolePermission(rp);
                 if (addRes.Code != 200)
                 {
-                    res.Message += addRes.Message + Environment.NewLine;
+                    msg.AppendLine(addRes.Message );
                     res.Code = 500;
                     res.Status = "ERROR";
                 }
             }
+            res.Message = msg.ToString();
             return res;
         }
 
@@ -616,6 +613,8 @@ namespace TreeMon.Managers.Membership
         public ServiceResult DeletePermissionsFromRole(string roleUUID, List<Permission> rps, User requestingUser)
         {
             ServiceResult res = ServiceResponse.OK();
+            StringBuilder msg = new StringBuilder();
+
             foreach (Permission p in rps)
             {
                 if (!_runningInstall && !this.DataAccessAuthorized(p, _requestingUser, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
@@ -623,11 +622,12 @@ namespace TreeMon.Managers.Membership
                 ServiceResult delRes = DeleteRolePermission(new RolePermission() { PermissionUUID = p.UUID, RoleUUID = roleUUID, AccountUUID = p.AccountUUID });
                 if (delRes.Code != 200)
                 {
-                    res.Message += delRes.Message + Environment.NewLine;
+                    msg.AppendLine(delRes.Message );
                     res.Code = 500;
                     res.Status = "ERROR";
                 }
             }
+            res.Message = msg.ToString();
             return res;
         }
 
@@ -654,11 +654,11 @@ namespace TreeMon.Managers.Membership
                     if (context.Delete<RolePermission>("WHERE PermissionUUID=@PERMISSIONUUID AND RoleUUID=@ROLEUUID AND AccountUUID=@ACCOUNTUUID", parameters) == 0)
                         return ServiceResponse.Error("Failed to delete. ");
                 }
-                //SQLITE
-                //this was the only way I could get it to delete a RolePermission without some stupid EF error.
-                //object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
-                //context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
-                //  context.Delete<RolePermission>(rp);
+                ////SQLITE
+                ////this was the only way I could get it to delete a RolePermission without some stupid EF error.
+                ////object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
+                ////context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
+                ////  context.Delete<RolePermission>(rp);
             }
             catch (Exception ex)
             {
@@ -673,14 +673,14 @@ namespace TreeMon.Managers.Membership
         {
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                // if (!_runningInstall &&  !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                //// if (!_runningInstall &&  !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<RolePermission>().FirstOrDefault(w => w.AccountUUID == accountUUID && w.RoleUUID == roleUUID && w.PermissionUUID == permissionUUID);
             }
         }
 
         public List<RolePermission> GetRolePermissions(string roleUUID, string accountUUID)
         {
-            // if (!_runningInstall &&  !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!_runningInstall &&  !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
                 return context.GetAll<RolePermission>().Where(w => w.AccountUUID == accountUUID && w.RoleUUID == roleUUID).ToList();
@@ -704,16 +704,18 @@ namespace TreeMon.Managers.Membership
         public ServiceResult AddUsersToRole(string roleUUID, List<User> urs, User requestingUser)
         {
             ServiceResult res = ServiceResponse.OK();
+            StringBuilder msg = new StringBuilder();
             foreach (User u in urs)
             {
                 ServiceResult addRes = AddUserToRole(roleUUID, u, requestingUser);
                 if (addRes.Code != 200)
                 {
-                    res.Message += addRes.Message + Environment.NewLine;
+                    msg.AppendLine( addRes.Message );
                     res.Code = 500;
                     res.Status = "ERROR";
                 }
             }
+            res.Message = msg.ToString();
             return res;
         }
 
@@ -752,18 +754,19 @@ namespace TreeMon.Managers.Membership
         public ServiceResult DeleteUsersFromRole(string roleUUID, List<User> users, User requestingUser)
         {
             ServiceResult res = ServiceResponse.OK();
-
+            StringBuilder msg = new StringBuilder();
             foreach (User user in users)
             {
                 ServiceResult delRes = DeleteUserFromRole(roleUUID, user, requestingUser);
                 if (delRes.Code != 200)
                 {
-                    res.Message += delRes.Message + Environment.NewLine;
+                    msg.AppendLine(delRes.Message);
                     res.Code = 500;
                     res.Status = "ERROR";
                 }
             }
 
+            res.Message = msg.ToString();
             return res;
         }
 
@@ -794,11 +797,11 @@ namespace TreeMon.Managers.Membership
                     if (context.Delete<UserRole>("WHERE UserUUID=@USERUUID AND RoleUUID=@ROLEUUID AND AccountUUID=@ACCOUNTUUID", parameters) == 0)
                         return ServiceResponse.Error(u.Name + " failed to remove from role. ");
                 }
-                //SQLITE
-                //this was the only way I could get it to delete a RolePermission without some stupid EF error.
-                // object[] paramters = new object[] { rp.UserUUID, rp.RoleUUID, rp.AccountUUID };
-                //context.Delete<UserRole>("WHERE UserUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
-                //  context.Delete<UserRole>(rp);
+                ////SQLITE
+                ////this was the only way I could get it to delete a RolePermission without some stupid EF error.
+                //// object[] paramters = new object[] { rp.UserUUID, rp.RoleUUID, rp.AccountUUID };
+                ////context.Delete<UserRole>("WHERE UserUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
+                ////  context.Delete<UserRole>(rp);
             }
             catch (Exception ex)
             {

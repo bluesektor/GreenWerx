@@ -24,8 +24,8 @@ namespace TreeMon.Managers.Membership
 {
     public  class UserManager : BaseManager,ICrud
     {
-        private RoleManager _roleManager = null;
-        SystemLogger _logger = null;
+        private readonly RoleManager _roleManager = null;
+        readonly SystemLogger _logger = null;
 
 
         public UserManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
@@ -35,7 +35,7 @@ namespace TreeMon.Managers.Membership
             this._connectionKey = connectionKey;
 
             _logger = new SystemLogger(connectionKey);
-            _roleManager = new RoleManager(connectionKey,this.GetUser(SessionKey));
+            _roleManager = new RoleManager(connectionKey,(User)this.GetUser(SessionKey,true));
         }
 
         public ServiceResult AuthenticateUser(string userName, string password, string ip)
@@ -217,12 +217,12 @@ namespace TreeMon.Managers.Membership
             return ServiceResponse.Error("Database failed to save user information.");
         }
 
-        public ServiceResult Insert(INode n , bool ignoreAuthorization)
+        public ServiceResult Insert(INode n)
         {
-            return this.Insert(n, "", ignoreAuthorization);
+            return this.Insert(n, "");
         }
 
-        public  ServiceResult Insert(INode n, string ipAddress = "", bool ignoreAuthorization = false)
+        public  ServiceResult Insert(INode n, string ipAddress, bool ignoreAuthorization = false)
         {
 
             if (n == null)
@@ -232,11 +232,12 @@ namespace TreeMon.Managers.Membership
 
             var u = (User)n;
 
-            if (!ignoreAuthorization) //we ignore authorization when a new user is registering.
+            //we ignore authorization when a new user is registering.
+            if (!ignoreAuthorization) 
             {
                 if (!this.DataAccessAuthorized(u, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
             }
-            User dbU = new User();
+            User dbU;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 dbU = context.GetAll<User>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(u.Name)?? false));
@@ -257,7 +258,7 @@ namespace TreeMon.Managers.Membership
         {
             try
             {
-                User u = new User();
+                User u;
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
                     u = context.GetAll<User>().FirstOrDefault(w => w.UUID == userUUID);
@@ -347,7 +348,7 @@ namespace TreeMon.Managers.Membership
             if (string.IsNullOrWhiteSpace(email))
                 return new User();
 
-            // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (clearSensitiveData)
@@ -365,8 +366,7 @@ namespace TreeMon.Managers.Membership
         /// <returns></returns>
         public List<User> GetUsers(string AccountUUID, bool clearSensitiveData = true)
         {
-            // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-            List<User> usrs = new List<User>();
+            //// if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (clearSensitiveData)
@@ -378,8 +378,8 @@ namespace TreeMon.Managers.Membership
 
         public List<User> GetUsers(bool clearSensitiveData = true)
         {
-            // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-            List<User> usrs = new List<User>();
+            //// if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            List<User> usrs;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (clearSensitiveData)
@@ -392,18 +392,18 @@ namespace TreeMon.Managers.Membership
             }
         }
 
-        public INode Get(string UUID)
+        public INode Get(string uuid)
         {
-            return this.Get(UUID, true);
+            return this.GetUser(uuid, true);
         }
 
-        public INode Get(string UUID, bool clearSensitiveData = true)
+        public INode GetUser(string UUID, bool clearSensitiveData = true)
         {
-            // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (clearSensitiveData)
-                    return ClearSensitiveData(context.GetAll<User>().Where(uw => uw.UUID == UUID).FirstOrDefault());
+                    return ClearSensitiveData(context.GetAll<User>().FirstOrDefault(uw => uw.UUID == UUID));
                 INode n = context.GetAll<User>().FirstOrDefault(uw => uw.UUID == UUID);
                 return n;
             }
@@ -483,10 +483,10 @@ namespace TreeMon.Managers.Membership
 
         public ServiceResult Update(INode n)
         {
-            return this.Update(n, true);
+            return this.UpdateUser(n, true);
         }
 
-        public ServiceResult Update(INode n, bool authorize = true)
+        public ServiceResult UpdateUser(INode n, bool authorize = true)
         {
             if (n == null)
                 return ServiceResponse.Error("No record was sent.");
@@ -722,7 +722,7 @@ namespace TreeMon.Managers.Membership
                 return ServiceResponse.Error("Invalid email name.");
             }
 
-            User dbUser = new User();
+            User dbUser;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 dbUser = context.GetAll<User>().FirstOrDefault(uw => (uw.Email?.EqualsIgnoreCase(ur.Email) ??false)|| (uw.Name?.EqualsIgnoreCase(ur.Name)??false));
@@ -784,8 +784,8 @@ namespace TreeMon.Managers.Membership
            
             string validationUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mreg/code/" + validationCode;
             string oopsUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + validationCode;
-           // string validationUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mreg&code=" + validationCode;
-          //  string oopsUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mdel&code=" + validationCode;
+           /// string validationUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mreg&code=" + validationCode;
+           ///  string oopsUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mdel&code=" + validationCode;
 
             DocumentManager dm = new DocumentManager(this._connectionKey, SessionKey);
             ServiceResult docRes = dm.GetTemplate("EmailNewMember");
@@ -830,9 +830,7 @@ namespace TreeMon.Managers.Membership
             #region build email from template 
             string validationUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mreg/code/" + validationCode;
             string oopsUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + validationCode;
-           // string validationUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mreg&code=" + validationCode;
-           // string oopsUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mdel&code=" + validationCode;
-
+        
             DocumentManager dm = new DocumentManager(this._connectionKey, SessionKey);
             ServiceResult docRes = dm.GetTemplate("EmailNewMember");
             if (docRes.Status != "OK")
@@ -881,10 +879,10 @@ namespace TreeMon.Managers.Membership
 
             DocumentManager dm = new DocumentManager(this._connectionKey,SessionKey);
             ServiceResult docRes = dm.GetTemplate("PasswordResetEmail");
-            if (docRes.Status != "OK")
+            if (docRes.Status != "OK" || docRes.Result == null)
                 return docRes;
 
-            string template = docRes.Result?.ToString();
+            string template = docRes.Result.ToString();
 
             template = template.Replace("[DOMAIN]", settings.SiteDomain);
             template = template.Replace("[USERNAME]", user.Name);
@@ -919,15 +917,15 @@ namespace TreeMon.Managers.Membership
             //users/validate/type/:type/operation/:operation/code/:code
             string validationUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/pwdr/code/" + user.ProviderUserKey;
             string oopsUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + user.ProviderUserKey;
-           // string validationUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=pwdr&code=" + user.ProviderUserKey;
-            //string oopsUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mdel&code=" + user.ProviderUserKey;
+            /// string validationUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=pwdr&code=" + user.ProviderUserKey;
+            ///string oopsUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mdel&code=" + user.ProviderUserKey;
 
             DocumentManager dm = new DocumentManager(this._connectionKey, SessionKey);
             ServiceResult docRes = dm.GetTemplate("UserInfoEmail");
-            if (docRes.Status != "OK")
+            if (docRes.Status != "OK" || docRes.Result == null)
                 return docRes;
 
-            string template = docRes.Result?.ToString();
+            string template = docRes.Result.ToString();
 
             template = template.Replace("[DOMAIN]", settings.SiteDomain);
             template = template.Replace("[USERNAME]", user.Name);
@@ -958,7 +956,7 @@ namespace TreeMon.Managers.Membership
                 return ServiceResponse.Error("Error processing request, invalid url.");
             }
 
-            User user = new User();
+            User user;
             try
             {
                 user = this.GetUsers(false).FirstOrDefault(dd => dd.ProviderUserKey == validationCode &&

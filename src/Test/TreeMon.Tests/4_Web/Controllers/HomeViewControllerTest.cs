@@ -8,7 +8,7 @@ namespace TreeMon.Web.Tests.Controllers
     public class HomeController_View_Tests   //todo re-implement
     {
 
-        ////private string connectionKey = "MSSQL_TEST";
+        //private string connectionKey = "MSSQL_TEST";
         //[TestMethod]
         //public void HomeController_View_Index()
         //{

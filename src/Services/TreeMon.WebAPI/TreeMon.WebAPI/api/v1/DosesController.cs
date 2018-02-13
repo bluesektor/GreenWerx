@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Web.Http;
 using TreeMon.Managers;
 using TreeMon.Managers.Medical;
@@ -48,8 +49,6 @@ namespace TreeMon.Web.api.v1
             UserSession us = SessionManager.GetSession(authToken);
             if (us == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
-
-         
 
             if (us.Captcha?.ToUpper() != d.Captcha?.ToUpper())
                 return ServiceResponse.Error("Invalid code.");
@@ -119,18 +118,18 @@ namespace TreeMon.Web.api.v1
             var dest = mapper.Map<DoseLogForm, DoseLog>(d);
 
             DoseManager DoseManager = new DoseManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            ServiceResult sr = DoseManager.Insert(dest,false);
+            ServiceResult sr = DoseManager.Insert(dest);
             if (sr.Code != 200)
                 return sr;
 
             SymptomManager sm = new SymptomManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            string symptomErrors = "";
+            StringBuilder symptomErrors = new StringBuilder();
            
             int index = 1;
             foreach (SymptomLog s in d.Symptoms)
             {
                 if (string.IsNullOrWhiteSpace(s.UUID)) {
-                    symptomErrors += "Symptom " + index + " UUID must be set! <br/>";
+                    symptomErrors.AppendLine( "Symptom " + index + " UUID must be set!");
                     Debug.Assert(false, "SYMPTOM UUID MUST BE SET!!");
                     continue;
                 }
@@ -142,14 +141,14 @@ namespace TreeMon.Web.api.v1
 
                 if (stmp == null)
                 {
-                    symptomErrors += "Symptom " + s.UUID + " could not be found! <br/>";
+                    symptomErrors.AppendLine("Symptom " + s.UUID + " could not be found!");
                     continue;
                 }
                 s.Name = stmp.Name;
 
                 if(s.SymptomDate == null || s.SymptomDate == DateTime.MinValue)
                 {
-                    symptomErrors += "Symptom " + s.UUID + " date must be set! <br/>";
+                    symptomErrors.AppendLine("Symptom " + s.UUID + " date must be set!");
                     continue;
                 }
                 //s.Status
@@ -160,12 +159,16 @@ namespace TreeMon.Web.api.v1
                 s.Deleted = false;
                 s.DoseUUID = dest.UUID;
                 s.Private = true;
-                ServiceResult slSr = sm.Insert(s, false);
+                ServiceResult slSr = sm.Insert(s);
 
                 if(slSr.Code != 200)
-                    symptomErrors += "Symptom " + index + " failed to save. " + slSr.Message;
+                    symptomErrors.AppendLine( "Symptom " + index + " failed to save. " + slSr.Message);
                 index++;
             }
+
+            if (symptomErrors.Length > 0)
+                return ServiceResponse.Error(symptomErrors.ToString());
+
             return ServiceResponse.OK("",dest);
         }
 

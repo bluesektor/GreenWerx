@@ -46,27 +46,8 @@ namespace TreeMon.Web.api.v1
 
             SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            return SideAffectManager.Insert(n, true);
+            return SideAffectManager.Insert(n);
         }
-
-        //[ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
-        //[HttpPost]
-        //[HttpGet]
-        //[Route("api/SideAffect/{name}")]
-        //public ServiceResult Get( string name )
-        //{
-        //    if (string.IsNullOrWhiteSpace(name))
-        //        return ServiceResponse.Error("You must provide a name for the SideAffect.");
-
-        //    SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-
-        //    List<SideAffect> s = (List<SideAffect>)SideAffectManager.Search(name);
-
-        //    if (s == null)
-        //        return ServiceResponse.Error("SideAffect could not be located for the name " + name);
-
-        //    return ServiceResponse.OK("",s);
-        //}
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpPost]

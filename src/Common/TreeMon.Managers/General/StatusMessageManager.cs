@@ -52,7 +52,7 @@ namespace TreeMon.Managers.General
         public List<StatusMessage> Search(string status)
         {
             if (string.IsNullOrWhiteSpace(status))
-                return null;
+                return new List<StatusMessage>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 return context.GetAll<StatusMessage>().Where(sw => sw.Status.EqualsIgnoreCase(status)).ToList();
@@ -66,7 +66,7 @@ namespace TreeMon.Managers.General
 
                 return context.GetAll<StatusMessage>().Where(sw => (sw.AccountUUID == accountUUID)).OrderBy(ob => ob.Status).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
 
@@ -78,7 +78,7 @@ namespace TreeMon.Managers.General
                 status = context.GetAll<StatusMessage>().Where(sw => (sw.StatusType?.EqualsIgnoreCase(statusType)??false) &&
                 sw.CreatedBy == userUUID && sw.AccountUUID == accountUUID).OrderBy(ob => ob.Status).DistinctBy(sd => sd.Status)?.ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             return status;
         }
 
@@ -90,10 +90,10 @@ namespace TreeMon.Managers.General
             {
                 return context.GetAll<StatusMessage>().FirstOrDefault(sw => sw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (n == null)
                 return ServiceResponse.Error("Invalid StatusMessage data.");
@@ -105,13 +105,12 @@ namespace TreeMon.Managers.General
             var s = (StatusMessage)n;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
+             
                     StatusMessage dbU = context.GetAll<StatusMessage>().FirstOrDefault(wu => wu.Status.EqualsIgnoreCase(s.Status) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("StatusMessage already exists.");
-                }
+                 
    
                 if (!this.DataAccessAuthorized(s, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 

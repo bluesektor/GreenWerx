@@ -94,22 +94,6 @@ namespace TreeMon.Web.api.v1
             res.Result = n.UUID;
             return res;
         }
-        //{"Message":"An error has occurred.","ExceptionMessage":"Object reference not set to an instance of an object.",
-        //"ExceptionType":"System.NullReferenceException","StackTrace":"   
-        //at TreeMon.Web.Filters.ApiAuthorizationRequiredAttribute.OnActionExecuting(HttpActionContext actionContext)\r\n  
-        //at System.Web.Http.Filters.ActionFilterAttribute.OnActionExecutingAsync(HttpActionContext actionContext, CancellationToken cancellationToken)\r\n--- 
-        //End of stack trace from previous location where exception was thrown ---\r\n  
-        //at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)\r\n   
-        //at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n  
-        //at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__0.MoveNext()\r\n
-        //--- End of stack trace from previous location where exception was thrown ---\r\n  
-        //at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)\r\n  
-        //at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n  
-        //at System.Web.Http.Controllers.ActionFilterResult.<ExecuteAsync>d__2.MoveNext()\r\n
-        //--- End of stack trace from previous location where exception was thrown ---\r\n  
-        //at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)\r\n  
-        //at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n 
-        //at System.Web.Http.Dispatcher.HttpControllerDispatcher.<SendAsync>d__1.MoveNext()"}
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpGet]
@@ -120,7 +104,7 @@ namespace TreeMon.Web.api.v1
             {
                 UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-                User u = (User)userManager.Get(uuid, true);
+                User u = (User)userManager.GetUser(uuid, true);
 
                 if (u == null)
                     return ServiceResponse.Error("User not found.");
@@ -228,18 +212,18 @@ namespace TreeMon.Web.api.v1
             //lock, unlock
             //put swith code in user manager 
 
-            UserManager um = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
+            ///UserManager um = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            //this.Get(Request.Headers?.Authorization?.Parameter)
+            ///this.Get(Request.Headers?.Authorization?.Parameter)
 
-            //u.Banned = !u.Banned;
+            ///u.Banned = !u.Banned;
 
-            //u.LastLockoutDate = DateTime.UtcNow;
-            //u.LockedOut = !u.LockedOut;
+            ///u.LastLockoutDate = DateTime.UtcNow;
+            ///u.LockedOut = !u.LockedOut;
 
-            //UserQueries.Update<User>(u);
+            ///UserQueries.Update<User>(u);
 
-            //string status = UserFlag.ClientStatus.Ban;
+            ///string status = UserFlag.ClientStatus.Ban;
             return ServiceResponse.Error("NOT IMPLEMENTED!");
 
         }
@@ -275,7 +259,7 @@ namespace TreeMon.Web.api.v1
  
             UserManager userManager = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            User dbAcct = (User)userManager.Get(u.UUID, false);
+            User dbAcct = (User)userManager.GetUser(u.UUID, false);
 
             if (dbAcct == null)
                 return ServiceResponse.Error("User was not found.");
@@ -442,7 +426,7 @@ namespace TreeMon.Web.api.v1
             ServiceResult res;
        
 #if DEBUG
-            //fullyQualifiedUrl += string.Format(returnParams, 200, "");
+          
             res = ServiceResponse.OK("Code validated.");
 #else
              string ip = network.GetClientIpAddress(this.Request);

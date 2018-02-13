@@ -68,11 +68,11 @@ namespace TreeMon.Managers.Store
                 }
 
                 return ServiceResponse.Error("No records deleted.");
-                //SQLITE
-                //this was the only way I could get it to delete a RolePermission without some stupid EF error.
-                //object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
-                //context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
-                //  context.Delete<RolePermission>(rp);
+                ////SQLITE
+                ////this was the only way I could get it to delete a RolePermission without some stupid EF error.
+                ////object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
+                ////context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
+                ////  context.Delete<RolePermission>(rp);
             }
             catch (Exception ex)
             {
@@ -86,7 +86,7 @@ namespace TreeMon.Managers.Store
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
 
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Location>().ToList();
@@ -97,7 +97,7 @@ namespace TreeMon.Managers.Store
 
         public List<Location> GetAll()
         {
-            //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                     return context.GetAll<Location>()
@@ -107,11 +107,15 @@ namespace TreeMon.Managers.Store
 
         public List<string> GetLocationTypes(string accountUUID)
         {
-            List<string> geoTypes = new List<string>();
-            //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            List<string> geoTypes;
+            ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                geoTypes = context.GetAll<Location>().Where(pw =>( pw.AccountUUID == accountUUID || pw.AccountUUID == SystemFlag.Default.Account) && pw.Deleted == false &&  string.IsNullOrWhiteSpace(pw.LocationType) == false).DistinctBy(pd => pd.LocationType).Select(s => s.LocationType).ToList();//.GroupBy( pg => pg.Category ).Select(ps => ps.First()).ToList();
+                geoTypes = context.GetAll<Location>().Where(pw =>( pw.AccountUUID == accountUUID || pw.AccountUUID == SystemFlag.Default.Account) && 
+                        pw.Deleted == false &&  
+                        string.IsNullOrWhiteSpace(pw.LocationType) == false)
+                        .DistinctBy(pd => pd.LocationType)
+                        .Select(s => s.LocationType).ToList();
             }
             return geoTypes;
         }
@@ -122,7 +126,7 @@ namespace TreeMon.Managers.Store
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<Location>().FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
@@ -130,14 +134,15 @@ namespace TreeMon.Managers.Store
         public List<Location> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Location>();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
                 if (context.GetAll<Location>()?.Any() ?? false)
                     return context.GetAll<Location>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
                 else
-                    return null;
+                    return new List<Location>();
             }
         }
 
@@ -145,8 +150,8 @@ namespace TreeMon.Managers.Store
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))
-                //    return ServiceResponse.Error("You are not authorized this action.");
+                /////if (!this.DataAccessAuthorized(p, "GET", false))
+                ////    return ServiceResponse.Error("You are not authorized this action.");
                 if (includeSystemAccount)
                 {
                     return context.GetAll<Location>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();
@@ -222,29 +227,20 @@ namespace TreeMon.Managers.Store
         /// <param name="p"></param>
         /// <param name="checkName">This will check the Locations by name to see if they exist already. If it does an error message will be returned.</param>
         /// <returns></returns>
-        public ServiceResult Insert(INode n,  bool validateFirst = true)
+        public ServiceResult Insert(INode n )
         {
             if (!this.DataAccessAuthorized(n, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             n.Initialize(this._requestingUser.UUID, this._requestingUser.AccountUUID, this._requestingUser.RoleWeight);
 
             var p = (Location)n;
-            if (validateFirst)
-            {
-                //Location dbU = Get(p.Name) as Location;
-
-                //if (dbU != null)
-                //{
-                //    if (p.AccountUUID == this._requestingUser.AccountUUID)
-                //        return ServiceResponse.Error("Location already exists.");
-                //}
-
+          
                 if (string.IsNullOrWhiteSpace(p.CreatedBy))
                     return ServiceResponse.Error("You must assign who the Location was created by.");
 
                 if (string.IsNullOrWhiteSpace(p.AccountUUID))
                     return ServiceResponse.Error("The account id is empty.");
-            }
+          
 
             if (!this.DataAccessAuthorized(p, "POST", false))
                 return ServiceResponse.Error("You are not authorized this action.");

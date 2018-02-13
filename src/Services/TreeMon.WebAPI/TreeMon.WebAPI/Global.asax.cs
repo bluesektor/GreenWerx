@@ -64,11 +64,11 @@ namespace TreeMon.WebAPI
 
             SetCorsOptions();
 
-            //if (Globals.Application.Status == "REQUIRES_INSTALL" || Globals.Application.Status == "INSTALLING")
-            //{
-            //    Globals.Application.Status = "INSTALLING";
-            //    return;
-            //}
+            ////if (Globals.Application.Status == "REQUIRES_INSTALL" || Globals.Application.Status == "INSTALLING")
+            ////{
+            ////    Globals.Application.Status = "INSTALLING";
+            ////    return;
+            ////}
            
             SessionManager sessionManager = new SessionManager(Globals.DBConnectionKey);
             TimeSpan ts = DateTime.UtcNow - _lastSessionsClear;
@@ -139,8 +139,7 @@ namespace TreeMon.WebAPI
 
             catch (HttpException httpEx)
             {
-               // Debug.Assert(false, httpEx.Message);
-
+               Debug.Assert(false, httpEx.Message);
             }
         }
     }

@@ -17,7 +17,7 @@ namespace TreeMon.Managers.Store
 {
     public class VendorManager : BaseManager, ICrud
     {
-        private SystemLogger _logger = null;
+        private readonly SystemLogger _logger = null;
 
         public VendorManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
         {
@@ -62,14 +62,12 @@ namespace TreeMon.Managers.Store
                             return ServiceResponse.OK();
                     }
                 }
-               
-
                 return ServiceResponse.Error("No records deleted.");
-                //SQLITE
-                //this was the only way I could get it to delete a RolePermission without some stupid EF error.
-                //object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
-                //context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
-                //  context.Delete<RolePermission>(rp);
+                ////SQLITE
+                ////this was the only way I could get it to delete a RolePermission without some stupid EF error.
+                ////object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
+                ////context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
+                ////  context.Delete<RolePermission>(rp);
             }
             catch (Exception ex)
             {
@@ -83,7 +81,7 @@ namespace TreeMon.Managers.Store
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
 
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Vendor>().ToList();
@@ -96,7 +94,7 @@ namespace TreeMon.Managers.Store
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Vendor>().ToList();
 
@@ -110,7 +108,7 @@ namespace TreeMon.Managers.Store
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<Vendor>().FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
@@ -118,10 +116,11 @@ namespace TreeMon.Managers.Store
         public List<Vendor> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Vendor>();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
 
                 return context.GetAll<Vendor>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
@@ -133,8 +132,8 @@ namespace TreeMon.Managers.Store
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(p, "GET", false))
-                //    return ServiceResponse.Error("You are not authorized this action.");
+                /////if (!this.DataAccessAuthorized(p, "GET", false))
+                ////    return ServiceResponse.Error("You are not authorized this action.");
                 if (includeSystemAccount)
                 {
                     return context.GetAll<Vendor>().Where(sw => (sw.AccountUUID == accountUUID ) && sw.Deleted == deleted).GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();
@@ -171,7 +170,7 @@ namespace TreeMon.Managers.Store
               /// <param name="p"></param>
               /// <param name="checkName">This will check the Vendors by name to see if they exist already. If it does an error message will be returned.</param>
               /// <returns></returns>
-        public ServiceResult Insert(INode n,bool validateFirst = true)
+        public ServiceResult Insert(INode n )
         {
             if (n == null)
                 return ServiceResponse.Error("No record sent.");
@@ -184,17 +183,13 @@ namespace TreeMon.Managers.Store
 
             var p = (Vendor)n;
 
-            if (validateFirst)
-            {
-                //Vendor dbU = (Vendor)Get(p.Name);
-
-
+          
                 if(string.IsNullOrWhiteSpace(p.CreatedBy))
                     return ServiceResponse.Error("You must assign who the Vendor was created by.");
 
                 if (string.IsNullOrWhiteSpace(p.AccountUUID))
                     return ServiceResponse.Error("The account id is empty.");
-            }
+         
     
             using (var context = new TreeMonDbContext(this._connectionKey))
             {

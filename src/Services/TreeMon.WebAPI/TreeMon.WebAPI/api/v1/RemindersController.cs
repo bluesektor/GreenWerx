@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers;
@@ -84,11 +85,11 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            ServiceResult sr = reminderManager.Insert(dest, true);
+            ServiceResult sr = reminderManager.Insert(dest);
             if (sr.Code != 200)
                 return sr;
 
-            string ruleErrors = "";
+            StringBuilder ruleErrors = new StringBuilder();
            
             int index = 1;
             foreach (ReminderRule r in s.ReminderRules)
@@ -99,16 +100,16 @@ namespace TreeMon.Web.api.v1
                 {
                     case "DATE":
                         if (!DateTime.TryParse(r.RangeStart, out dt))
-                            ruleErrors += "Rule " + index + " is not a valid start date.";
+                            ruleErrors.AppendLine("Rule " + index + " is not a valid start date.");
                         if (!DateTime.TryParse(r.RangeEnd, out dt))
-                            ruleErrors += "Rule " + index + " is not a valid end date.";
+                            ruleErrors.AppendLine("Rule " + index + " is not a valid end date.");
                         break;
 
                     case "TIME":
                         if (!DateTime.TryParse(r.RangeStart, out dt))
-                            ruleErrors += "Rule " + index + " is not a valid start time.";
+                            ruleErrors.AppendLine("Rule " + index + " is not a valid start time.");
                         if (!DateTime.TryParse(r.RangeEnd, out dt))
-                            ruleErrors += "Rule " + index + " is not a valid end time.";
+                            ruleErrors.AppendLine("Rule " + index + " is not a valid end time.");
                         break;
                 }
                 index++;
@@ -117,20 +118,20 @@ namespace TreeMon.Web.api.v1
                 r.CreatedBy = CurrentUser.UUID;
                 r.DateCreated = DateTime.UtcNow;
             }
-
-            if(!string.IsNullOrWhiteSpace(ruleErrors))
-                return ServiceResponse.Error(ruleErrors);
+            
+            if(ruleErrors.Length > 0)
+                return ServiceResponse.Error(ruleErrors.ToString());
 
             index = 1;
             foreach (ReminderRule r in s.ReminderRules) {
                ServiceResult srr =   reminderManager.Insert(r);
                 if(srr.Code!= 200)
                 {
-                    ruleErrors += "Rule " + index + " failed to save.";
+                    ruleErrors.AppendLine("Rule " + index + " failed to save.");
                 }
              }
-            if (!string.IsNullOrWhiteSpace(ruleErrors))
-                return ServiceResponse.Error(ruleErrors);
+            if (ruleErrors.Length > 0)
+                return ServiceResponse.Error(ruleErrors.ToString());
 
             return sr;
         }

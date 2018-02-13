@@ -44,7 +44,7 @@ namespace TreeMon.Web.api.v1
                 n.DateCreated = DateTime.Now;
 
             CategoryManager CategoryManager = new CategoryManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            return CategoryManager.Insert(n, true);
+            return CategoryManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -128,7 +128,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
             CategoryManager CategoryManager = new CategoryManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            List<dynamic> Categorys = (List<dynamic>)CategoryManager.GetCategories(CurrentUser.AccountUUID, false, true).Cast<dynamic>().ToList();
+            List<dynamic> Categorys = (List<dynamic>)CategoryManager.GetCategories(CurrentUser.AccountUUID, false    , true            ).Cast<dynamic>().ToList();
             int count;
             DataFilter tmpFilter = this.GetFilter(filter);
             Categorys = FilterEx.FilterInput(Categorys, tmpFilter, out count);

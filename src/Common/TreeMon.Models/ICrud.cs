@@ -10,11 +10,9 @@ namespace TreeMon.Models
     {
         ServiceResult Delete(INode n, bool purge = false);
 
-        //List<INode> Search( string name);
-
         INode Get(string uuid);
 
-        ServiceResult Insert(INode n, bool validateFirst = true);
+        ServiceResult Insert(INode n);
 
         ServiceResult Update(INode n);
     }

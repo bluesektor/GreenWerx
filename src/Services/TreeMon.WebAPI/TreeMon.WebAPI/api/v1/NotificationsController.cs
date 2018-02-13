@@ -49,7 +49,7 @@ namespace TreeMon.Web.api.v1
                 s.FromType = "ip";
             }
             NotificationManager NotificationManager = new NotificationManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            return NotificationManager.Insert(s, true);
+            return NotificationManager.Insert(s);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]

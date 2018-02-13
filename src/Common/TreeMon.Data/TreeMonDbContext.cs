@@ -963,8 +963,10 @@ namespace TreeMon.Data
         {
             try {
                 base.Set<T>().Add(entity);
+
                 int res = SaveChanges();
                 return res > 0 ? true : false;
+
             }
             catch (Exception ex)
             {
@@ -978,7 +980,7 @@ namespace TreeMon.Data
         {
             try
             {
-                base.Set<T>().Add(entity);
+               base.Set<T>().Add(entity);
             }
             catch (Exception ex)
             {
@@ -1011,7 +1013,7 @@ namespace TreeMon.Data
             {
                 case "SQLITE":
                     //This actually works, but the schema is so out of sync I removed it for now.
-                    // res = CopyDefaultSQLiteDatabase(appSettings);
+                    //// res = CopyDefaultSQLiteDatabase(appSettings);
                     res = ServiceResponse.Error(appSettings.ActiveDbProvider + " NOT IMPLEMENTED");
 
                     break;
@@ -1025,6 +1027,7 @@ namespace TreeMon.Data
                         this.Database.Connection.ConnectionString = connectionString;
                         Database.SetInitializer<TreeMonDbContext>(new CreateDatabaseIfNotExists<TreeMonDbContext>());
                         Database.Initialize(true);
+                       //// this.Insert<LogEntry>(new LogEntry() { LogDate = DateTime.UtcNow, Level = SystemFlag.Level.Info, Source = "TreeMonDbContext.Initialize", Type = "LogEntry" });
                         SystemLogger sl = new SystemLogger(this.ConnectionKey, false);
                         sl.Insert(new LogEntry() { LogDate = DateTime.UtcNow, Level = SystemFlag.Level.Info, Source = "TreeMonDbContext.Initialize", Type = "LogEntry" });
                     }
@@ -1098,32 +1101,32 @@ namespace TreeMon.Data
                 }
             }
             #region future
-            //if (ConnectionSettings == null)
-            //    return res;
-            //string sql = "";
-            //switch (_providerType)
-            //{
-            //    case "SQLITE":
-            //        Debug.Assert(false, "NOT IMPLEMENTED");
-            //        //sql = "SELECT tbl_name FROM sqlite_master WHERE type='table'";
-            //        //res = _sqliteContext.Table<sqlite_master>().AsQueryable().Select(s => s.tbl_name).ToList();
-            //        ////using (SQLiteConnection conn = new SQLiteConnection(PathToDatabase))
-            //        ////{ 
-            //        ////    res = conn.Table<sqlite_master>().AsQueryable().Select(s => s.tbl_name).ToList();
-            //        ////}
-            //        break;
-            //    case "MYSQL":
-            //        Debug.Assert(false, "NOT IMPLEMENTED");
-            //        //sql = "SELECT * FROM information_schema.tables";
-            //        //res =  Select<string>(sql, new object[] { }).ToList();
-            //        break;
-            //    case "MSSQL":
-            //        // Debug.Assert(false, "NOT IMPLEMENTED");
-            //        //SQL Server 2005, 2008, 2012 or 2014:
-            //        // sql = "SELECT * FROM information_schema.tables";                //SQL Server 2000: SELECT* FROM sysobjects WHERE xtype = 'U'
-            //        //res = Select<string>(sql, new object[] { }).ToList();
-            //        break;
-            //}
+            ////if (ConnectionSettings == null)
+            ////    return res;
+            ////string sql = "";
+            ////switch (_providerType)
+            ////{
+            ////    case "SQLITE":
+            ////        Debug.Assert(false, "NOT IMPLEMENTED");
+            ////        //sql = "SELECT tbl_name FROM sqlite_master WHERE type='table'";
+            ////        //res = _sqliteContext.Table<sqlite_master>().AsQueryable().Select(s => s.tbl_name).ToList();
+            ////        ////using (SQLiteConnection conn = new SQLiteConnection(PathToDatabase))
+            ////        ////{ 
+            ////        ////    res = conn.Table<sqlite_master>().AsQueryable().Select(s => s.tbl_name).ToList();
+            ////        ////}
+            ////        break;
+            ////    case "MYSQL":
+            ////        Debug.Assert(false, "NOT IMPLEMENTED");
+            ////        //sql = "SELECT * FROM information_schema.tables";
+            ////        //res =  Select<string>(sql, new object[] { }).ToList();
+            ////        break;
+            ////    case "MSSQL":
+            ////        // Debug.Assert(false, "NOT IMPLEMENTED");
+            ////        //SQL Server 2005, 2008, 2012 or 2014:
+            ////        // sql = "SELECT * FROM information_schema.tables";                //SQL Server 2000: SELECT* FROM sysobjects WHERE xtype = 'U'
+            ////        //res = Select<string>(sql, new object[] { }).ToList();
+            ////        break;
+            ////}
             #endregion
 
             return res;

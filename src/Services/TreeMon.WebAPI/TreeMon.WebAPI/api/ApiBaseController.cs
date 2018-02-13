@@ -57,11 +57,11 @@ namespace TreeMon.Web.api
             {
                 tmpFilter = JsonConvert.DeserializeObject<DataFilter>(filter);
 
-                int pageSize = Globals.MaxRecordsPerRequest;
+                tmpFilter.PageSize = Globals.MaxRecordsPerRequest;
 
                 if (currentUserRoleWeight > 0 && siteAdmin == false)
                 {
-                    pageSize = currentUserRoleWeight * Globals.DefaultDataFilter.PageSize;
+                    tmpFilter.PageSize = currentUserRoleWeight * Globals.DefaultDataFilter.PageSize;
                 }
             }
             catch (Exception ex)

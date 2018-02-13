@@ -41,7 +41,7 @@ namespace TreeMon.Web.api.v1
 
             SymptomManager symptomManager = new SymptomManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return symptomManager.Insert(n, true);
+            return symptomManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -234,7 +234,7 @@ namespace TreeMon.Web.api.v1
                         Category = "General"
                     };
 
-                    ServiceResult sr = symptomManager.Insert(symptom, true);
+                    ServiceResult sr = symptomManager.Insert(symptom);
                     if (sr.Code == 500)
                         return ServiceResponse.Error(sr.Message);
 
@@ -252,7 +252,7 @@ namespace TreeMon.Web.api.v1
             if (s.Severity > 5) return ServiceResponse.Error("Severity must not be greater than 5.");
             if (s.Efficacy > 5) return ServiceResponse.Error("Efficacy must not be greater than 5.");
 
-            return symptomManager.Insert(s, false);
+            return symptomManager.Insert(s);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]

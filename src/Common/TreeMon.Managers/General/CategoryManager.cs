@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using TreeMon.Data;
+using TreeMon.Data.Logging.Models;
 using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.General;
@@ -33,8 +34,6 @@ namespace TreeMon.Managers.General
 
             var s = (Category)n;
 
-            List<Category> pms = new List<Category>();
-
             if (purge)
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
@@ -60,12 +59,12 @@ namespace TreeMon.Managers.General
         public List<Category> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Category>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 return context.GetAll<Category>().Where(w => (w.Name?.EqualsIgnoreCase(name) ?? false)  && w.AccountUUID == this._requestingUser.AccountUUID).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
 
@@ -77,32 +76,22 @@ namespace TreeMon.Managers.General
             {
                 return context.GetAll<Category>().FirstOrDefault(w =>( w.Name?.EqualsIgnoreCase(name)??false) && (w.CategoryType?.EqualsIgnoreCase(categoryType)?? false) && w.AccountUUID == AccountUUID);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public List<Category> GetCategories(string accountUUID, bool deleted = false)
+        public List<Category> GetCategories(string accountUUID, bool deleted = false, bool includeDefaults = false)
         {
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
+                if(includeDefaults)
+                    return context.GetAll<Category>().Where(sw => (sw.AccountUUID == accountUUID || sw.AccountUUID == SystemFlag.Default.Account) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+
                 return context.GetAll<Category>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public List<Category> GetCategories(string accountUUID, bool deleted = false, bool includeSystemAccount = false)
-        {
-            using (var context = new TreeMonDbContext(this._connectionKey))
-            {
-                if (includeSystemAccount)
-                {
-                    return context.GetAll<Category>()
-                                        .Where(sw => (sw.AccountUUID == accountUUID ) && sw.Deleted == deleted).ToList();
-                                      //  .GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();//this was to remove duplicates when getting system.default.acccount
-                }
-                return context.GetAll<Category>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
-            }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-        }
+       
 
         public List<Category> GetCategories(string categoryType, string accountUUID, bool deleted = false)
         {
@@ -110,7 +99,7 @@ namespace TreeMon.Managers.General
             {
                 return context.GetAll<Category>().Where(sw => (sw.CategoryType?.EqualsIgnoreCase(categoryType)??false) && (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
         public INode Get(string uuid)
@@ -121,10 +110,10 @@ namespace TreeMon.Managers.General
             {
                 return context.GetAll<Category>().FirstOrDefault(sw => sw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "post", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -134,8 +123,7 @@ namespace TreeMon.Managers.General
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
+           
                     Category dbU = context.GetAll<Category>()
                         .FirstOrDefault( wu => (wu.Name?.EqualsIgnoreCase(s.Name)?? false) && 
                                 wu.AccountUUID == s.AccountUUID && 
@@ -153,7 +141,7 @@ namespace TreeMon.Managers.General
                         return this.Update(dbU);
                     }
 
-                }
+              
    
                 if (context.Insert<Category>(s))
                     return ServiceResponse.OK("",s);

@@ -42,7 +42,7 @@ namespace TreeMon.Models.Inventory
         public string LinkProperties { get; set; }
 
         //TODO inventory log. show when items added, removed, etc. 
-        //public DateTime DateAdded { get; set; }
-        //public string AddedByUUID { get; set; }
+        ////public DateTime DateAdded { get; set; }
+        ////public string AddedByUUID { get; set; }
     }
 }

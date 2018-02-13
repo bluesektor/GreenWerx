@@ -36,9 +36,6 @@ namespace TreeMon.Web.api.v1
         [Route("api/Sessions/Delete")]
         public ServiceResult DeleteSesssion()
         {
-            string root = EnvironmentEx.AppDataFolder;
-            var provider = new MultipartFormDataStreamProvider(root);
-            ServiceResult res = new ServiceResult();
             try
             {
                   Task<string> content = ActionContext.Request.Content.ReadAsStringAsync();

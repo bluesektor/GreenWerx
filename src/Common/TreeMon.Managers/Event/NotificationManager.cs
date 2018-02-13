@@ -55,12 +55,13 @@ namespace TreeMon.Managers.Event
         public List<Notification> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Notification>();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 return context.GetAll<Notification>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ////if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
         public List<Notification> GetNotifications(string accountUUID, bool deleted = false)
@@ -69,7 +70,7 @@ namespace TreeMon.Managers.Event
             {
                 return context.GetAll<Notification>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //////if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
 
@@ -81,10 +82,10 @@ namespace TreeMon.Managers.Event
             {
                 return context.GetAll<Notification>().FirstOrDefault(sw => sw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ////if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "post", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -94,13 +95,12 @@ namespace TreeMon.Managers.Event
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
+               
                     Notification dbU = context.GetAll<Notification>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
               
                     if (dbU != null)
                         return ServiceResponse.Error("Notification already exists.");
-                }
+               
     
                 if (context.Insert<Notification>(s))
                     return ServiceResponse.OK("",s);

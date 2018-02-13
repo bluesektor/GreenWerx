@@ -249,9 +249,14 @@ namespace TreeMon.Data.Logging
             return Insert(message, source, function, SystemFlag.Level.Info);
         }
 
-        //SECURITY - This is to log events that may comprimise system security.
-        //public const string SecurityLevel = "SECURITY";
-        //
+        /// <summary>
+        /// SECURITY - This is to log events that may comprimise system security.
+        /// public const string SecurityLevel = "SECURITY";
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="source"></param>
+        /// <param name="function"></param>
+        /// <returns></returns>
         public bool InsertSecurity(string message, string source, string function)
         {
             return Insert(message, source, function, SystemFlag.Level.Security);

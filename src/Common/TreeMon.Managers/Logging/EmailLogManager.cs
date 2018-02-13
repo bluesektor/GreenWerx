@@ -32,8 +32,6 @@ namespace TreeMon.Managers
 
             var s = (EmailLog)n;
 
-            List<EmailLog> pms = new List<EmailLog>();
-
             if (purge)
             {
                 using (var context = new TreeMonDbContext(_dbConnectionKey))
@@ -69,7 +67,8 @@ namespace TreeMon.Managers
         public List<EmailLog> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<EmailLog>();
+
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
                 return context.GetAll<EmailLog>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
@@ -93,7 +92,7 @@ namespace TreeMon.Managers
         /// <param name="n"></param>
         /// <param name="validateFirst"></param>
         /// <returns></returns>
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
     {
             if (n == null)
                 return ServiceResponse.Error("No record sent.");
@@ -104,13 +103,6 @@ namespace TreeMon.Managers
          
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                //if (validateFirst)
-                //{
-                //    EmailLog dbU = context.GetAll<EmailLog>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name) ?? false) && wu.AccountUUID == s.AccountUUID);
-                //    if (dbU != null)
-                //        return ServiceResponse.Error("Email log already exists.");
-                //}
-
                 if (context.Insert<EmailLog>(s))
                     return ServiceResponse.OK("",s);
             }

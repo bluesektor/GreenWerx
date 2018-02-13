@@ -39,7 +39,7 @@ namespace TreeMon.WebAPI.api.v1
           
             OrderManager orderManager = new OrderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return orderManager.Insert(n, true);
+            return orderManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]

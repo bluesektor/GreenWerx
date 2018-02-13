@@ -41,7 +41,7 @@ namespace TreeMon.Web.api.v1
 
             VendorManager vendorManager = new VendorManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return vendorManager.Insert(n, true);
+            return vendorManager.Insert(n);
 
         }
 

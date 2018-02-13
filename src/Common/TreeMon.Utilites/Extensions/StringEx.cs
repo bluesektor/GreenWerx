@@ -246,10 +246,7 @@ namespace TreeMon.Utilites.Extensions
 
         public static bool EqualsIgnoreCase(this string input, string data, bool currentCulture = true)
         {
-            if (input == null && data == null)
-                return true;
-
-            if (input == null && string.IsNullOrWhiteSpace(data) == false )
+            if (string.IsNullOrWhiteSpace(data) == true )
                 return false;
 
             if (currentCulture)
@@ -260,24 +257,24 @@ namespace TreeMon.Utilites.Extensions
 
         public static bool EqualsEx( string input, string data, bool ignoreCase = true, bool currentCulture = true)
         {
-            if (input == null && data == null)
-                return true;
+            try
+            {
+                if (ignoreCase && currentCulture)
+                    return input.Equals(data, StringComparison.CurrentCultureIgnoreCase);
 
-            if (input == null && string.IsNullOrWhiteSpace(data) == false)
+
+                if (ignoreCase == true && currentCulture == false)
+                    return input.Equals(data, StringComparison.OrdinalIgnoreCase);
+
+                if (ignoreCase == false && currentCulture == true)
+                    return input.Equals(data, StringComparison.CurrentCulture);
+
+
+                return input.Equals(data, StringComparison.Ordinal);
+            }
+            catch {
                 return false;
-
-            if (ignoreCase && currentCulture)
-                return input.Equals(data, StringComparison.CurrentCultureIgnoreCase);
-
-
-            if (ignoreCase == true && currentCulture == false)
-                return input.Equals(data, StringComparison.OrdinalIgnoreCase);
-
-            if (ignoreCase == false && currentCulture == true)
-                return input.Equals(data, StringComparison.CurrentCulture);
-
-
-            return input.Equals(data, StringComparison.Ordinal);
+            }
         }
 
         /// <summary>

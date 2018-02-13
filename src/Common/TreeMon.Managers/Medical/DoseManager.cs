@@ -57,12 +57,12 @@ namespace TreeMon.Managers
         public List<DoseLog> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<DoseLog>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 return context.GetAll<DoseLog>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
         public List<DoseLog> GetDoses(string accountUUID, bool deleted = false)
@@ -71,7 +71,7 @@ namespace TreeMon.Managers
             {
                 return context.GetAll<DoseLog>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name)?.ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
 
@@ -83,10 +83,10 @@ namespace TreeMon.Managers
             {
                 return context.GetAll<DoseLog>().FirstOrDefault(sw => sw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -96,13 +96,12 @@ namespace TreeMon.Managers
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
+             
                     DoseLog dbU = context.GetAll<DoseLog>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name)??false) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Dose already exists.");
-                }
+                
 
                 if (context.Insert<DoseLog>(s))
                     return ServiceResponse.OK("",s);

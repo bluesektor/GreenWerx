@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using TreeMon.Data.Logging;
@@ -40,7 +41,7 @@ namespace TreeMon.Web.api.v1
 
             ServiceResult res = new ServiceResult();
             res.Code = 200;
-
+            StringBuilder msg = new StringBuilder();
             try
             {
                 Task<string> content = ActionContext.Request.Content.ReadAsStringAsync();
@@ -61,11 +62,11 @@ namespace TreeMon.Web.api.v1
                     u.DateCreated = DateTime.UtcNow;
                     UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-                    ServiceResult tmpRes = UnitsOfMeasureManager.Insert(u,false);
+                    ServiceResult tmpRes = UnitsOfMeasureManager.Insert(u);
                     if (tmpRes.Code != 200)
                     {
                         res.Code = tmpRes.Code;
-                        res.Message += tmpRes.Message + "<br/>";
+                        msg.AppendLine(tmpRes.Message );
                     }
                 }
             }
@@ -77,6 +78,7 @@ namespace TreeMon.Web.api.v1
 
                 logger.InsertError(ex.Message, "UnitsOfMeasureController", "AssignUOMsToProductCategories");
             }
+            res.Message = msg.ToString();
             return res;
         }
 
@@ -102,7 +104,7 @@ namespace TreeMon.Web.api.v1
 
             UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            return UnitsOfMeasureManager.Insert(n, true);
+            return UnitsOfMeasureManager.Insert(n);
             }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]

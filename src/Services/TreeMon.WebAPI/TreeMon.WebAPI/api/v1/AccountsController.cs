@@ -291,7 +291,6 @@ namespace TreeMon.Web.api.v1
             User user = null;
             #region
 
-            //User user = null;
             if (userName.Contains("/"))
             {
                 accountName = userName.Split('/')[0];
@@ -379,7 +378,7 @@ namespace TreeMon.Web.api.v1
 
             string userName = credentials.UserName;
             string accountName = "";
-            List<User> users = new List<TreeMon.Models.Membership.User>();
+            List<User> users;
             User user = null;
 
             if (userName.Contains("/"))
@@ -476,7 +475,7 @@ namespace TreeMon.Web.api.v1
 
             //IMPORTANT!!! when you know an update is going to be used on the user internally, 
             //DO NOT CLEAR THE SENSITIVE DATA! It will make the password blank! 
-            User u = (User)userManager.Get(us.UserUUID, false);
+            User u = (User)userManager.GetUser(us.UserUUID, false);
 
             if (u == null)
                 return ServiceResponse.OK();
@@ -509,50 +508,50 @@ namespace TreeMon.Web.api.v1
 
             UserManager   userManager = new UserManager(Globals.DBConnectionKey, Request?.Headers?.Authorization?.Parameter);
 
-            //if (ur.ClientType != "mobile.app")
-            //{ //if not the mobile app then validate the captcha
-            //    UserSession us = SessionManager.GetSessionByUser(ur.Captcha?.ToUpper());
-            //    if (us == null)
-            //    {
-            //        us = SessionManager.GetSessionByUser(ip);//in the sitecontroller the captcha doesn't know whoe the user is when registering, so we used the ip addres as the name
-            //        if (us == null)
-            //            return ServiceResponse.Error("Invalid session.");
-            //    }
-            //    if (ur.Captcha?.ToUpper() != us.Captcha?.ToUpper())
-            //        return ServiceResponse.Error("Code doesn't match.");
-            //}
+            ////if (ur.ClientType != "mobile.app")
+            ////{ //if not the mobile app then validate the captcha
+            ////    UserSession us = SessionManager.GetSessionByUser(ur.Captcha?.ToUpper());
+            ////    if (us == null)
+            ////    {
+            ////        us = SessionManager.GetSessionByUser(ip);//in the sitecontroller the captcha doesn't know whoe the user is when registering, so we used the ip addres as the name
+            ////        if (us == null)
+            ////            return ServiceResponse.Error("Invalid session.");
+            ////    }
+            ////    if (ur.Captcha?.ToUpper() != us.Captcha?.ToUpper())
+            ////        return ServiceResponse.Error("Code doesn't match.");
+            ////}
 
-            //if (ur.ClientType == "mobile.app")
-            //    sendValidationEmail = false; //if mobile app don't send the validation email.
+            ////if (ur.ClientType == "mobile.app")
+            ////    sendValidationEmail = false; //if mobile app don't send the validation email.
             ServiceResult res = await userManager.RegisterUserAsync(ur, false, ip);
             return res;
-            //TODO reimplement this. Change the url sent to be encrypted.
-            //if (res.Code != 200  )
-            //    return res;
+            ////TODO reimplement this. Change the url sent to be encrypted.
+            ////if (res.Code != 200  )
+            ////    return res;
 
-            //User newUser = (User)res.Result;
+            ////User newUser = (User)res.Result;
 
-            //EmailSettings settings = new EmailSettings();
+            ////EmailSettings settings = new EmailSettings();
 
-            //string appKey = Globals.Application.AppSetting("AppKey");
-            //string emailPassword = Globals.Application.AppSetting("EmailHostPassword");
-            //// var testHostPassword = Cipher.Crypt(appKey,emailPassword, false);
-            //settings.HostPassword =  Globals.Application.AppSetting("EmailHostPassword");
-            //settings.EncryptionKey = Globals.Application.AppSetting("AppKey");
-            //settings.HostUser= Globals.Application.AppSetting("EmailHostUser");
-            //settings.MailHost= Globals.Application.AppSetting("MailHost");
-            //settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
-            //settings.SiteDomain= Globals.Application.AppSetting("SiteDomain");
-            //settings.SiteEmail= Globals.Application.AppSetting("SiteEmail");
-            //settings.UseSSL= StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
+            ////string appKey = Globals.Application.AppSetting("AppKey");
+            ////string emailPassword = Globals.Application.AppSetting("EmailHostPassword");
+            ////// var testHostPassword = Cipher.Crypt(appKey,emailPassword, false);
+            ////settings.HostPassword =  Globals.Application.AppSetting("EmailHostPassword");
+            ////settings.EncryptionKey = Globals.Application.AppSetting("AppKey");
+            ////settings.HostUser= Globals.Application.AppSetting("EmailHostUser");
+            ////settings.MailHost= Globals.Application.AppSetting("MailHost");
+            ////settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
+            ////settings.SiteDomain= Globals.Application.AppSetting("SiteDomain");
+            ////settings.SiteEmail= Globals.Application.AppSetting("SiteEmail");
+            ////settings.UseSSL= StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
             
-            //ServiceResult emailRes = await userManager.SendUserEmailValidationAsync(newUser, newUser.ProviderUserKey, ip, settings);
+            ////ServiceResult emailRes = await userManager.SendUserEmailValidationAsync(newUser, newUser.ProviderUserKey, ip, settings);
 
-            //if (emailRes.Code != 200)
-            //{
-            //    return ServiceResponse.OK("Registration email failed to send. Check later for email confirmation.");
-            //}
-            //return emailRes;
+            ////if (emailRes.Code != 200)
+            ////{
+            ////    return ServiceResponse.OK("Registration email failed to send. Check later for email confirmation.");
+            ////}
+            ////return emailRes;
         }
 
 
@@ -753,7 +752,7 @@ namespace TreeMon.Web.api.v1
 
                 sessionToken = Request.Headers?.Authorization?.Parameter;
                 u = GetUser(sessionToken);//since the user session doesn't contain the password, wi have to pull it.
-                u = (User)userManager.Get(u.UUID, false);
+                u = (User)userManager.GetUser(u.UUID, false);
             }
 
             if (u == null)
@@ -802,7 +801,7 @@ namespace TreeMon.Web.api.v1
             u.ProviderUserKey = "";
             u.LastPasswordChangedDate = DateTime.UtcNow;
 
-            ServiceResult updateResult = userManager.Update(u, false);
+            ServiceResult updateResult = userManager.UpdateUser(u, false);
             if (updateResult.Code != 200)
                 return ServiceResponse.Error("Error updating password. Try again later.");
 

@@ -24,9 +24,8 @@ namespace TreeMon.Web.Tests.API.V1
     [TestClass]
     public class ReportsControllerTests
     {
-        private string connectionKey = "MSSQL_TEST";
+        private readonly string connectionKey = "MSSQL_TEST";
         private string _ownerAuthToken = "";
-        private string _captcha = "TESTCAPTCHA";
 
         [TestInitialize]
         public void TestSetup()

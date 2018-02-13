@@ -56,7 +56,7 @@ namespace TreeMon.WebAPI.api.v1
             }
 
             LocationManager locationManager = new LocationManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            return locationManager.Insert(n, true);
+            return locationManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -190,7 +190,7 @@ namespace TreeMon.WebAPI.api.v1
             DataFilter tmpFilter = this.GetFilter(filter);
             locations = FilterEx.FilterInput(locations, tmpFilter, out count);
 
-            if (locations == null || locations.Count() == 0)
+            if (locations == null || locations.Count == 0)
                 return ServiceResponse.Error("No locations available.");
 
             return ServiceResponse.OK("", locations, count);

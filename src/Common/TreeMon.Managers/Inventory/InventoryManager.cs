@@ -56,11 +56,11 @@ namespace TreeMon.Managers.Inventory
                             return ServiceResponse.Error(p.Name + " failed to delete. ");
                     }
                 }
-                //SQLITE
-                //this was the only way I could get it to delete a RolePermission without some stupid EF error.
-                //object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
-                //context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
-                //  context.Delete<RolePermission>(rp);
+                ////SQLITE
+                ////this was the only way I could get it to delete a RolePermission without some stupid EF error.
+                ////object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
+                ////context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
+                ////  context.Delete<RolePermission>(rp);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace TreeMon.Managers.Inventory
      
         public List<InventoryItem> GetAccountItems(string accountUUID)
         {
-            //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
@@ -91,7 +91,7 @@ namespace TreeMon.Managers.Inventory
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<InventoryItem>().ToList();
 
@@ -105,7 +105,7 @@ namespace TreeMon.Managers.Inventory
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<InventoryItem>().FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
@@ -113,10 +113,11 @@ namespace TreeMon.Managers.Inventory
         public List<InventoryItem> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<InventoryItem>();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<InventoryItem>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
@@ -125,7 +126,7 @@ namespace TreeMon.Managers.Inventory
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
                 List<InventoryItem> items = context.GetAll<InventoryItem>()
                                     .Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
@@ -135,17 +136,17 @@ namespace TreeMon.Managers.Inventory
                    x.WeightUOM = context.GetAll<UnitOfMeasure>().FirstOrDefault(w => w.UUID == x.UOMUUID)?.Name;
                });
 
-                //todo reimplement this after making sure the unit of measure id is set.
-                //return context.GetAll<InventoryItem>()
-                //                 .Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted)
-                //                 .Join(context.GetAll<UnitOfMeasure>(),
-                //                 ii => ii?.UOMUUID,
-                //                 uom => uom?.UUID,
-                //                 (ii, uom) =>{
-                //                     ii.WeightUOM = uom.Name;
-                //                     return ii;
-                //                 })
-                //                 .OrderBy(ob => ob.Name).ToList();
+                ////todo reimplement this after making sure the unit of measure id is set.
+                ////return context.GetAll<InventoryItem>()
+                ////                 .Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted)
+                ////                 .Join(context.GetAll<UnitOfMeasure>(),
+                ////                 ii => ii?.UOMUUID,
+                ////                 uom => uom?.UUID,
+                ////                 (ii, uom) =>{
+                ////                     ii.WeightUOM = uom.Name;
+                ////                     return ii;
+                ////                 })
+                ////                 .OrderBy(ob => ob.Name).ToList();
 
                 return items;
             }
@@ -184,37 +185,20 @@ namespace TreeMon.Managers.Inventory
         /// <param name="p"></param>
         /// <param name="checkName">This will check the products by name to see if they exist already. If it does an error message will be returned.</param>
         /// <returns></returns>
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             n.Initialize(this._requestingUser.UUID, this._requestingUser.AccountUUID, this._requestingUser.RoleWeight);
 
             var p = (InventoryItem)n;
-            if (validateFirst)
-            {
-                //InventoryItem dbU = (InventoryItem)Get(p.Name);
-
-                //if (dbU != null)
-                //{
-                //    //TODO in ui give option to show deleted items and update
-                //    if (dbU.Deleted)
-                //    {
-                //        dbU.Deleted = false;
-                //        return this.Update(n);
-                //    }
-                   
-                //   return ServiceResponse.Error("InventoryItem already exists.");
-                //}
-
+            
                 if (string.IsNullOrWhiteSpace(p.CreatedBy))
                     return ServiceResponse.Error("You must assign who the product was created by.");
 
                 if (string.IsNullOrWhiteSpace(p.AccountUUID))
                     return ServiceResponse.Error("The account id is empty.");
-            }
-
-           //if(GetBy(p.UUID)  != null)                p.UUID = Guid.NewGuid().ToString("N"); //can't have duplicate id's
+           
 
             p.ItemDate = DateTime.UtcNow;
 

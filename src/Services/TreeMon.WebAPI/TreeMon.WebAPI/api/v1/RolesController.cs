@@ -37,9 +37,6 @@ namespace TreeMon.Web.api.v1
         [Route("api/Roles/{roleUUID}/Permissions/Add")]
         public ServiceResult AddPermissionsToRole(string roleUUID )
         {
-            string root = EnvironmentEx.AppDataFolder;
-            var provider = new MultipartFormDataStreamProvider(root);
-
             try
             {
                 Task<string> content = ActionContext.Request.Content.ReadAsStringAsync();
@@ -95,7 +92,6 @@ namespace TreeMon.Web.api.v1
         public ServiceResult AddUsersToRole(string roleUUID)
         {
             ServiceResult res;
-            string root = EnvironmentEx.AppDataFolder;
 
             try
             {

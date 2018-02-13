@@ -60,7 +60,8 @@ namespace TreeMon.Managers
         public List<UnitOfMeasure> Search(string name)
                 {
                     if (string.IsNullOrWhiteSpace(name))
-                        return null;
+                        return new List<UnitOfMeasure> ();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 return context.GetAll<UnitOfMeasure>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
@@ -99,8 +100,6 @@ namespace TreeMon.Managers
 
             if (string.IsNullOrWhiteSpace(uuid) && string.IsNullOrWhiteSpace(name) == false)
                 res = this.Search(name).FirstOrDefault();
-            //else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
-            //    res.Add((UnitOfMeasure)this.Get(uuid));
             else
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
@@ -120,7 +119,7 @@ namespace TreeMon.Managers
             return null;
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (n == null)
                 return ServiceResponse.Error("Value is empty.");
@@ -131,13 +130,12 @@ namespace TreeMon.Managers
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
+             
                     UnitOfMeasure dbU = context.GetAll<UnitOfMeasure>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name)??false) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("UnitOfMeasure already exists.");
-                }
+             
      
                 if (context.Insert<UnitOfMeasure>(s))
                     return ServiceResponse.OK("",s);

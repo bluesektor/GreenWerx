@@ -90,7 +90,7 @@ namespace TreeMon.Web.api.v1
 
             StrainManager strainManager = new StrainManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return strainManager.Insert(dest, true);
+            return strainManager.Insert(dest);
         }
 
         [EnableThrottling(PerSecond = 1, PerMinute = 20, PerHour = 200, PerDay = 1500, PerWeek = 3000)]

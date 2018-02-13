@@ -44,7 +44,7 @@ namespace TreeMon.Managers.Finance
                 return null;
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<PaymentGatewayLog>().FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
@@ -55,7 +55,7 @@ namespace TreeMon.Managers.Finance
                 return null;
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<PaymentGatewayLog>().FirstOrDefault(sw => (sw.Gateway?.Trim()?.EqualsIgnoreCase(gateway?.Trim())??false) ) ;
             }
         }
@@ -64,7 +64,7 @@ namespace TreeMon.Managers.Finance
         {
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<PaymentGatewayLog>().ToList();
             }
         }

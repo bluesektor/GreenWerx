@@ -65,20 +65,8 @@ namespace TreeMon.Web.api.v1
                 n.AccountUUID = CurrentUser.AccountUUID;
                 n.DateCreated = DateTime.UtcNow;
             }
-
-            #region Convert to product from productview because entity frameworks doesn't recognize casting.
-
-            //var config = new MapperConfiguration(cfg =>
-            //{
-            //    cfg.CreateMap<ProductForm, Product>();
-            //});
-
-            //IMapper mapper = config.CreateMapper();
-            //var dest = mapper.Map<ProductForm, Product>(n);
-            #endregion
-
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            return productManager.Insert(n, true);
+            return productManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -332,7 +320,7 @@ namespace TreeMon.Web.api.v1
 
 
             CategoryManager catManager = new CategoryManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            List<dynamic> categories = (List<dynamic>)catManager.GetCategories(CurrentUser.AccountUUID, false, true).Where(w => (w.CategoryType?.EqualsIgnoreCase("PRODUCT")??false) ).Cast<dynamic>().ToList();
+            List<dynamic> categories = (List<dynamic>)catManager.GetCategories(CurrentUser.AccountUUID, false , true).Where(w => (w.CategoryType?.EqualsIgnoreCase("PRODUCT")??false) ).Cast<dynamic>().ToList();
             int count;
 
                             DataFilter tmpFilter = this.GetFilter(filter);
@@ -466,26 +454,26 @@ namespace TreeMon.Web.api.v1
             dbP.Weight = pv.Weight;
             dbP.UOMUUID = pv.UOMUUID;
 
-            //dbP.Expires           =
-            //dbP.Category          =
+            ////dbP.Expires           =
+            ////dbP.Category          =
             dbP.Description = pv.Description;
 
             #region future implementation. may need to be implemented in inventory.
-            //     dbP.Cost = pv.Cost;
-            //dbP.StockCount        =
-            //dbP.Discount          =
-            //dbP.MarkUp            =
-            //dbP.MarkUpType        =
-            //dbP.Condition         =
-            //dbP.Quality           =
-            //dbP.Rating            =
-            //dbP.LocationUUID      =
-            //dbP.ParentId          =
-            //dbP.Status            =
-            //dbP.Active            =
-            //dbP.Deleted           =
-            //dbP.Private           =
-            //dbP.SortOrder         =
+            ////     dbP.Cost = pv.Cost;
+            ////dbP.StockCount        =
+            ////dbP.Discount          =
+            ////dbP.MarkUp            =
+            ////dbP.MarkUpType        =
+            ////dbP.Condition         =
+            ////dbP.Quality           =
+            ////dbP.Rating            =
+            ////dbP.LocationUUID      =
+            ////dbP.ParentId          =
+            ////dbP.Status            =
+            ////dbP.Active            =
+            ////dbP.Deleted           =
+            ////dbP.Private           =
+            ////dbP.SortOrder         =
 
             #endregion
 

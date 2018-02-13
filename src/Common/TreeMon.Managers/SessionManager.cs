@@ -142,19 +142,19 @@ namespace TreeMon.Managers
             return token;
 
             #region Unsecured jwt example
-            //var hmac = new HMACSHA256();
-            //var header = "{ \"alg\": \"HS256\",  \"typ\": \"JWT\"  }";
-            ////Some PayLoad that contain information about the  customer
-            //var payload = "{ \"userUUID\": \"" + userUUID + "\",  \"scope\": \"http://test.com\"  }";
-            //var secToken = hmac.ComputeHash(Encoding.UTF8.GetBytes(header + payload));
-            //// Token to String so you can use it in your client
+            ////var hmac = new HMACSHA256();
+            ////var header = "{ \"alg\": \"HS256\",  \"typ\": \"JWT\"  }";
+            //////Some PayLoad that contain information about the  customer
+            ////var payload = "{ \"userUUID\": \"" + userUUID + "\",  \"scope\": \"http://test.com\"  }";
+            ////var secToken = hmac.ComputeHash(Encoding.UTF8.GetBytes(header + payload));
+            ////// Token to String so you can use it in your client
 
-            //Debug.Assert(false, "TODO NEED TO REMOVE THE END PADDING = OR == ");
-            //var tokenString = Convert.ToBase64String(Encoding.UTF8.GetBytes(header)) + "." +
-            //                    Convert.ToBase64String(Encoding.UTF8.GetBytes(payload)) + "." +
-            //                    Convert.ToBase64String(secToken);
+            ////Debug.Assert(false, "TODO NEED TO REMOVE THE END PADDING = OR == ");
+            ////var tokenString = Convert.ToBase64String(Encoding.UTF8.GetBytes(header)) + "." +
+            ////                    Convert.ToBase64String(Encoding.UTF8.GetBytes(payload)) + "." +
+            ////                    Convert.ToBase64String(secToken);
 
-            //return tokenString;
+            ////return tokenString;
             #endregion
         }
 

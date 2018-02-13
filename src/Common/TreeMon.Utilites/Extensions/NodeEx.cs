@@ -43,10 +43,14 @@ namespace TreeMon.Utilites.Extensions
 
         }
 
-        //Exmaple how to convert to node list.
-        //List<User> users = am.GetAccountMembers(accounts[0].AccountUUID);
-        //LoadListViewDelegate delAccounts = new LoadListViewDelegate(LoadListView);
-        //List<INode> n = users.ConvertAll(new Converter<User, INode>(NodeEx.ObjectToNode));
+        /// <summary>
+        ///Exmaple how to convert to node list.
+        ///List<User> users = am.GetAccountMembers(accounts[0].AccountUUID);
+        ///LoadListViewDelegate delAccounts = new LoadListViewDelegate(LoadListView);
+        ///List<INode> n = users.ConvertAll(new Converter<User, INode>(NodeEx.ObjectToNode));
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
         //
         public static INode ObjectToNode(object o)
         {

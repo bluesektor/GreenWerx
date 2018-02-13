@@ -20,19 +20,18 @@ namespace TreeMon.Managers.Membership
             this._connectionKey = connectionKey;
         }
 
-        public ServiceResult Insert(Credential c, bool validateFirst = true)
+        public ServiceResult Insert(Credential c)
         {
              if (!this.DataAccessAuthorized(c, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
+           
                     Credential dbU = context.GetAll<Credential>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(c.Name) && wu.AccountUUID == c.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Credential already exists.");
-                }
+              
 
                 if(string.IsNullOrWhiteSpace(c.UUID))
                     c.UUID = Guid.NewGuid().ToString("N");

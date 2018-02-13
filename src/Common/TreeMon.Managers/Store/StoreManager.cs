@@ -138,7 +138,6 @@ namespace TreeMon.Managers.Store
 
         public ServiceResult AddToCart(string cartUUID, string inventoryItemUUID, float quantity)
         {
-            User u = null;
             InventoryManager inventoryManager = new InventoryManager(this._connectionKey, _sessionKey);
 
             InventoryItem item = (InventoryItem)inventoryManager.Get(inventoryItemUUID);
@@ -156,7 +155,9 @@ namespace TreeMon.Managers.Store
             {
                 return this.AddCartItem(cartUUID, existingItem.UUID, quantity);
             }
-
+            SessionManager sm = new SessionManager(_connectionKey);
+            
+            
             ShoppingCartItem cartItem = new ShoppingCartItem()
             {
                 Id = 0,
@@ -165,7 +166,7 @@ namespace TreeMon.Managers.Store
                 SKU = item.SKU,
                 ItemType = item.ReferenceType,
                 ItemUUID = item.UUID,
-                UserUUID = u == null ? "" : u.UUID,
+                UserUUID = sm.GetSession(_sessionKey)?.UserUUID,
                 DateAdded = DateTime.UtcNow,
                 DateCreated = DateTime.UtcNow,
                 RoleOperation = ">=1",
@@ -215,11 +216,7 @@ namespace TreeMon.Managers.Store
                     _logger.InsertError(ex.Message, "StoreManager", MethodInfo.GetCurrentMethod().Name);
                 }
             }
-            //using (var dbContext = new TreeMonDbContext(this._connectionKey))
-            //{
-            //    itemsInCart = dbContext.GetAll<ShoppingCartItem>().Where(w => w.UserUUID == trackingID).Count();
-            //}
-            //  return ServiceResponse.OK("", "{    \"CartItemUUID\" :\"" + cartItem.UUID + "\", \"RemainingStock\" : \"" + remainingStock + "\", \"IsVirtual\" : \"" + item.Virtual + "\" , \"ItemsInCart\" : \"" + itemsInCart + "\" }");
+         
             return ServiceResponse.OK();
         }
 
@@ -265,15 +262,11 @@ namespace TreeMon.Managers.Store
                         _logger.InsertError("Failed to delete shopping cart item. " + cartItem.UUID, "StoreManager", MethodInfo.GetCurrentMethod().Name);
                         return ServiceResponse.Error("Failed to update shopping cart.");
                     }
-                    else
-                    {
-                        int changeCount = dbContext.Update<ShoppingCartItem>(cartItem);
-                        // if (dbContext.Update<ShoppingCartItem>(cartItem) <= 0)
-                        //{
-                        //    _logger.InsertError("Failed to update shopping cart. " + cartItem.UUID, "StoreManager", MethodInfo.GetCurrentMethod().Name);
-                        //    return ServiceResponse.Error("Failed to update shopping cart.");
-                        //}
-                    }
+                    ////else
+                    ////{
+                    ////    int changeCount = dbContext.Update<ShoppingCartItem>(cartItem);
+                  
+                    ////}
 
                     if (dbContext.Update<InventoryItem>(item) <= 0) {
                         _logger.InsertError("Failed to update inventory. " + item.UUID, "StoreManager", MethodInfo.GetCurrentMethod().Name);
@@ -286,7 +279,7 @@ namespace TreeMon.Managers.Store
                 catch (Exception ex) {
                     _logger.InsertError(ex.Message, "StoreManager", MethodInfo.GetCurrentMethod().Name);
                 }
-                itemsInCart = dbContext.GetAll<ShoppingCartItem>().Where(w => w.UserUUID == trackingID).Count();
+                itemsInCart = dbContext.GetAll<ShoppingCartItem>().Count(w => w.UserUUID == trackingID);
             }
             return ServiceResponse.OK("", "{ \"CartUUID\" :\"" + trackingID + "\",    \"CartItemUUID\" :\"" + cartItem.UUID + "\", \"RemainingStock\" : \"" + remainingStock + "\", \"IsVirtual\" : \"" + item.Virtual + "\" , \"ItemsInCart\" : \"" + itemsInCart + "\" }");
         }
@@ -308,8 +301,6 @@ namespace TreeMon.Managers.Store
                 item.Quantity += cartItem.Quantity; //add the item back to inventory.
             }
 
-            User u = this.GetUser(_sessionKey);
-
             using (var transactionScope = new TransactionScope())
             using (var dbContext = new TreeMonDbContext(this._connectionKey))
             {
@@ -325,7 +316,6 @@ namespace TreeMon.Managers.Store
                         return ServiceResponse.Error("Failed to update inventory.");
                     }
                     transactionScope.Complete();
-                    //  remainingStock = item.Quantity;
                 }
                 catch (Exception ex)
                 {
@@ -374,24 +364,24 @@ namespace TreeMon.Managers.Store
                                            ItemUUID = s.cartItem.ItemUUID,
                                            ItemType = s.cartItem.ItemType
                                        }).Cast<dynamic>().ToList();
-                    //.Join(context.GetAll<UnitOfMeasure>(),
-                    //     ii => ii.invItem.UOMUUID,
-                    //     uom => uom.UUID,
-                    //    (uom, ii) => new { uom, ii })
-                    //.Select(s => new {
-                    //    Name = s.uom.invItem.Name,
-                    //    Weight = s.uom.invItem.Weight,
-                    //    WeightUOM = s.ii.Name,
-                    //    Virtual = s.uom.invItem.Virtual,
-                    //    Image = s.uom.invItem.Image,
-                    //    CartItemUUID = s.uom.cartItem.UUID,
-                    //    Quantity = s.uom.cartItem.Quantity,
-                    //    Price = s.uom.cartItem.Price,
-                    //    TotalPrice = s.uom.cartItem.TotalPrice,
-                    //    UserUUID = s.uom.cartItem.UserUUID,
-                    //    ItemUUID = s.uom.cartItem.ItemUUID,
-                    //    ItemType = s.uom.cartItem.ItemType
-                    //}).Cast<dynamic>().ToList();
+                    ////.Join(context.GetAll<UnitOfMeasure>(),
+                    ////     ii => ii.invItem.UOMUUID,
+                    ////     uom => uom.UUID,
+                    ////    (uom, ii) => new { uom, ii })
+                    ////.Select(s => new {
+                    ////    Name = s.uom.invItem.Name,
+                    ////    Weight = s.uom.invItem.Weight,
+                    ////    WeightUOM = s.ii.Name,
+                    ////    Virtual = s.uom.invItem.Virtual,
+                    ////    Image = s.uom.invItem.Image,
+                    ////    CartItemUUID = s.uom.cartItem.UUID,
+                    ////    Quantity = s.uom.cartItem.Quantity,
+                    ////    Price = s.uom.cartItem.Price,
+                    ////    TotalPrice = s.uom.cartItem.TotalPrice,
+                    ////    UserUUID = s.uom.cartItem.UserUUID,
+                    ////    ItemUUID = s.uom.cartItem.ItemUUID,
+                    ////    ItemType = s.uom.cartItem.ItemType
+                    ////}).Cast<dynamic>().ToList();
                     return res;
                 }
             }
@@ -471,46 +461,46 @@ namespace TreeMon.Managers.Store
                     }
 
                     #region old btc code
-                    //If btc I recall reading optimally you want a new btc address for each transaction, the send the btc to your main address after full payment is made.
-                    //Get the account the currency is going to be paid to.
-                    //   FinanceAccount payToAcct = new FinanceAccount();
-                    //      form.PayTypeUUID    get the finance account for paytype. so if payment type is btc, get the default or active account for the btc.
-                    //    string accountNumber = "";
-                    //    if (PayType.Symbol.EqualsIgnoreCase("BTC" || PayType.Symbol.EqualsIgnoreCase("BTCT")
-                    //    {
-                    //        payToAcct = CreateNewBtcAccount();
-                    //        if (payToAcct == null)
-                    //        {
-                    //            Message = "Could not create an account for Payment type:" + paymentTypeId.ToString() + " is test:" + Globals.UsePaymentTestnet.ToString();
-                    //            LogQueries.InsertError(Message, className, MethodInfo.GetCurrentMethod().Name);
-                    //            Debug.Assert(false, Message);
-                    //            return false;
-                    //        }
-                    //        accountNumber = payToAcct.AccountNumber;
-                    //        AccountImage = payToAcct.ImageUrl;   //Market.GetQrCodePath(accountNumber, PayType.Symbol), true);
-                    //    }
+                    ////If btc I recall reading optimally you want a new btc address for each transaction, the send the btc to your main address after full payment is made.
+                    ////Get the account the currency is going to be paid to.
+                    ////   FinanceAccount payToAcct = new FinanceAccount();
+                    ////      form.PayTypeUUID    get the finance account for paytype. so if payment type is btc, get the default or active account for the btc.
+                    ////    string accountNumber = "";
+                    ////    if (PayType.Symbol.EqualsIgnoreCase("BTC" || PayType.Symbol.EqualsIgnoreCase("BTCT")
+                    ////    {
+                    ////        payToAcct = CreateNewBtcAccount();
+                    ////        if (payToAcct == null)
+                    ////        {
+                    ////            Message = "Could not create an account for Payment type:" + paymentTypeId.ToString() + " is test:" + Globals.UsePaymentTestnet.ToString();
+                    ////            LogQueries.InsertError(Message, className, MethodInfo.GetCurrentMethod().Name);
+                    ////            Debug.Assert(false, Message);
+                    ////            return false;
+                    ////        }
+                    ////        accountNumber = payToAcct.AccountNumber;
+                    ////        AccountImage = payToAcct.ImageUrl;   //Market.GetQrCodePath(accountNumber, PayType.Symbol), true);
+                    ////    }
                     #endregion
 
 
                     #region Affiliate process. 
-                    //todo move to affiliate manager. Also this uses the parent id. we may want to use another refernce since we have accounts now that can establish a heirarchy
-                    ////If the current user has a parent id (ie under a user) then get that users affiliate account info so they
-                    ////get credit for the sale.
-                    //int affiliateId = -1;
-                    //string type = string.Empty;
-                    //if (currentUser.ParentId > 0)
-                    //{
-                    //    Omni.Models.Users.User parentUser = new UserManager().Get(currentUser.ParentId);
-                    //    if (parentUser != null && parentUser.IsBanned == false && parentUser.IsApproved == true)
-                    //    {
-                    //        Affiliate aff = UserQueries.GetAll<Affiliate>().FirstOrDefault(af => af.UserId == currentUser.ParentId);
-                    //        if (aff != null)
-                    //        {
-                    //            affiliateId = aff.Id;
-                    //            type = "affiliate";
-                    //        }
-                    //    }
-                    //}
+                    ////todo move to affiliate manager. Also this uses the parent id. we may want to use another refernce since we have accounts now that can establish a heirarchy
+                    //////If the current user has a parent id (ie under a user) then get that users affiliate account info so they
+                    //////get credit for the sale.
+                    ////int affiliateId = -1;
+                    ////string type = string.Empty;
+                    ////if (currentUser.ParentId > 0)
+                    ////{
+                    ////    Omni.Models.Users.User parentUser = new UserManager().Get(currentUser.ParentId);
+                    ////    if (parentUser != null && parentUser.IsBanned == false && parentUser.IsApproved == true)
+                    ////    {
+                    ////        Affiliate aff = UserQueries.GetAll<Affiliate>().FirstOrDefault(af => af.UserId == currentUser.ParentId);
+                    ////        if (aff != null)
+                    ////        {
+                    ////            affiliateId = aff.Id;
+                    ////            type = "affiliate";
+                    ////        }
+                    ////    }
+                    ////}
                     #endregion
 
                     List<ShoppingCartItem> cartItems = context.GetAll<ShoppingCartItem>().Where(w => w.ShoppingCartUUID == cart.UUID).ToList();
@@ -521,13 +511,13 @@ namespace TreeMon.Managers.Store
                     Debug.Assert(false, "TODO verify not getting duplicate rules.");
 
                     List<PriceRuleLog> priceRules = cart.PriceRules;
-                    //todo get mandatory price rules       // todo implement shipping/delivery and make sure it's tracked properly. cart.ShippingMethodUUID 
-                    //List<PriceRule> mandatoryRules = context.GetAll<PriceRule>()
-                    //                                    .Where( w => w.AccountUUID == user.AccountUUID && 
-                    //                                            w.Mandatory == true && w.Deleted == false  &&
-                    //                                            priceRules.Any( a => a.PriceRuleUUID != w.UUID)
-                    //                                            ).ToList();
-                   //priceRules.AddRange(mandatoryRules);
+                   ////todo get mandatory price rules       // todo implement shipping/delivery and make sure it's tracked properly. cart.ShippingMethodUUID 
+                   ////List<PriceRule> mandatoryRules = context.GetAll<PriceRule>()
+                   ////                                    .Where( w => w.AccountUUID == user.AccountUUID && 
+                   ////                                            w.Mandatory == true && w.Deleted == false  &&
+                   ////                                            priceRules.Any( a => a.PriceRuleUUID != w.UUID)
+                   ////                                            ).ToList();
+                   ////priceRules.AddRange(mandatoryRules);
 
                     decimal subTotal = this.GetSubtotal(cartItems);
                     //todo validate the price rules (only one coupon, expiration date hasn't exceeded, max usage hasn't exceeded..)
@@ -568,16 +558,16 @@ namespace TreeMon.Managers.Store
                     }
 
                     #region todo Currency conversion. May not be needed or move to somewhere else.
-                    //// get payment type. then use symbol for conversion
-                    ////paymentTypeId 
-                    //PayType = StoreQueries.GetPaymentTypes().FirstOrDefault(pt => pt.Id == paymentTypeId);
-                    decimal orderTotalConverted = order.Total; //PayTypeTotal = TODO => Market.ConvertCurrencyAmmount(Globals.CurrencySymbol, PayType.Symbol, Cart.Total);
-                    decimal orderSubTotalConverted = 0;   //PayTypeSubTotal
+                    ////// get payment type. then use symbol for conversion
+                    //////paymentTypeId 
+                    ////PayType = StoreQueries.GetPaymentTypes().FirstOrDefault(pt => pt.Id == paymentTypeId);
+                    decimal orderTotalConverted = order.Total; ////PayTypeTotal = TODO => Market.ConvertCurrencyAmmount(Globals.CurrencySymbol, PayType.Symbol, Cart.Total);
+                    ////decimal orderSubTotalConverted = 0;   //PayTypeSubTotal
 
-                    if (order.Total == order.SubTotal)
-                        orderSubTotalConverted = orderTotalConverted;
-                    else
-                        orderSubTotalConverted = order.SubTotal; //TODO =>  // Market.ConvertCurrencyAmmount(Globals.CurrencySymbol, PayType.Symbol, Cart.SubTotal);
+                    ////if (order.Total == order.SubTotal)
+                    ////    orderSubTotalConverted = orderTotalConverted;
+                    ////else
+                    ////    orderSubTotalConverted = order.SubTotal; ////TODO =>  // Market.ConvertCurrencyAmmount(Globals.CurrencySymbol, PayType.Symbol, Cart.SubTotal);
                     #endregion
 
                     //Clear order items and refresh with members selected items.
@@ -724,16 +714,16 @@ namespace TreeMon.Managers.Store
                     emailContent = emailContent.Replace("[PaymentType.Title]", cart.PaidType); 
                     emailContent = emailContent.Replace("[StoreManager.PayType]", account.CurrencyName); 
                     emailContent = emailContent.Replace("[StoreManager.PayTypeTotal]", order.Total.ToString()); 
-                    //emailContent = emailContent.Replace( "                               ,PayTypeSubTotal);
-                   // emailContent = emailContent.Replace("[PayType.Address]", account. PayType.Address);
+                    ////emailContent = emailContent.Replace( "                               ,PayTypeSubTotal);
+                    //// emailContent = emailContent.Replace("[PayType.Address]", account. PayType.Address);
                     emailContent = emailContent.Replace("[PayType.PictureUrl]",account.Image );
                     emailContent = emailContent.Replace("[Settings.CurrencySymbol]",am.GetSetting("default.currency.symbol").Value);
                     emailContent = emailContent.Replace("[Settings.SiteDomain]", domain);
 
-                    //todo  paytype.address and qr code for btc.
-                    //todo bookmark latest currency symbol
-                    // string validationCode = Cipher.RandomString(12);  
-                    //   emailContent = emailContent.Replace("[Url.Unsubscribe]", "http://" + domain + "/FinanceAccount/ValidateEmail/?type=mbr&operation=mdel&code=" + validationCode);
+                    ////todo  paytype.address and qr code for btc.
+                    ////todo bookmark latest currency symbol
+                    //// string validationCode = Cipher.RandomString(12);  
+                    ////   emailContent = emailContent.Replace("[Url.Unsubscribe]", "http://" + domain + "/FinanceAccount/ValidateEmail/?type=mbr&operation=mdel&code=" + validationCode);
 
                     StringBuilder ShoppingCartItemsList = new StringBuilder();
 
