@@ -92,7 +92,6 @@
             this.Controls.Add(this.btnAddSubNode);
             this.Name = "ctlNodeTree";
             this.Size = new System.Drawing.Size(155, 289);
-            this.ClientSizeChanged += new System.EventHandler(this.ctlNodeTree_ClientSizeChanged);
             this.ResumeLayout(false);
 
         }

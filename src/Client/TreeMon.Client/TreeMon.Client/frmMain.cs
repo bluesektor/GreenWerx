@@ -226,21 +226,21 @@ namespace TreeMon.Client
         private void frmMain_Resize(object sender, EventArgs e)
         {
             splitContainer1.Dock = DockStyle.Fill; //MUST update the splitter for the resize message to pump down to the plugin.
-            //If you want to mannually resize.
-            //Make sure there's a selected Plugin
-            //if (this.tvwPlugins.SelectedNode != null)
-            //{
-            //    //Get the selected Plugin
-            //    Types.AvailablePlugin selectedPlugin = Global.Plugins.AvailablePlugins.Find(tvwPlugins.SelectedNode.Text.ToString());
+            ////If you want to mannually resize.
+            ////Make sure there's a selected Plugin
+            ////if (this.tvwPlugins.SelectedNode != null)
+            ////{
+            ////    //Get the selected Plugin
+            ////    Types.AvailablePlugin selectedPlugin = Global.Plugins.AvailablePlugins.Find(tvwPlugins.SelectedNode.Text.ToString());
 
-            //    if (selectedPlugin != null)
-            //    {
-            //        //Set the dockstyle of the plugin to fill, to fill up the space provided
-            //        //selectedPlugin.Instance.MainInterface.Dock = DockStyle.Fill;
-            //        selectedPlugin.Instance.ResizeControl();
-            //    }
+            ////    if (selectedPlugin != null)
+            ////    {
+            ////        //Set the dockstyle of the plugin to fill, to fill up the space provided
+            ////        //selectedPlugin.Instance.MainInterface.Dock = DockStyle.Fill;
+            ////        selectedPlugin.Instance.ResizeControl();
+            ////    }
 
-            //}
+            ////}
         }
 
         private void menuItem2_Click(object sender, System.EventArgs e)

@@ -126,7 +126,7 @@ namespace ClientCore.Controls
             ServiceResult res;
 
             if (string.IsNullOrWhiteSpace(user.UUID))
-                res = um.Insert(user,false);
+                res = um.Insert(user );
             else
                 res = um.Update(user);
 

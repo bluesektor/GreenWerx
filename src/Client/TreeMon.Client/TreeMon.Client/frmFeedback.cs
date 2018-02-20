@@ -20,12 +20,8 @@ namespace TreeMon.Client
         private System.Windows.Forms.Label lblPluginName;
         private System.Windows.Forms.Label lblPluginDesc;
         private System.Windows.Forms.Label lblFeedback;
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-      //  private System.ComponentModel.Container components = null;
 
-        public frmFeedback()
+         public frmFeedback()
         {
             //
             // Required for Windows Form Designer support
@@ -33,15 +29,6 @@ namespace TreeMon.Client
             InitializeComponent();
 
      
-        }
-
-      
-
-     
-
-        private void frmFeedback_Load(object sender, System.EventArgs e)
-        {
-
         }
 
         private void butOk_Click(object sender, System.EventArgs e)
@@ -78,8 +65,6 @@ namespace TreeMon.Client
             set { this.lblFeedback.Text = value; }
         }
 
-        public void HostFunctionTest()
-        {
-        }
+
     }
 }

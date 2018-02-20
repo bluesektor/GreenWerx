@@ -21,8 +21,6 @@ namespace Tools
     {
         #region Plugin interface properties
 
-        private IPluginHost myPluginHost = null;
-        //  private string myPluginName = "Name";
         private string myPluginAuthor = "TreeMon.org";
         private string myPluginDescription = "Opensource tools.";
         private string myPluginVersion = "1.0.0";
@@ -32,7 +30,9 @@ namespace Tools
         private AppInfo _appSettings;
 
         void PluginInterface.IPlugin.Dispose()
-        { }
+        {
+            //add clean up here
+        }
 
         public string Description
         { get { return myPluginDescription; } }
@@ -40,11 +40,7 @@ namespace Tools
         public string Author
         { get { return myPluginAuthor; } }
 
-        public IPluginHost Host
-        {
-            get { return myPluginHost; }
-            set { myPluginHost = value; }
-        }
+        public IPluginHost Host { get; set; }
 
         public void Initialize(UserSession session, AppInfo appSettings)
         {
@@ -52,11 +48,15 @@ namespace Tools
             _appSettings = appSettings;
         }
 
-        protected void Run() //not mandatory, but good for a standard interface to main.
-        { }
+        protected void Run()
+        {
+            //not mandatory, but good for a standard interface to main.
+        }
 
         public void ResizeControl()
-        { }
+        {
+            //adjust windows here
+        }
 
         public UserControl MainInterface
         { get { return this; } }
@@ -76,16 +76,7 @@ namespace Tools
 
         public ctlTools()
         {
-            
             InitializeComponent();
-            // AppManager am = new AppManager(Globals.DBConnectionKey, "web", Request.Headers?.Authorization?.Parameter);
-            //  am.DataTypes();
-            //MainInterface.
-        }
-
-        private void ctlTools_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }

@@ -73,11 +73,11 @@ namespace ClientCore.Controls
             }
             lblAccount.Text = _accountManager.Get(_node.AccountUUID)?.Name;
         
-            //if (File.Exists(_node.Image))
-            //{
-            //    picBox.SizeMode = PictureBoxSizeMode.StretchImage;
-            //    picBox.Image = Image.FromFile(_node.Image);
-            //}
+            ////if (File.Exists(_node.Image))
+            ////{
+            ////    picBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            ////    picBox.Image = Image.FromFile(_node.Image);
+            ////}
         }
 
         public INode Get()
@@ -85,8 +85,6 @@ namespace ClientCore.Controls
             if (_node == null)
             {
                 _node = new Node();
-               
-                //return _node;
             }
 
             _node.Name = txtName.Text;
@@ -103,9 +101,6 @@ namespace ClientCore.Controls
             return _node;
         }
 
-        private void chkDeleted_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
+       
     }
 }

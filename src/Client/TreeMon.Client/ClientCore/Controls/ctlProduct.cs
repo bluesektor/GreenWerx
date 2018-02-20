@@ -99,7 +99,7 @@ namespace ClientCore.Controls
             ServiceResult res;
 
             if (string.IsNullOrWhiteSpace(item.UUID))
-                res = im.Insert(item, false);
+                res = im.Insert(item);
             else
                 res = im.Update(item);
 

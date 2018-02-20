@@ -75,9 +75,7 @@ namespace ClientCore.Controls
 
             foreach (TreeNode n in foundNodes)
             {
-              // int index =  treeNodes.TopNode.Nodes.IndexOf(n);
-
-               n.Name = node.UUID;
+                n.Name = node.UUID;
                 n.Text = node.Name;
                 n.Tag = (object)node;
             }
@@ -172,40 +170,49 @@ namespace ClientCore.Controls
 
         #region event to parent
 
-        //Raise event from Child:
-        //public event EventHandler CloseButtonClicked;
-        //protected virtual void OnCloseButtonClicked(EventArgs e)
-        //{
-        //    var handler = CloseButtonClicked;
-        //    if (handler != null)
-        //        handler(this, e);
-        //}
-        //private void CloseButton_Click(object sender, EventArgs e)
-        //{
-        //    //While you can call `this.ParentForm.Close()` it's better to raise an event
-        //    OnCloseButtonClicked(e);
-        //}
+    ////    Raise event from Child:
+    ////    public event EventHandler CloseButtonClicked;
+    ////    protected virtual void OnCloseButtonClicked(EventArgs e)
+    ////    {
+    ////        var handler = CloseButtonClicked;
+    ////        if (handler != null)
+    ////            handler(this, e);
+    ////    }
+    ////    private void CloseButton_Click(object sender, EventArgs e)
+    ////    {
+    ////        //While you can call `this.ParentForm.Close()` it's better to raise an event
+    ////        OnCloseButtonClicked(e);
+    ////    }
 
-        //Subscribe and use event in Parent:
-        //Subscribe for event using designer or in form load
-        //this.userControl11.CloseButtonClicked += userControl11_CloseButtonClicked;
+    ////    Subscribe and use event in Parent:
+    ////    Subscribe for event using designer or in form load
+    ////    this.userControl11.CloseButtonClicked += userControl11_CloseButtonClicked;
 
-        ////Close the form when you received the notification
-        //private void userControl11_CloseButtonClicked(object sender, EventArgs e)
-        //        {
-        //            this.Close();
-        //        }
-        #endregion
+    ////    //Close the form when you received the notification
+    ////private void userControl11_CloseButtonClicked(object sender, EventArgs e)
+    ////{
+    ////    this.Close();
+    ////}
+    #endregion
 
-        private void ctlNodeTree_ClientSizeChanged(object sender, EventArgs e)
+
+
+    private void treeNodes_AfterSelect(object sender, TreeViewEventArgs e)
         {
-           
-        }
 
-        private void treeNodes_AfterSelect(object sender, TreeViewEventArgs e)
-        {
+            //todo turn current node backcolor to default then update selected
+            // _treeLocations.SelectedTreeNode.BackColor = Color.Transparent; //todo may need to see if the previouse selected node need to be set to transparent.
+            this.treeNodes.SelectedNode.BackColor = Color.LightGreen;
+
+            SelectedTreeNode = e.Node;
             SelectedNode = (INode)e.Node.Tag;
             OnTreeNodeAfterSelect(e);
+        }
+
+        private void treeNodes_Click(object sender, EventArgs e)
+        {
+            var tree = (TreeView)sender;
+            SelectedTreeNode = tree.SelectedNode;
         }
     }
 

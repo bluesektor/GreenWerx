@@ -20,15 +20,15 @@ namespace TreeMon.Models.App
         }
 
         #region To use jquery jtable on the client you'll have to uncomment these and return them in the controller
-        //public static ServiceResult OK( object records = null, int allRecordsCount = 0, string message = "", string result = "")
-        //{
-        //    return new ServiceResult() { Code = 200, Status = "OK", Records = records, TotalRecordCount = allRecordsCount, Message = message, Result = result };
-        //}
+        ////public static ServiceResult OK( object records = null, int allRecordsCount = 0, string message = "", string result = "")
+        ////{
+        ////    return new ServiceResult() { Code = 200, Status = "OK", Records = records, TotalRecordCount = allRecordsCount, Message = message, Result = result };
+        ////}
 
-        //public static ServiceResult OK("",object record = null, string message = "", string result = "")
-        //{
-        //    return new ServiceResult() { Code = 200, Status = "OK", Record = record, Message = message, Result = result };
-        //}
+        ////public static ServiceResult OK("",object record = null, string message = "", string result = "")
+        ////{
+        ////    return new ServiceResult() { Code = 200, Status = "OK", Record = record, Message = message, Result = result };
+        ////}
         #endregion
 
     }
@@ -45,8 +45,8 @@ namespace TreeMon.Models.App
         public string Status { get; set; }
         public int TotalRecordCount { get; set; }
         #region To use jquery jtable on the client you'll have to uncomment these and return them in the controller
-        //public object Records;
-        //public object Record;
+        ////public object Records;
+        ////public object Record;
         #endregion
     }
 

@@ -44,6 +44,7 @@
             this.lblDateType = new System.Windows.Forms.Label();
             this.lblItemDate = new System.Windows.Forms.Label();
             this.lblReferenceValue = new System.Windows.Forms.Label();
+            this.pnlItem = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // pnlNodeList
@@ -54,7 +55,7 @@
             this.pnlNodeList.BackColor = System.Drawing.SystemColors.Control;
             this.pnlNodeList.Location = new System.Drawing.Point(3, 4);
             this.pnlNodeList.Name = "pnlNodeList";
-            this.pnlNodeList.Size = new System.Drawing.Size(165, 294);
+            this.pnlNodeList.Size = new System.Drawing.Size(143, 294);
             this.pnlNodeList.TabIndex = 63;
             this.pnlNodeList.ClientSizeChanged += new System.EventHandler(this.pnlNodeList_ClientSizeChanged);
             // 
@@ -63,9 +64,9 @@
             this.pnlNodeInventory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlNodeInventory.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.pnlNodeInventory.Location = new System.Drawing.Point(174, 5);
+            this.pnlNodeInventory.Location = new System.Drawing.Point(152, 5);
             this.pnlNodeInventory.Name = "pnlNodeInventory";
-            this.pnlNodeInventory.Size = new System.Drawing.Size(377, 294);
+            this.pnlNodeInventory.Size = new System.Drawing.Size(313, 294);
             this.pnlNodeInventory.TabIndex = 62;
             // 
             // lblError
@@ -80,7 +81,7 @@
             // txtQuantity
             // 
             this.txtQuantity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtQuantity.Location = new System.Drawing.Point(613, 12);
+            this.txtQuantity.Location = new System.Drawing.Point(882, 12);
             this.txtQuantity.Name = "txtQuantity";
             this.txtQuantity.Size = new System.Drawing.Size(49, 20);
             this.txtQuantity.TabIndex = 66;
@@ -89,7 +90,7 @@
             // 
             this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(562, 15);
+            this.label6.Location = new System.Drawing.Point(831, 15);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(49, 13);
             this.label6.TabIndex = 65;
@@ -99,7 +100,7 @@
             // 
             this.cboReferenceType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cboReferenceType.FormattingEnabled = true;
-            this.cboReferenceType.Location = new System.Drawing.Point(613, 113);
+            this.cboReferenceType.Location = new System.Drawing.Point(882, 113);
             this.cboReferenceType.Name = "cboReferenceType";
             this.cboReferenceType.Size = new System.Drawing.Size(121, 21);
             this.cboReferenceType.TabIndex = 67;
@@ -108,7 +109,7 @@
             // 
             this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(577, 116);
+            this.label10.Location = new System.Drawing.Point(846, 116);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(34, 13);
             this.label10.TabIndex = 68;
@@ -118,7 +119,7 @@
             // 
             this.cboLocationType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cboLocationType.FormattingEnabled = true;
-            this.cboLocationType.Location = new System.Drawing.Point(613, 174);
+            this.cboLocationType.Location = new System.Drawing.Point(882, 174);
             this.cboLocationType.Name = "cboLocationType";
             this.cboLocationType.Size = new System.Drawing.Size(121, 21);
             this.cboLocationType.TabIndex = 69;
@@ -127,7 +128,7 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(573, 177);
+            this.label1.Location = new System.Drawing.Point(842, 177);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(34, 13);
             this.label1.TabIndex = 70;
@@ -137,7 +138,7 @@
             // 
             this.lblLocation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblLocation.AutoSize = true;
-            this.lblLocation.Location = new System.Drawing.Point(617, 158);
+            this.lblLocation.Location = new System.Drawing.Point(886, 158);
             this.lblLocation.Name = "lblLocation";
             this.lblLocation.Size = new System.Drawing.Size(0, 13);
             this.lblLocation.TabIndex = 71;
@@ -146,7 +147,7 @@
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(560, 158);
+            this.label3.Location = new System.Drawing.Point(829, 158);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(51, 13);
             this.label3.TabIndex = 72;
@@ -156,7 +157,7 @@
             // 
             this.lblReferenceType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblReferenceType.AutoSize = true;
-            this.lblReferenceType.Location = new System.Drawing.Point(597, 87);
+            this.lblReferenceType.Location = new System.Drawing.Point(866, 87);
             this.lblReferenceType.Name = "lblReferenceType";
             this.lblReferenceType.Size = new System.Drawing.Size(10, 13);
             this.lblReferenceType.TabIndex = 73;
@@ -166,7 +167,7 @@
             // 
             this.chkPublished.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkPublished.AutoSize = true;
-            this.chkPublished.Location = new System.Drawing.Point(613, 38);
+            this.chkPublished.Location = new System.Drawing.Point(882, 38);
             this.chkPublished.Name = "chkPublished";
             this.chkPublished.Size = new System.Drawing.Size(72, 17);
             this.chkPublished.TabIndex = 75;
@@ -177,7 +178,7 @@
             // 
             this.lblDateType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblDateType.AutoSize = true;
-            this.lblDateType.Location = new System.Drawing.Point(597, 60);
+            this.lblDateType.Location = new System.Drawing.Point(866, 60);
             this.lblDateType.Name = "lblDateType";
             this.lblDateType.Size = new System.Drawing.Size(10, 13);
             this.lblDateType.TabIndex = 76;
@@ -187,7 +188,7 @@
             // 
             this.lblItemDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblItemDate.AutoSize = true;
-            this.lblItemDate.Location = new System.Drawing.Point(617, 60);
+            this.lblItemDate.Location = new System.Drawing.Point(886, 60);
             this.lblItemDate.Name = "lblItemDate";
             this.lblItemDate.Size = new System.Drawing.Size(10, 13);
             this.lblItemDate.TabIndex = 77;
@@ -197,17 +198,27 @@
             // 
             this.lblReferenceValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblReferenceValue.AutoSize = true;
-            this.lblReferenceValue.Location = new System.Drawing.Point(617, 87);
+            this.lblReferenceValue.Location = new System.Drawing.Point(886, 87);
             this.lblReferenceValue.Name = "lblReferenceValue";
             this.lblReferenceValue.Size = new System.Drawing.Size(10, 13);
             this.lblReferenceValue.TabIndex = 78;
             this.lblReferenceValue.Text = "-";
+            // 
+            // pnlItem
+            // 
+            this.pnlItem.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlItem.BackColor = System.Drawing.SystemColors.Control;
+            this.pnlItem.Location = new System.Drawing.Point(470, 7);
+            this.pnlItem.Name = "pnlItem";
+            this.pnlItem.Size = new System.Drawing.Size(335, 292);
+            this.pnlItem.TabIndex = 79;
             // 
             // ctlInventory
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
+            this.Controls.Add(this.pnlItem);
             this.Controls.Add(this.lblReferenceValue);
             this.Controls.Add(this.lblItemDate);
             this.Controls.Add(this.lblDateType);
@@ -225,7 +236,7 @@
             this.Controls.Add(this.pnlNodeList);
             this.Controls.Add(this.pnlNodeInventory);
             this.Name = "ctlInventory";
-            this.Size = new System.Drawing.Size(756, 319);
+            this.Size = new System.Drawing.Size(1025, 319);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -249,5 +260,6 @@
         private System.Windows.Forms.Label lblDateType;
         private System.Windows.Forms.Label lblItemDate;
         private System.Windows.Forms.Label lblReferenceValue;
+        private System.Windows.Forms.Panel pnlItem;
     }
 }

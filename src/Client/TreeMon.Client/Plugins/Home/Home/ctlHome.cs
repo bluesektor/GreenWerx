@@ -39,8 +39,6 @@ namespace Home
 
         #region Plugin interface properties
 
-        private IPluginHost myPluginHost = null;
-        //  private string myPluginName = "Name";
         private string myPluginAuthor = "TreeMon.org";
         private string myPluginDescription = "Opensource cannabis system.";
         private string myPluginVersion = "1.0.0";
@@ -49,8 +47,9 @@ namespace Home
         private UserSession _session;
         private AppInfo _appSettings;
 
-        void PluginInterface.IPlugin.Dispose()
-        { }
+        void PluginInterface.IPlugin.Dispose() {
+            //add cleanup here.
+        }
 
         public string Description
         { get { return myPluginDescription; } }
@@ -58,11 +57,7 @@ namespace Home
         public string Author
         { get { return myPluginAuthor; } }
 
-        public IPluginHost Host
-        {
-            get { return myPluginHost; }
-            set { myPluginHost = value; }
-        }
+        public IPluginHost Host { get; set; }
 
         public void Initialize(UserSession session, AppInfo appSettings)
         {
@@ -128,11 +123,16 @@ namespace Home
             }
         }
 
-        protected void Run() //not mandatory, but good for a standard interface to main.
-        { }
+        protected void Run()
+        {
+            //not mandatory, but good for a standard interface to main.
+        }
 
         public void ResizeControl()
-        { }
+        {
+            //adjust windows here
+        }
+
 
         public UserControl MainInterface
         { get { return this; } }
@@ -196,7 +196,7 @@ namespace Home
             {
 
                 User u = JsonConvert.DeserializeObject<User>(_session.UserData);
-                res = um.Insert(account, false);
+                res = um.Insert(account);
                 um.AddUserToAccount(account.UUID, u.UUID, u);
             }
             else

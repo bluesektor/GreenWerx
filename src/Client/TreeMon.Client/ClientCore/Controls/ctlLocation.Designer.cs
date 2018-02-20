@@ -488,7 +488,6 @@
             this.Controls.Add(this.pnlNodeLocation);
             this.Name = "ctlLocation";
             this.Size = new System.Drawing.Size(961, 408);
-            this.Load += new System.EventHandler(this.ctlLocation_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

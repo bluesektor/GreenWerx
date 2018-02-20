@@ -103,28 +103,28 @@ namespace ClientCore.Controls
             _nodeControl.Show(l);
 
 
-            //            //This is to link an account to a location.
-            //            //Set this to the account.UUID
-            //        public string AccountReference;
+            ////            //This is to link an account to a location.
+            ////            //Set this to the account.UUID
+            ////        public string AccountReference;
 
-            //        //this replaces the Id field on the insert. the ParentId will reference this.
-            //        public int RootId ;
+            ////        //this replaces the Id field on the insert. the ParentId will reference this.
+            ////        public int RootId ;
 
             txtAbbr.Text = l.Abbr;
             txtCode.Text = l.Code;
-            //todo txtCurrencyUUID.Text = l.CurrencyUUID;
-            //todo txtLocationType.text l.LocationType;
+            ////todo txtCurrencyUUID.Text = l.CurrencyUUID;
+            ////todo txtLocationType.text l.LocationType;
             txtLatitude.Text = l.Latitude.ToString();
             txtLongitude.Text = l.Longitude.ToString();
-            //todo txtType.Text = l.Type;
-            //todo txtDescription.Text = l.Description;
+            ////todo txtType.Text = l.Type;
+            ////todo txtDescription.Text = l.Description;
             txtFirstName.Text = l.FirstName;
             txtLastName.Text = l.LastName;
             txtAddress1.Text = l.Address1;
             txtAddress2.Text = l.Address2;
-            //txtCity.Text = l.City;
-            //txtState.Text = l.State;
-            //txtCountry.Text = l.Country;
+            ////txtCity.Text = l.City;
+            ////txtState.Text = l.State;
+            ////txtCountry.Text = l.Country;
             txtPostal.Text = l.Postal;
             chkIsBillingAddress.Checked = l.IsBillingAddress;
             chkDispensary.Checked = l.Dispensary;
@@ -140,30 +140,25 @@ namespace ClientCore.Controls
 
         }
 
-        private void ctlLocation_Load(object sender, EventArgs e)
-        {
-
-        }
-
         protected Location GetLocationDetail()
         {
             _selectedLocation = (Location)_nodeControl.Get();
             _selectedLocation.Abbr = txtAbbr.Text; ;
             _selectedLocation.Code = txtCode.Text;
-            //_selectedLocation.CurrencyUUID = txtCurrencyUUID.Text;
-            //_selectedLocation.LocationType = txtLocationType.text;
-            //_selectedLocation.Latitude = txtLatitude.Text;
-            //_selectedLocation.Longitude = txtLongitude.Text;
-            //_selectedLocation.Longitude = txtLongitude.Text;
-            //_selectedLocation.Type = txtType.Text;
-            //_selectedLocation.Description = txtDescription.Text;
+            ////_selectedLocation.CurrencyUUID = txtCurrencyUUID.Text;
+            ////_selectedLocation.LocationType = txtLocationType.text;
+            ////_selectedLocation.Latitude = txtLatitude.Text;
+            ////_selectedLocation.Longitude = txtLongitude.Text;
+            ////_selectedLocation.Longitude = txtLongitude.Text;
+            ////_selectedLocation.Type = txtType.Text;
+            ////_selectedLocation.Description = txtDescription.Text;
             _selectedLocation.FirstName = txtFirstName.Text;
             _selectedLocation.LastName = txtLastName.Text;
             _selectedLocation.Address1 = txtAddress1.Text;
             _selectedLocation.Address2 = txtAddress2.Text;
-            //_selectedLocation.City = txtCity.Text;
-            //_selectedLocation.State = txtState.Text;
-            //_selectedLocation.Country = txtCountry.Text;
+            ////_selectedLocation.City = txtCity.Text;
+            ////_selectedLocation.State = txtState.Text;
+            ////_selectedLocation.Country = txtCountry.Text;
             _selectedLocation.Postal = txtPostal.Text;
             _selectedLocation.IsBillingAddress = chkIsBillingAddress.Checked;
             _selectedLocation.Dispensary = chkDispensary.Checked;
@@ -283,7 +278,7 @@ namespace ClientCore.Controls
 
             if (string.IsNullOrWhiteSpace(location.UUID))
             {
-                res = um.Insert(location,false);
+                res = um.Insert(location);
                if(res.Code == 200)
                     _treeLocations.AddToTree(n);
             }

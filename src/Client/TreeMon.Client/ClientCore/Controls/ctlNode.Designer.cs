@@ -106,7 +106,6 @@
             this.chkDeleted.TabIndex = 5;
             this.chkDeleted.Text = "Deleted";
             this.chkDeleted.UseVisualStyleBackColor = true;
-            this.chkDeleted.CheckedChanged += new System.EventHandler(this.chkDeleted_CheckedChanged);
             // 
             // chkPrivate
             // 

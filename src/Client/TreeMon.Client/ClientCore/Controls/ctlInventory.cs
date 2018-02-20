@@ -76,10 +76,9 @@ namespace ClientCore.Controls
       
             _nodeControl = new ctlNode(_connectionKey, _sessionKey);
             pnlNodeInventory.Controls.Add(_nodeControl);
-            
 
             _itemControl = new ctlItem(_connectionKey, _sessionKey);
-            //todo bookmark latest add item panel
+            pnlItem.Controls.Add(_itemControl); //todo bookmark latest check if works. see ctlProducts
 
             _nodeTree.Init(nodes, "", null);
 
@@ -124,14 +123,14 @@ namespace ClientCore.Controls
                 return;
 
             _nodeControl.Show(item);
+            _itemControl.Show(item);
 
-           // this.cboReferenceType.DisplayMember = "Name";
             this.cboReferenceType.Items.AddRange(_dataTypes.ToArray());
 
             if (_selectedItem != null && !string.IsNullOrWhiteSpace(_selectedItem.ReferenceType))
                  cboReferenceType.SelectedIndex = _dataTypes.IndexOf(_dataTypes.Single(w => w == _selectedItem.ReferenceType));
 
-            // this.cboLocationType.DisplayMember = "Name";
+            //// this.cboLocationType.DisplayMember = "Name";
             this.cboLocationType.Items.AddRange(_locationTypes.ToArray());
             if (_selectedItem != null && !string.IsNullOrWhiteSpace(_selectedItem.LocationType))
                 cboLocationType.SelectedIndex = _locationTypes.IndexOf(_locationTypes.Single(w => w == _selectedItem.LocationType));
@@ -154,10 +153,7 @@ namespace ClientCore.Controls
 
             lblDateType.Text = item.DateType + ":";//expires, end of cycle ....
             lblItemDate.Text = item.ItemDate.ToString();
-
-            //  string VendorUUID { get; set; }
-            //  string Link { get; set; }
-            //  string LinkProperties { get; set; }
+ 
 
 
         }
@@ -200,7 +196,7 @@ namespace ClientCore.Controls
             ServiceResult res;
 
             if (string.IsNullOrWhiteSpace(item.UUID))
-                res = im.Insert(item, false);
+                res = im.Insert(item);
             else
                 res = im.Update(item);
 

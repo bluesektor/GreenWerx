@@ -108,55 +108,55 @@ namespace ClientCore.Controls
 
 
     */
-            //txtName.Text = _node.Name;
-            //txtStatus.Text = _node.Status;
-            //txtSortOrder.Text = _node.SortOrder.ToString();
-            //txtRoleWeight.Text = _node.RoleWeight.ToString();
+            ////txtName.Text = _node.Name;
+            ////txtStatus.Text = _node.Status;
+            ////txtSortOrder.Text = _node.SortOrder.ToString();
+            ////txtRoleWeight.Text = _node.RoleWeight.ToString();
 
-            //chkActive.Checked = _node.Active;
-            //chkDeleted.Checked = _node.Deleted;
-            //chkPrivate.Checked = _node.Private;
+            ////chkActive.Checked = _node.Active;
+            ////chkDeleted.Checked = _node.Deleted;
+            ////chkPrivate.Checked = _node.Private;
 
-            //lblCreatedBy.Text = _userManager.GetBy(_node.CreatedBy)?.Name;
-            //lblDateCreated.Text = _node.DateCreated.ToShortDateString();
+            ////lblCreatedBy.Text = _userManager.GetBy(_node.CreatedBy)?.Name;
+            ////lblDateCreated.Text = _node.DateCreated.ToShortDateString();
 
-            //for (int i = 0; i < cboRoleOperation.Items.Count; i++)
-            //{
-            //    string cboItem = cboRoleOperation.Items[i].ToString();
-            //    if (string.IsNullOrEmpty(cboItem))
-            //        continue;
+            ////for (int i = 0; i < cboRoleOperation.Items.Count; i++)
+            ////{
+            ////    string cboItem = cboRoleOperation.Items[i].ToString();
+            ////    if (string.IsNullOrEmpty(cboItem))
+            ////        continue;
 
-            //    if (cboItem.EqualsIgnoreCase(_node.RoleOperation, true))
-            //    {
-            //        cboRoleOperation.SelectedIndex = i;
-            //        break;
-            //    }
-            //}
-            //lblAccount.Text = _accountManager.GetBy(_node.AccountUUID)?.Name;
+            ////    if (cboItem.EqualsIgnoreCase(_node.RoleOperation, true))
+            ////    {
+            ////        cboRoleOperation.SelectedIndex = i;
+            ////        break;
+            ////    }
+            ////}
+            ////lblAccount.Text = _accountManager.GetBy(_node.AccountUUID)?.Name;
 
 
         }
 
-        //public INode Get()
-        //{
-        //    if (_node == null)
-        //    {
-        //        _node = new Node();
-        //        //return _node;
-        //    }
+        ////public INode Get()
+        ////{
+        ////    if (_node == null)
+        ////    {
+        ////        _node = new Node();
+        ////        //return _node;
+        ////    }
 
-        //    _node.Name = txtName.Text;
-        //    _node.Status = txtStatus.Text;
+        ////    _node.Name = txtName.Text;
+        ////    _node.Status = txtStatus.Text;
 
-        //    _node.SortOrder = StringEx.ConvertTo<int>(txtSortOrder.Text);
-        //    _node.RoleWeight = StringEx.ConvertTo<int>(txtRoleWeight.Text);
+        ////    _node.SortOrder = StringEx.ConvertTo<int>(txtSortOrder.Text);
+        ////    _node.RoleWeight = StringEx.ConvertTo<int>(txtRoleWeight.Text);
 
-        //    _node.Active = chkActive.Checked;
-        //    _node.Deleted = chkDeleted.Checked;
-        //    _node.Private = chkPrivate.Checked;
+        ////    _node.Active = chkActive.Checked;
+        ////    _node.Deleted = chkDeleted.Checked;
+        ////    _node.Private = chkPrivate.Checked;
 
-        //    _node.RoleOperation = cboRoleOperation.Text;
-        //    return _node;
-        //}
+        ////    _node.RoleOperation = cboRoleOperation.Text;
+        ////    return _node;
+        ////}
     }
 }
