@@ -76,7 +76,7 @@ namespace TreeMon.Managers.Finance
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Currency>().ToList();
 
-                return context.GetAll<Currency>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<Currency>()?.Where(pw => pw.AccountUUID == accountUUID).ToList();
             }
         }
 
@@ -87,7 +87,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Currency>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<Currency>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -99,7 +99,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Currency>().Where(sw => (sw.Name?.Trim()?.EqualsIgnoreCase(name?.Trim()) ?? false)).ToList();
+                return context.GetAll<Currency>()?.Where(sw => (sw.Name?.Trim()?.EqualsIgnoreCase(name?.Trim()) ?? false)).ToList();
             }
         }
 
@@ -111,9 +111,9 @@ namespace TreeMon.Managers.Finance
                 //tod check if asset class is returned if so delete the line below.
 
                 if(inlcudeSystemDefault)
-                    return context.GetAll<Currency>().Where(sw => (sw.AccountUUID == accountUUID || sw.AccountUUID == SystemFlag.Default.Account) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<Currency>()?.Where(sw => (sw.AccountUUID == accountUUID || sw.AccountUUID == SystemFlag.Default.Account) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
 
-                return context.GetAll<Currency>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Currency>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 

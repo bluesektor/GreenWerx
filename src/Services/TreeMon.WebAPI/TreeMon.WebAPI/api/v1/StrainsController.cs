@@ -18,10 +18,12 @@ using TreeMon.Utilites.Extensions;
 using TreeMon.Web.Filters;
 using TreeMon.Web.Models;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 using WebApiThrottle;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class StrainsController : ApiBaseController
     {
 
@@ -133,15 +135,18 @@ namespace TreeMon.Web.api.v1
             return ServiceResponse.OK("", s);
         }
 
-     
 
+        //todo bookmark latest. none of the paging is working
+        //assets/strains
+     //   assets/products
+     //    not paging, maybe check the filter in the angular page
 
-        [EnableThrottling(PerSecond = 1, PerMinute= 20, PerHour= 200, PerDay= 1500, PerWeek= 3000)]
+                [EnableThrottling(PerSecond = 1, PerMinute= 20, PerHour= 200, PerDay= 1500, PerWeek= 3000)]
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Strains/")]
-        public ServiceResult GetStrains(string filter = "")
+        [Route("api/Strains")]
+        public ServiceResult GetStrains()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -151,9 +156,9 @@ namespace TreeMon.Web.api.v1
             List<dynamic>   Strains = (List <dynamic>) strainManager.GetStrains(CurrentUser.AccountUUID, false, true).Cast<dynamic>().ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
+             DataFilter tmpFilter = this.GetFilter(Request);
             
-            Strains = FilterEx.FilterInput(Strains, tmpFilter, out count);
+            Strains = Strains.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Strains, count);
             
         }

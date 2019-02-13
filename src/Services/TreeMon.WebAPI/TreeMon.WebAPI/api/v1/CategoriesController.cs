@@ -12,10 +12,12 @@ using TreeMon.Models.Datasets;
 using TreeMon.Models.General;
 using TreeMon.Utilites.Extensions;
 using TreeMon.Web.Filters;
-
+using WebApi.OutputCache.V2;
+// using WebApi.OutputCache.V2;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class CategoriesController : ApiBaseController 
     {
         public CategoriesController()
@@ -122,7 +124,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Categories")]
-        public ServiceResult GetCategories(string filter = "")
+        public ServiceResult GetCategories()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -130,8 +132,8 @@ namespace TreeMon.Web.api.v1
             CategoryManager CategoryManager = new CategoryManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
             List<dynamic> Categorys = (List<dynamic>)CategoryManager.GetCategories(CurrentUser.AccountUUID, false    , true            ).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            Categorys = FilterEx.FilterInput(Categorys, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            Categorys = Categorys.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Categorys, count);
         }
 

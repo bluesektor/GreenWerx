@@ -9,11 +9,11 @@ using System.Text;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers;
-using TreeMon.Managers.Event;
+using TreeMon.Managers.Events;
 using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Utilites.Extensions;
 using TreeMon.Web.Filters;
 using TreeMon.Web.Models;
@@ -174,11 +174,11 @@ namespace TreeMon.Web.api.v1
             return ServiceResponse.OK("", s);
         }
 
-        [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
+        [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 0)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Reminders/")]
-        public ServiceResult GetReminders(string filter = "")
+        [Route("api/Reminders")]
+        public ServiceResult GetReminders()
         {
             if (Request.Headers.Authorization == null || string.IsNullOrWhiteSpace(Request.Headers?.Authorization?.Parameter))
                 return ServiceResponse.Error("You must be logged in to access this functionality.");
@@ -188,11 +188,15 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            List<dynamic> Reminders =reminderManager.GetReminders(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
+            var tmp = reminderManager.GetReminders(CurrentUser.UUID, CurrentUser.AccountUUID);
+            if (tmp == null)
+                return ServiceResponse.OK("", null, 0);
+
+            List<dynamic> Reminders =tmp.Cast<dynamic>()?.ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            Reminders = FilterEx.FilterInput(Reminders, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            Reminders = Reminders.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", Reminders, count);
         }
@@ -252,6 +256,8 @@ namespace TreeMon.Web.api.v1
             dbS.RepeatForever = s.RepeatForever;
             dbS.RepeatCount = s.RepeatCount;
             dbS.Frequency = s.Frequency;
+            dbS.EventUUID = s.EventUUID;
+            dbS.Favorite = s.Favorite;
             return reminderManager.Update(dbS);
         } 
     }

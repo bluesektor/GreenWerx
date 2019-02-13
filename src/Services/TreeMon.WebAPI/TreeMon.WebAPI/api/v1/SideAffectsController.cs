@@ -72,7 +72,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/SideAffects/{parentUUID}")]
-        public ServiceResult GetSideAffects(string parentUUID = "", string filter = "")
+        public ServiceResult GetSideAffects(string parentUUID = "")
             {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -84,8 +84,8 @@ namespace TreeMon.Web.api.v1
             SideAffects = SideAffectManager.GetSideAffects(parentUUID, CurrentUser.AccountUUID).Cast<dynamic>().ToList(); ;
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                SideAffects = FilterEx.FilterInput(SideAffects, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                SideAffects = SideAffects.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("",SideAffects, count);
         }
@@ -94,7 +94,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Doses/{doseUUID}/SideAffects/History/{parentUUID}")]
-        public ServiceResult GetChildSideAffects(string doseUUID, string parentUUID = "", string filter = "")
+        public ServiceResult GetChildSideAffects(string doseUUID, string parentUUID = "")
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -110,8 +110,8 @@ namespace TreeMon.Web.api.v1
             int count;
 
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                SymptomsLog = FilterEx.FilterInput(SymptomsLog, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                SymptomsLog = SymptomsLog.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("",SymptomsLog, count);
         }

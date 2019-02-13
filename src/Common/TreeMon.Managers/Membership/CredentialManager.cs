@@ -27,7 +27,7 @@ namespace TreeMon.Managers.Membership
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
            
-                    Credential dbU = context.GetAll<Credential>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(c.Name) && wu.AccountUUID == c.AccountUUID);
+                    Credential dbU = context.GetAll<Credential>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(c.Name) && wu.AccountUUID == c.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Credential already exists.");

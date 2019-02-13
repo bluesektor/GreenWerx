@@ -22,11 +22,11 @@ namespace TreeMon.Utilites.Extensions
             if(string.IsNullOrWhiteSpace(item.UUIDType))
                 item.UUIDType = item.GetType().Name;
 
-            if (string.IsNullOrWhiteSpace(item.SyncKey))
-                item.SyncKey = item.UUID;
+            if (string.IsNullOrWhiteSpace(item.GUUID))
+                item.GUUID = item.UUID;
 
-            if (string.IsNullOrWhiteSpace(item.SyncType))
-                item.SyncType = item.GetType().Name;
+            if (string.IsNullOrWhiteSpace(item.GuuidType))
+                item.GuuidType = item.GetType().Name;
 
             if (item.DateCreated == DateTime.MinValue)
                 item.DateCreated = DateTime.UtcNow;
@@ -37,7 +37,7 @@ namespace TreeMon.Utilites.Extensions
             
             item.RoleWeight = roleWeight;
             item.Deleted = false;
-            item.Private = true;
+            // item.Private = true;
                  
                  
 

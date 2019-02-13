@@ -6,7 +6,9 @@ namespace TreeMon.Models.Datasets
 {
     public class DataPoint
     {
-        public DataPoint() { }
+        public DataPoint() {
+           
+        }
 
         public DataPoint(string caption, string dataValue, string dataType, DateTime pointDate, int pointIndex, bool isSeries = true)
         {
@@ -16,6 +18,7 @@ namespace TreeMon.Models.Datasets
             Date = pointDate;
             Index = pointIndex;
             IsSeries = isSeries;
+         
         }
         public int RoleWeight { get; set; }
 
@@ -30,6 +33,7 @@ namespace TreeMon.Models.Datasets
         public DateTime? Date { get; set; }
       
         public int Index { get; set; }
+
     }
 
     public class Coordinate

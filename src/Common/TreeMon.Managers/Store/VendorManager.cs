@@ -86,7 +86,7 @@ namespace TreeMon.Managers.Store
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Vendor>().ToList();
 
-                return context.GetAll<Vendor>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<Vendor>()?.Where(pw => pw.AccountUUID == accountUUID).ToList();
             }
         }
 
@@ -98,7 +98,7 @@ namespace TreeMon.Managers.Store
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Vendor>().ToList();
 
-                return context.GetAll<Vendor>().Where(pw => pw.AccountUUID == accountUUID && pw.CreatedBy == userUUID).ToList();
+                return context.GetAll<Vendor>()?.Where(pw => pw.AccountUUID == accountUUID && pw.CreatedBy == userUUID).ToList();
             }
         }
 
@@ -109,7 +109,7 @@ namespace TreeMon.Managers.Store
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Vendor>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<Vendor>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -122,7 +122,7 @@ namespace TreeMon.Managers.Store
             {
                 ///if (!this.DataAccessAuthorized(p, "GET", false))return ServiceResponse.Error("You are not authorized this action.");
 
-                return context.GetAll<Vendor>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<Vendor>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -136,10 +136,10 @@ namespace TreeMon.Managers.Store
                 ////    return ServiceResponse.Error("You are not authorized this action.");
                 if (includeSystemAccount)
                 {
-                    return context.GetAll<Vendor>().Where(sw => (sw.AccountUUID == accountUUID ) && sw.Deleted == deleted).GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<Vendor>()?.Where(sw => (sw.AccountUUID == accountUUID ) && sw.Deleted == deleted).GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();
                 }
 
-                return context.GetAll<Vendor>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Vendor>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 

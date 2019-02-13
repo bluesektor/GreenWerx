@@ -14,7 +14,8 @@ namespace TreeMon.Models
         public Node()
         {
             this.ParentId       = 0;
-            this.UUID           = Guid.NewGuid().ToString("N");
+            if(string.IsNullOrWhiteSpace(this.UUID))
+                this.UUID           = Guid.NewGuid().ToString("N");
             this.UUIDType       = string.Empty;
             this.UUParentID     = string.Empty;
             this.UUParentIDType = string.Empty;
@@ -32,10 +33,11 @@ namespace TreeMon.Models
             this.Image          = "";
         }
 
-        public string SyncKey { get; set; }
+        public string GUUID { get; set; }
 
-        public string SyncType { get; set; }
+        public string GuuidType { get; set; }
 
+        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         [Key]       // [Column(Order = 1)] //column order for multiple keys
         public int Id { get; set; }        //sqlite only allows integer for auto inc. primary key?! ugh
 
@@ -45,7 +47,7 @@ namespace TreeMon.Models
 
         public int? ParentId { get; set; }
 
-        [StringLength(32)]
+        [StringLength(64)]
         public string UUID { get; set; }
 
         /// <summary>
@@ -54,7 +56,7 @@ namespace TreeMon.Models
          [StringLength(32)]
         public string UUIDType { get; set; }
 
-        [StringLength(32)]
+        [StringLength(64)]
         public string UUParentID { get; set; }
 
         [StringLength(32)]

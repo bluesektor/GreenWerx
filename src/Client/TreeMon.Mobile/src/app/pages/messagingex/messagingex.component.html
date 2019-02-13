@@ -1,0 +1,36 @@
+ <ion-header>
+    <ion-toolbar>
+   
+        <ion-buttons slot="start">
+        <ion-button (click)="dismiss()" style="color:red;" >Close</ion-button>
+        </ion-buttons>
+        <ion-title>
+        Send Message
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+            
+<ion-content >
+        <div style="color:red" *ngIf="hasError === true" innerHtml="{{responseMessage}}" > </div>
+        <div style="color:green" *ngIf="hasError === false" innerHtml="{{responseMessage}}" > </div>
+    <ion-list lines="none">
+        <ion-item>
+                <ion-input [(ngModel)]="messageToSend.Subject" placeholder="Subject" name="Subject" type="text" #subject="ngModel" spellcheck="true" autocapitalize="off"
+                required>
+              </ion-input>
+        </ion-item>
+        <ion-item>
+                
+            <ion-textarea [(ngModel)]="messageToSend.Comment" placeholder="Enter your message.." name="messageToSend"
+             type="text" #comment="ngModel" spellcheck="true" autocapitalize="off"            >
+            </ion-textarea>  
+        </ion-item>
+    </ion-list>
+    <ion-list lines="none">
+            <ion-button *ngIf="sendingMessage !== true" (click)="sendMessage()" type="button" expand="block">Send</ion-button>
+            <ion-spinner  *ngIf="sendingMessage === true"></ion-spinner>
+           
+    </ion-list>
+
+</ion-content>
+             

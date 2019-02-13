@@ -16,14 +16,14 @@ namespace TreeMon.Managers.Finance
 {
     public class FinanceAccountManager : BaseManager, ICrud
     {
-        private readonly string _sessionKey;
+     
         private readonly SystemLogger _logger;
 
         public FinanceAccountManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(connectionKey), "FinanceAccountManager CONTEXT IS NULL!");
 
-            _sessionKey = sessionKey;
+            SessionKey = sessionKey;
             this._connectionKey = connectionKey;
 
             _logger = new SystemLogger(connectionKey);
@@ -36,9 +36,9 @@ namespace TreeMon.Managers.Finance
             {
 
                 if (mustBeUnused)
-                    return context.GetAll<FinanceAccount>().FirstOrDefault(l => l.SourceUUID == -1 && l.AccountUUID == accountUUID);
+                    return context.GetAll<FinanceAccount>()?.FirstOrDefault(l => l.SourceUUID == -1 && l.AccountUUID == accountUUID);
 
-                return context.GetAll<FinanceAccount>().FirstOrDefault(l => l.AccountUUID == accountUUID);
+                return context.GetAll<FinanceAccount>()?.FirstOrDefault(l => l.AccountUUID == accountUUID);
             }
         }
 
@@ -97,7 +97,7 @@ namespace TreeMon.Managers.Finance
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<FinanceAccount>().ToList();
 
-                return context.GetAll<FinanceAccount>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<FinanceAccount>()?.Where(pw => pw.AccountUUID == accountUUID).ToList();
             }
         }
 
@@ -108,7 +108,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ////if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<FinanceAccount>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<FinanceAccount>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -120,7 +120,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<FinanceAccount>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<FinanceAccount>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -130,11 +130,11 @@ namespace TreeMon.Managers.Finance
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-                List<FinanceAccount> tmp = context.GetAll<FinanceAccount>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                List<FinanceAccount> tmp = context.GetAll<FinanceAccount>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
 
                tmp.ForEach(x =>
                {
-                   x.CurrencyName = context.GetAll<Currency>().FirstOrDefault(w => w.UUID == x.CurrencyUUID)?.Name;
+                   x.CurrencyName = context.GetAll<Currency>()?.FirstOrDefault(w => w.UUID == x.CurrencyUUID)?.Name;
                });
                 return tmp;
             }

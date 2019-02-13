@@ -25,7 +25,7 @@ namespace TreeMon.Web.Tests.API.V1
     [TestClass]
     public class DoseControllerTests //todo re-implement
     {
-        ////private string connectionKey = "MSSQL_TEST";
+        //private string connectionKey = "MSSQL_TEST";
         //private string _ownerAuthToken = "";
         //private string _captcha = "TESTCAPTCHA";
         //private string _symptomUUID = Guid.NewGuid().ToString("N");

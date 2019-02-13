@@ -86,20 +86,20 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Symptoms/")]
-        public ServiceResult GetSymptoms(string filter = "")
+        [Route("api/Symptoms")]
+        public ServiceResult GetSymptoms()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
            
-            DataFilter tmpFilter = this.GetFilter(filter);
+             DataFilter tmpFilter = this.GetFilter(Request);
             SymptomManager symptomManager = new SymptomManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
             List<dynamic> Symptoms = symptomManager.GetSymptoms(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count = 0;
 
 
-            Symptoms = FilterEx.FilterInput(Symptoms, tmpFilter, out count);
+            Symptoms = Symptoms.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Symptoms, count);
           
         }
@@ -279,7 +279,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/SymptomsLog/{parentUUID}")]
-        public ServiceResult GetSymptomLogs(string parentUUID ="",string filter = "")
+        public ServiceResult GetSymptomLogs(string parentUUID ="")
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -291,8 +291,8 @@ namespace TreeMon.Web.api.v1
 
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            SymptomsLog = FilterEx.FilterInput(SymptomsLog, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            SymptomsLog = SymptomsLog.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", SymptomsLog, count);
         }
 
@@ -301,7 +301,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Doses/{doseUUID}/SymptomsLog/History/{parentUUID}")]
-        public ServiceResult GetChildSymptomLogs(string doseUUID, string parentUUID = "", string filter = "")
+        public ServiceResult GetChildSymptomLogs(string doseUUID, string parentUUID = "")
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -314,8 +314,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> SymptomsLog = symptomManager.GetSymptomsByDose(doseUUID, parentUUID, CurrentUser.AccountUUID).Cast<dynamic>().ToList();
 
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            SymptomsLog = FilterEx.FilterInput(SymptomsLog, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            SymptomsLog = SymptomsLog.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", SymptomsLog, count);
         }
 
@@ -323,8 +323,8 @@ namespace TreeMon.Web.api.v1
         //[ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Doses/{doseUUID}/SymptomsLog/")]
-        public ServiceResult GetSymptomsLogByDose(string doseUUID, string filter = "")
+        [Route("api/Doses/{doseUUID}/SymptomsLog")]
+        public ServiceResult GetSymptomsLogByDose(string doseUUID)
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -339,8 +339,8 @@ namespace TreeMon.Web.api.v1
 
             SymptomsLog = symptomManager.GetSymptomsByDose(doseUUID,"", CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            SymptomsLog = FilterEx.FilterInput(SymptomsLog, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            SymptomsLog = SymptomsLog.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", SymptomsLog, count);
         }
 

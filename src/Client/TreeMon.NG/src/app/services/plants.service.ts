@@ -56,7 +56,6 @@ export class PlantsService extends WebApiService {
     getStrain(strainUUID) {
         return this.invokeRequest('GET', 'api/StrainsBy/' + strainUUID, ''    );
     }
-  
 
     deleteStrain(strainUUID: string) {
         return this.invokeRequest('DELETE', 'api/Strains/Delete/' + strainUUID, ''    );

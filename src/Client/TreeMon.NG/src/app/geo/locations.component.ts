@@ -400,7 +400,8 @@ export class LocationsComponent implements OnInit {
         filter.PageSize = 25;
         if ( BasicValidators.isNullOrEmpty(event.query) === false) {
             const screen = new Screen();
-            screen.Command = 'Contains';
+            screen.Command = 'SearchBy';
+            screen.Operator = 'Contains';
             screen.Field = 'Name';
             screen.Value = event.query.toLowerCase();
             filter.Screens.push(screen);

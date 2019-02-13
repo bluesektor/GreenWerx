@@ -8,7 +8,7 @@ import { Setting } from './models/setting';
 import { SettingsService } from './services/settings.service';
 
 @Component({
-    selector: 'tm-navbar-default',
+    selector: 'app-navbar-default',
     templateUrl: './navbar.default.component.html',
     providers: [AppService, SessionService, SettingsService]
 })

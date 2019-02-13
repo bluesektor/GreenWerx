@@ -52,5 +52,8 @@ namespace TreeMon.Models.App
         /// csv usert role
         /// </summary>
         public string roleWeights { get; set; }
+
+        public string roleNames { get; set; }
+
     }
 }

@@ -175,8 +175,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/DoseLogs/")]
-        public ServiceResult GetLogs(string filter = "")
+        [Route("api/DoseLogs")]
+        public ServiceResult GetLogs()
         {
             if (Request.Headers.Authorization == null || string.IsNullOrWhiteSpace(Request.Headers?.Authorization?.Parameter))
                 return ServiceResponse.Error("You must be logged in to access this functionality.");
@@ -188,10 +188,11 @@ namespace TreeMon.Web.api.v1
             DoseManager DoseManager = new DoseManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
             List<dynamic> Doses = DoseManager.GetDoses(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
 
-            if (!string.IsNullOrWhiteSpace(filter))
+            DataFilter filter = this.GetFilter(Request);
+            if (filter != null)
             {
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                Doses = FilterEx.FilterInput(Doses, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                Doses = Doses.Filter( tmpFilter, out count);
            
                  //todo move the code below to the filter input
                 string sortField = tmpFilter.SortBy?.ToUpper();

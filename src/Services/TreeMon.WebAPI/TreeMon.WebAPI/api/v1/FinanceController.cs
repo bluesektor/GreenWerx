@@ -8,6 +8,7 @@ using System.Threading;
 using System.Web.Mvc;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers.Finance;
+using TreeMon.Managers.Geo;
 using TreeMon.Managers.Store;
 using TreeMon.Models;
 using TreeMon.Models.App;
@@ -101,8 +102,8 @@ namespace TreeMon.WebAPI.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
-        [System.Web.Http.Route("api/Finance/Accounts/")]
-        public ServiceResult GetFinanceAccounts(string filter = "")
+        [System.Web.Http.Route("api/Finance/Accounts")]
+        public ServiceResult GetFinanceAccounts()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -113,8 +114,8 @@ namespace TreeMon.WebAPI.api.v1
             List<dynamic> FinanceAccounts = financeAccountManager.GetFinanceAccounts(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            FinanceAccounts = FilterEx.FilterInput(FinanceAccounts, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            FinanceAccounts = FinanceAccounts.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", FinanceAccounts, count);
         }
@@ -286,7 +287,7 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult GetPriceRule(string PriceRuleCode)
         {
             if (string.IsNullOrWhiteSpace(PriceRuleCode))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide a code for the rule.");
 
             PriceManager financeManager = new PriceManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
@@ -301,8 +302,8 @@ namespace TreeMon.WebAPI.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
-        [System.Web.Http.Route("api/Finance/PriceRules/")]
-        public ServiceResult GetPriceRules(string filter = "")
+        [System.Web.Http.Route("api/Finance/PriceRules")]
+        public ServiceResult GetPriceRules()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -311,8 +312,8 @@ namespace TreeMon.WebAPI.api.v1
 
             List<dynamic> PriceRule = (List<dynamic>)financeManager.GetPriceRules(CurrentUser.AccountUUID, false).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            PriceRule = FilterEx.FilterInput(PriceRule, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            PriceRule = PriceRule.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", PriceRule, count);
         }
 
@@ -447,7 +448,7 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult GetFinanceAccountTransactionByName(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide a name for the transaction.");
 
             FinanceAccountTransactionsManager financeManager = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
@@ -462,8 +463,8 @@ namespace TreeMon.WebAPI.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
-        [System.Web.Http.Route("api/Finance/Accounts/Transactions/")]
-        public ServiceResult GetAccountTransactions(string filter = "")
+        [System.Web.Http.Route("api/Finance/Accounts/Transactions")]
+        public ServiceResult GetAccountTransactions()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -473,8 +474,8 @@ namespace TreeMon.WebAPI.api.v1
             List<dynamic> FinanceAccountTransaction = (List<dynamic>)financeManager.GetFinanceAccountTransactions(CurrentUser.AccountUUID, false).Cast<dynamic>().ToList();
 
           int count;
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                FinanceAccountTransaction = FilterEx.FilterInput(FinanceAccountTransaction, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                FinanceAccountTransaction = FinanceAccountTransaction.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", FinanceAccountTransaction, count);
         }
@@ -619,7 +620,7 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult GetCurrencyByName(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide a name for the currency.");
 
             CurrencyManager financeManager = new CurrencyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
@@ -635,7 +636,7 @@ namespace TreeMon.WebAPI.api.v1
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
         [System.Web.Http.Route("api/Finance/Currency")]
-        public ServiceResult GetCurrency(string filter = "")
+        public ServiceResult GetCurrency()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -646,8 +647,8 @@ namespace TreeMon.WebAPI.api.v1
 
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            currency = FilterEx.FilterInput(currency, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            currency = currency.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", currency, count);
         }
 
@@ -657,7 +658,7 @@ namespace TreeMon.WebAPI.api.v1
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
         [System.Web.Http.Route("api/Finance/Currency/Symbols")]
-        public ServiceResult GetCurrencySymbols(string filter = "")
+        public ServiceResult GetCurrencySymbols()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -678,7 +679,7 @@ namespace TreeMon.WebAPI.api.v1
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
         [System.Web.Http.Route("api/Finance/AssetClasses")]
-        public ServiceResult GetAssetClasses(string filter = "")
+        public ServiceResult GetAssetClasses()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");

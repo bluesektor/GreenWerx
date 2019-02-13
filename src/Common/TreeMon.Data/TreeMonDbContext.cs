@@ -2,7 +2,6 @@
 //Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
 
 using Dapper;
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,17 +10,19 @@ using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Infrastructure.Annotations;
+using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
+using TreeMon.Data.Helpers;
 using TreeMon.Data.Logging;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Models;
 using TreeMon.Models.App;
+using TreeMon.Models.Datasets;
 using TreeMon.Models.Equipment;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Models.Finance;
 using TreeMon.Models.Finance.PaymentGateways;
 using TreeMon.Models.General;
@@ -35,9 +36,10 @@ using TreeMon.Models.Store;
 using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Security;
 
+
 namespace TreeMon.Data
 {
-    public class TreeMonDbContext : DbContext, IDbContext
+    public partial class TreeMonDbContext : DbContext, IDbContext
     {
         #region Properties
         public bool Install { get; set; }
@@ -56,11 +58,15 @@ namespace TreeMon.Data
 
         readonly SystemLogger _fileLogger = new SystemLogger(null, true);
 
+
         #region Initialization
 
         public TreeMonDbContext(string nameOrConnectionString)
             : base(nameOrConnectionString)
         {
+             Database.SetInitializer<TreeMonDbContext>(null); // dev try context has changed since the database was created
+
+
             Initialize(nameOrConnectionString);
         }
 
@@ -117,88 +123,106 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "Initialize");
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Initialize");
             }
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Location>())) { TypeTables.Add(DatabaseEx.GetTableName<Location>(), new Location()); }
+
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Tag>())) { TypeTables.Add(DatabaseEx.GetTableName<Tag>(), new Tag()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<TreeMon.Models.General.Attribute>())) { TypeTables.Add(DatabaseEx.GetTableName<TreeMon.Models.General.Attribute>(), new TreeMon.Models.General.Attribute()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Category>())) { TypeTables.Add(DatabaseEx.GetTableName<Category>(), new Category()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<UnitOfMeasure>())) { TypeTables.Add(DatabaseEx.GetTableName<UnitOfMeasure>(), new UnitOfMeasure()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<StatusMessage>())) { TypeTables.Add(DatabaseEx.GetTableName<StatusMessage>(), new StatusMessage()); }
+
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<AppInfo>())) { TypeTables.Add(DatabaseEx.GetTableName<AppInfo>(), new AppInfo()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Setting>())) { TypeTables.Add(DatabaseEx.GetTableName<Setting>(), new Setting()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<UserSession>())) { TypeTables.Add(DatabaseEx.GetTableName<UserSession>(), new UserSession()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<AnatomyTag>())) { TypeTables.Add(DatabaseEx.GetTableName<AnatomyTag>(), new AnatomyTag()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Anatomy>())) { TypeTables.Add(DatabaseEx.GetTableName<Anatomy>(), new Anatomy()); }
+
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<SideAffect>())) { TypeTables.Add(DatabaseEx.GetTableName<SideAffect>(), new SideAffect()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Symptom>())) { TypeTables.Add(DatabaseEx.GetTableName<Symptom>(), new Symptom()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<SymptomLog>())) { TypeTables.Add(DatabaseEx.GetTableName<SymptomLog>(), new SymptomLog()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<DoseLog>())) { TypeTables.Add(DatabaseEx.GetTableName<DoseLog>(), new DoseLog()); }
 
 
-            if (!TypeTables.ContainsKey(this.GetTableName<Location>())) { TypeTables.Add(this.GetTableName<Location>(), new Location()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Ballast>())) { TypeTables.Add(DatabaseEx.GetTableName<Ballast>(), new Ballast()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Bulb>())) { TypeTables.Add(DatabaseEx.GetTableName<Bulb>(), new Bulb()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Fan>())) { TypeTables.Add(DatabaseEx.GetTableName<Fan>(), new Fan()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Filter>())) { TypeTables.Add(DatabaseEx.GetTableName<Filter>(), new Filter()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Pump>())) { TypeTables.Add(DatabaseEx.GetTableName<Pump>(), new Pump()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Vehicle>())) { TypeTables.Add(DatabaseEx.GetTableName<Vehicle>(), new Vehicle()); }
+           
+
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Currency>())) { TypeTables.Add(DatabaseEx.GetTableName<Currency>(), new Currency()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Fee>())) { TypeTables.Add(DatabaseEx.GetTableName<Fee>(), new Fee()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<FinanceAccount>())) { TypeTables.Add(DatabaseEx.GetTableName<FinanceAccount>(), new FinanceAccount()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<FinanceAccountTransaction>())) { TypeTables.Add(DatabaseEx.GetTableName<FinanceAccountTransaction>(), new FinanceAccountTransaction()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<PriceRule>())) { TypeTables.Add(DatabaseEx.GetTableName<PriceRule>(), new PriceRule()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<PaymentGatewayLog>())) { TypeTables.Add(DatabaseEx.GetTableName<PaymentGatewayLog>(), new PaymentGatewayLog()); }
+
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Event>())) { TypeTables.Add(DatabaseEx.GetTableName<Event>(), new Event()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<EventMember>())) { TypeTables.Add(DatabaseEx.GetTableName<EventMember>(), new EventMember()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<EventGroup>())) { TypeTables.Add(DatabaseEx.GetTableName<EventGroup>(), new EventGroup()); }
 
             
-            if (!TypeTables.ContainsKey(this.GetTableName<TreeMon.Models.General.Attribute>())) { TypeTables.Add(this.GetTableName<TreeMon.Models.General.Attribute>(), new TreeMon.Models.General.Attribute()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Category>())) { TypeTables.Add(this.GetTableName<Category>(), new Category()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<UnitOfMeasure>())) { TypeTables.Add(this.GetTableName<UnitOfMeasure>(), new UnitOfMeasure()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<StatusMessage>())) { TypeTables.Add(this.GetTableName<StatusMessage>(), new StatusMessage()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<EventItem>())) { TypeTables.Add(DatabaseEx.GetTableName<EventItem>(), new EventItem()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<EventLocation>())) { TypeTables.Add(DatabaseEx.GetTableName<EventLocation>(), new EventLocation()); }
 
-            if (!TypeTables.ContainsKey(this.GetTableName<AppInfo>())) { TypeTables.Add(this.GetTableName<AppInfo>(), new AppInfo()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Setting>())) { TypeTables.Add(this.GetTableName<Setting>(), new Setting()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<UserSession>())) { TypeTables.Add(this.GetTableName<UserSession>(), new UserSession()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<AnatomyTag>())) { TypeTables.Add(this.GetTableName<AnatomyTag>(), new AnatomyTag()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Anatomy>())) { TypeTables.Add(this.GetTableName<Anatomy>(), new Anatomy()); }
+            
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Notification>())) { TypeTables.Add(DatabaseEx.GetTableName<Notification>(), new Notification()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Reminder>())) { TypeTables.Add(DatabaseEx.GetTableName<Reminder>(), new Reminder()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<ReminderRule>())) { TypeTables.Add(DatabaseEx.GetTableName<ReminderRule>(), new ReminderRule()); }
 
-            if (!TypeTables.ContainsKey(this.GetTableName<SideAffect>())) { TypeTables.Add(this.GetTableName<SideAffect>(), new SideAffect()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Symptom>())) { TypeTables.Add(this.GetTableName<Symptom>(), new Symptom()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<SymptomLog>())) { TypeTables.Add(this.GetTableName<SymptomLog>(), new SymptomLog()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<DoseLog>())) { TypeTables.Add(this.GetTableName<DoseLog>(), new DoseLog()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<AccessLog>())) { TypeTables.Add(DatabaseEx.GetTableName<AccessLog>(), new AccessLog()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<LineItemLog>())) { TypeTables.Add(DatabaseEx.GetTableName<LineItemLog>(), new LineItemLog()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<MeasurementLog>())) { TypeTables.Add(DatabaseEx.GetTableName<MeasurementLog>(), new MeasurementLog()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<EmailLog>())) { TypeTables.Add(DatabaseEx.GetTableName<EmailLog>(), new EmailLog()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<LogEntry>())) { TypeTables.Add(DatabaseEx.GetTableName<LogEntry>(), new LogEntry()); }
 
-            if (!TypeTables.ContainsKey(this.GetTableName<Ballast>())) { TypeTables.Add(this.GetTableName<Ballast>(), new Ballast()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Bulb>())) { TypeTables.Add(this.GetTableName<Bulb>(), new Bulb()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Fan>())) { TypeTables.Add(this.GetTableName<Fan>(), new Fan()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Filter>())) { TypeTables.Add(this.GetTableName<Filter>(), new Filter()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Pump>())) { TypeTables.Add(this.GetTableName<Pump>(), new Pump()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Vehicle>())) { TypeTables.Add(this.GetTableName<Vehicle>(), new Vehicle()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Account>())) { TypeTables.Add(DatabaseEx.GetTableName<Account>(), new Account()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<AccountMember>())) { TypeTables.Add(DatabaseEx.GetTableName<AccountMember>(), new AccountMember()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<ApiKey>())) { TypeTables.Add(DatabaseEx.GetTableName<ApiKey>(), new ApiKey()); }
+            
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Credential>())) { TypeTables.Add(DatabaseEx.GetTableName<Credential>(), new Credential()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<RolePermission>())) { TypeTables.Add(DatabaseEx.GetTableName<RolePermission>(), new RolePermission()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<PersonalProfile>())) { TypeTables.Add(DatabaseEx.GetTableName<PersonalProfile>(), new PersonalProfile()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Profile>())) { TypeTables.Add(DatabaseEx.GetTableName<Profile>(), new Profile()); }
+                if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Role>())) { TypeTables.Add(DatabaseEx.GetTableName<Role>(), new Role()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<User>())) { TypeTables.Add(DatabaseEx.GetTableName<User>(), new User()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<UserRole>())) { TypeTables.Add(DatabaseEx.GetTableName<UserRole>(), new UserRole()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Permission>())) { TypeTables.Add(DatabaseEx.GetTableName<Permission>(), new Permission()); }
 
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Product>())) { TypeTables.Add(DatabaseEx.GetTableName<Product>(), new Product()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Vendor>())) { TypeTables.Add(DatabaseEx.GetTableName<Vendor>(), new Vendor()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<ShoppingCart>())) { TypeTables.Add(DatabaseEx.GetTableName<ShoppingCart>(), new ShoppingCart()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<ShoppingCartItem>())) { TypeTables.Add(DatabaseEx.GetTableName<ShoppingCartItem>(), new ShoppingCartItem()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<InventoryItem>())) { TypeTables.Add(DatabaseEx.GetTableName<InventoryItem>(), new InventoryItem()); }
 
-            if (!TypeTables.ContainsKey(this.GetTableName<Currency>())) { TypeTables.Add(this.GetTableName<Currency>(), new Currency()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Fee>())) { TypeTables.Add(this.GetTableName<Fee>(), new Fee()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<FinanceAccount>())) { TypeTables.Add(this.GetTableName<FinanceAccount>(), new FinanceAccount()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<FinanceAccountTransaction>())) { TypeTables.Add(this.GetTableName<FinanceAccountTransaction>(), new FinanceAccountTransaction()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<PriceRule>())) { TypeTables.Add(this.GetTableName<PriceRule>(), new PriceRule()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<PaymentGatewayLog>())) { TypeTables.Add(this.GetTableName<PaymentGatewayLog>(), new PaymentGatewayLog()); }
-
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Notification>())) { TypeTables.Add(this.GetTableName<Notification>(), new Notification()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Reminder>())) { TypeTables.Add(this.GetTableName<Reminder>(), new Reminder()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<ReminderRule>())) { TypeTables.Add(this.GetTableName<ReminderRule>(), new ReminderRule()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<AuthenticationLog>())) { TypeTables.Add(this.GetTableName<AuthenticationLog>(), new AuthenticationLog()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<LineItemLog>())) { TypeTables.Add(this.GetTableName<LineItemLog>(), new LineItemLog()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<MeasurementLog>())) { TypeTables.Add(this.GetTableName<MeasurementLog>(), new MeasurementLog()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<EmailLog>())) { TypeTables.Add(this.GetTableName<EmailLog>(), new EmailLog()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<LogEntry>())) { TypeTables.Add(this.GetTableName<LogEntry>(), new LogEntry()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Account>())) { TypeTables.Add(this.GetTableName<Account>(), new Account()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<AccountMember>())) { TypeTables.Add(this.GetTableName<AccountMember>(), new AccountMember()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Credential>())) { TypeTables.Add(this.GetTableName<Credential>(), new Credential()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<RolePermission>())) { TypeTables.Add(this.GetTableName<RolePermission>(), new RolePermission()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Profile>())) { TypeTables.Add(this.GetTableName<Profile>(), new Profile()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Role>())) { TypeTables.Add(this.GetTableName<Role>(), new Role()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<User>())) { TypeTables.Add(this.GetTableName<User>(), new User()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<UserRole>())) { TypeTables.Add(this.GetTableName<UserRole>(), new UserRole()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Permission>())) { TypeTables.Add(this.GetTableName<Permission>(), new Permission()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Product>())) { TypeTables.Add(this.GetTableName<Product>(), new Product()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Vendor>())) { TypeTables.Add(this.GetTableName<Vendor>(), new Vendor()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<ShoppingCart>())) { TypeTables.Add(this.GetTableName<ShoppingCart>(), new ShoppingCart()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<ShoppingCartItem>())) { TypeTables.Add(this.GetTableName<ShoppingCartItem>(), new ShoppingCartItem()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<InventoryItem>())) { TypeTables.Add(this.GetTableName<InventoryItem>(), new InventoryItem()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<PriceRule>())) { TypeTables.Add(this.GetTableName<PriceRule>(), new PriceRule()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<PriceRuleLog>())) { TypeTables.Add(this.GetTableName<PriceRuleLog>(), new PriceRuleLog()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<Order>())) { TypeTables.Add(this.GetTableName<Order>(), new Order()); }
-            if (!TypeTables.ContainsKey(this.GetTableName<OrderItem>())) { TypeTables.Add(this.GetTableName<OrderItem>(), new OrderItem()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<PriceRule>())) { TypeTables.Add(DatabaseEx.GetTableName<PriceRule>(), new PriceRule()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<PriceRuleLog>())) { TypeTables.Add(DatabaseEx.GetTableName<PriceRuleLog>(), new PriceRuleLog()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Order>())) { TypeTables.Add(DatabaseEx.GetTableName<Order>(), new Order()); }
+            if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<OrderItem>())) { TypeTables.Add(DatabaseEx.GetTableName<OrderItem>(), new OrderItem()); }
 
             try
                 {
-                    //Note: if you get error 'The entity type XXXXX is not part of the model for the current context.' you need to add it below.
+                //Note: if you get error 'The entity type XXXXX is not part of the model for the current context.' you need to add it below.
 
-                    #region General
-                    
-                    modelBuilder.Entity<TreeMon.Models.General.Attribute>()
-                          .ToTable(GetTableName<TreeMon.Models.General.Attribute>())
+                #region General
+
+                modelBuilder.Entity<Tag>()
+                     .ToTable(DatabaseEx.GetTableName<Tag>())
+                     .HasKey(o => o.UUID)
+                     .Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                     {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                     }));
+
+                modelBuilder.Entity<TreeMon.Models.General.Attribute>()
+                          .ToTable(DatabaseEx.GetTableName<TreeMon.Models.General.Attribute>())
                           .HasKey(o => o.Id)
                           .Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                           {
@@ -206,19 +230,19 @@ namespace TreeMon.Data
                           }));
 
                     modelBuilder.Entity<Category>()
-                            .ToTable(GetTableName<Category>())
+                            .ToTable(DatabaseEx.GetTableName<Category>())
                             .HasKey(o => o.Id)
                             .Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                             }));
 
-                    modelBuilder.Entity<UnitOfMeasure>().ToTable(GetTableName<UnitOfMeasure>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<UnitOfMeasure>().ToTable(DatabaseEx.GetTableName<UnitOfMeasure>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<StatusMessage>().ToTable(GetTableName<StatusMessage>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<StatusMessage>().ToTable(DatabaseEx.GetTableName<StatusMessage>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
@@ -227,17 +251,17 @@ namespace TreeMon.Data
 
                     #region App
 
-                    modelBuilder.Entity<AppInfo>().ToTable(GetTableName<AppInfo>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<AppInfo>().ToTable(DatabaseEx.GetTableName<AppInfo>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Setting>().ToTable(GetTableName<Setting>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Setting>().ToTable(DatabaseEx.GetTableName<Setting>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<UserSession>().ToTable(GetTableName<UserSession>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<UserSession>().ToTable(DatabaseEx.GetTableName<UserSession>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
@@ -245,91 +269,116 @@ namespace TreeMon.Data
                     #endregion
 
                     #region Medical
-                    modelBuilder.Entity<AnatomyTag>().ToTable(GetTableName<AnatomyTag>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<AnatomyTag>().ToTable(DatabaseEx.GetTableName<AnatomyTag>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Anatomy>().ToTable(GetTableName<Anatomy>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Anatomy>().ToTable(DatabaseEx.GetTableName<Anatomy>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<SideAffect>().ToTable(GetTableName<SideAffect>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<SideAffect>().ToTable(DatabaseEx.GetTableName<SideAffect>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Symptom>().ToTable(GetTableName<Symptom>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Symptom>().ToTable(DatabaseEx.GetTableName<Symptom>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<SymptomLog>().ToTable(GetTableName<SymptomLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
-                            {
-                            new IndexAttribute("IX_UUID") { IsUnique = true }
-                        }));
-
-
-                    modelBuilder.Entity<DoseLog>().ToTable(GetTableName<DoseLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<SymptomLog>().ToTable(DatabaseEx.GetTableName<SymptomLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
 
-                    #endregion
+                    modelBuilder.Entity<DoseLog>().ToTable(DatabaseEx.GetTableName<DoseLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));               
 
-                    #region Equipment
-                    modelBuilder.Entity<Ballast>().ToTable(GetTableName<Ballast>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                #endregion
+
+                #region Equipment
+                modelBuilder.Entity<Ballast>().ToTable(DatabaseEx.GetTableName<Ballast>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Bulb>().ToTable(GetTableName<Bulb>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Bulb>().ToTable(DatabaseEx.GetTableName<Bulb>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Fan>().ToTable(GetTableName<Fan>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Fan>().ToTable(DatabaseEx.GetTableName<Fan>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
 
-                    modelBuilder.Entity<Filter>().ToTable(GetTableName<Filter>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Filter>().ToTable(DatabaseEx.GetTableName<Filter>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Pump>().ToTable(GetTableName<Pump>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Pump>().ToTable(DatabaseEx.GetTableName<Pump>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Vehicle>().ToTable(GetTableName<Vehicle>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Vehicle>().ToTable(DatabaseEx.GetTableName<Vehicle>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<InventoryItem>().ToTable(GetTableName<InventoryItem>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<InventoryItem>().ToTable(DatabaseEx.GetTableName<InventoryItem>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                           {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
-                    #endregion
+                #endregion
 
-                    #region Events
-                    modelBuilder.Entity<Notification>().ToTable(GetTableName<Notification>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                #region Events
+               modelBuilder.Entity<Event>().ToTable(DatabaseEx.GetTableName<Event>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Reminder>().ToTable(GetTableName<Reminder>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<EventMember>().ToTable(DatabaseEx.GetTableName<EventMember>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+                modelBuilder.Entity<EventGroup>().ToTable(DatabaseEx.GetTableName<EventGroup>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                          {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+
+                
+                modelBuilder.Entity<EventItem>().ToTable(DatabaseEx.GetTableName<EventItem>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+
+                modelBuilder.Entity<EventLocation>().ToTable(DatabaseEx.GetTableName<EventLocation>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+
+                
+                modelBuilder.Entity<Notification>().ToTable(DatabaseEx.GetTableName<Notification>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+
+                    modelBuilder.Entity<Reminder>().ToTable(DatabaseEx.GetTableName<Reminder>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
 
-                    modelBuilder.Entity<ReminderRule>().ToTable(GetTableName<ReminderRule>()).HasKey(o => o.UUID).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<ReminderRule>().ToTable(DatabaseEx.GetTableName<ReminderRule>()).HasKey(o => o.UUID).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
@@ -337,166 +386,176 @@ namespace TreeMon.Data
                 #endregion
 
                     #region Finance
-                    modelBuilder.Entity<Currency>().ToTable(GetTableName<Currency>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Currency>().ToTable(DatabaseEx.GetTableName<Currency>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                           {
                                 new IndexAttribute("IX_UUID") { IsUnique = true }
                             }));
 
-                    modelBuilder.Entity<Fee>().ToTable(GetTableName<Fee>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Fee>().ToTable(DatabaseEx.GetTableName<Fee>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                          {
                                 new IndexAttribute("IX_UUID") { IsUnique = true }
                             }));
-                    modelBuilder.Entity<FinanceAccount>().ToTable(GetTableName<FinanceAccount>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<FinanceAccount>().ToTable(DatabaseEx.GetTableName<FinanceAccount>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                          {
                                 new IndexAttribute("IX_UUID") { IsUnique = true }
                             }));
-                    modelBuilder.Entity<FinanceAccountTransaction>().ToTable(GetTableName<FinanceAccountTransaction>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<FinanceAccountTransaction>().ToTable(DatabaseEx.GetTableName<FinanceAccountTransaction>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                          { new IndexAttribute("IX_UUID") { IsUnique = true } }));
 
 
-                modelBuilder.Entity<PriceRule>().ToTable(GetTableName<PriceRule>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<PriceRule>().ToTable(DatabaseEx.GetTableName<PriceRule>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                           { new IndexAttribute("IX_UUID") { IsUnique = true } }));
 
-                modelBuilder.Entity<PaymentGatewayLog>().ToTable(GetTableName<PaymentGatewayLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<PaymentGatewayLog>().ToTable(DatabaseEx.GetTableName<PaymentGatewayLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             { new IndexAttribute("IX_UUID") { IsUnique = true }}));
                 #endregion
 
                     #region Geo
-                modelBuilder.Entity<Location>().ToTable(GetTableName<Location>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<Location>().ToTable(DatabaseEx.GetTableName<Location>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                           {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
                     #endregion
 
                     #region Logging
-                    modelBuilder.Entity<AuthenticationLog>().ToTable(GetTableName<AuthenticationLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<AccessLog>().ToTable(DatabaseEx.GetTableName<AccessLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
-                    modelBuilder.Entity<LineItemLog>().ToTable(GetTableName<LineItemLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<LineItemLog>().ToTable(DatabaseEx.GetTableName<LineItemLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                            {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<MeasurementLog>().ToTable(GetTableName<MeasurementLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<MeasurementLog>().ToTable(DatabaseEx.GetTableName<MeasurementLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
 
-                    modelBuilder.Entity<EmailLog>().ToTable(GetTableName<EmailLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<EmailLog>().ToTable(DatabaseEx.GetTableName<EmailLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                          {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
 
                     //Data project...
-                    modelBuilder.Entity<LogEntry>().ToTable(GetTableName<LogEntry>()).HasKey(o => o.Id);
+                    modelBuilder.Entity<LogEntry>().ToTable(DatabaseEx.GetTableName<LogEntry>()).HasKey(o => o.Id);
 
                     #endregion
 
                     #region Membership
-                    modelBuilder.Entity<Account>().ToTable(GetTableName<Account>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Account>().ToTable(DatabaseEx.GetTableName<Account>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
 
-                    modelBuilder.Entity<AccountMember>().ToTable(GetTableName<AccountMember>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
-                            {
-                            new IndexAttribute("IX_UUID") { IsUnique = true }
-                        }));
-
-                    modelBuilder.Entity<Credential>().ToTable(GetTableName<Credential>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
-                            {
-                            new IndexAttribute("IX_UUID") { IsUnique = true }
-                        }));
-
-                    modelBuilder.Entity<RolePermission>().ToTable(GetTableName<RolePermission>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
-                            {
-                            new IndexAttribute("IX_UUID") { IsUnique = true }
-                        }));
-
-                    modelBuilder.Entity<Profile>().ToTable(GetTableName<Profile>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
-                            {
-                            new IndexAttribute("IX_UUID") { IsUnique = true }
-                        }));
-
-                    modelBuilder.Entity<Role>().ToTable(GetTableName<Role>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<AccountMember>().ToTable(DatabaseEx.GetTableName<AccountMember>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
 
-                    modelBuilder.Entity<User>().ToTable(GetTableName<User>()).HasKey(usr => usr.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<ApiKey>().ToTable(DatabaseEx.GetTableName<ApiKey>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                       {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+
+                modelBuilder.Entity<Credential>().ToTable(DatabaseEx.GetTableName<Credential>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<UserRole>().ToTable(GetTableName<UserRole>()).HasKey(usr => usr.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<RolePermission>().ToTable(DatabaseEx.GetTableName<RolePermission>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Permission>().ToTable(GetTableName<Permission>()).HasKey(usr => usr.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<PersonalProfile>().ToTable(DatabaseEx.GetTableName<PersonalProfile>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    #endregion
-
-                    #region Plant
-                    modelBuilder.Entity<Plant>().ToTable(GetTableName<Plant>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Role>().ToTable(DatabaseEx.GetTableName<Role>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
-                    if (!TypeTables.ContainsKey(this.GetTableName<Plant>())) { TypeTables.Add(this.GetTableName<Plant>(), new Plant()); }
 
-                    modelBuilder.Entity<Strain>().ToTable(GetTableName<Strain>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+
+                    modelBuilder.Entity<User>().ToTable(DatabaseEx.GetTableName<User>()).HasKey(usr => usr.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
-                    if (!TypeTables.ContainsKey(this.GetTableName<Strain>())) { TypeTables.Add(this.GetTableName<Strain>(), new Strain()); }
+
+                    modelBuilder.Entity<UserRole>().ToTable(DatabaseEx.GetTableName<UserRole>()).HasKey(usr => usr.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+
+                    modelBuilder.Entity<Permission>().ToTable(DatabaseEx.GetTableName<Permission>()).HasKey(usr => usr.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+
+                modelBuilder.Entity<Profile>().ToTable(DatabaseEx.GetTableName<Profile>()).HasKey(usr => usr.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                       {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+                #endregion
+
+                #region Plant
+                modelBuilder.Entity<Plant>().ToTable(DatabaseEx.GetTableName<Plant>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+                    if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Plant>())) { TypeTables.Add(DatabaseEx.GetTableName<Plant>(), new Plant()); }
+
+                    modelBuilder.Entity<Strain>().ToTable(DatabaseEx.GetTableName<Strain>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                            {
+                            new IndexAttribute("IX_UUID") { IsUnique = true }
+                        }));
+                    if (!TypeTables.ContainsKey(DatabaseEx.GetTableName<Strain>())) { TypeTables.Add(DatabaseEx.GetTableName<Strain>(), new Strain()); }
 
                     #endregion
 
                     #region Store    
 
-                    modelBuilder.Entity<Product>().ToTable(GetTableName<Product>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Product>().ToTable(DatabaseEx.GetTableName<Product>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<Vendor>().ToTable(GetTableName<Vendor>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<Vendor>().ToTable(DatabaseEx.GetTableName<Vendor>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                             {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
-                    modelBuilder.Entity<ShoppingCart>().ToTable(GetTableName<ShoppingCart>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                    modelBuilder.Entity<ShoppingCart>().ToTable(DatabaseEx.GetTableName<ShoppingCart>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                     {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
 
 
-                modelBuilder.Entity<ShoppingCartItem>().ToTable(GetTableName<ShoppingCartItem>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<ShoppingCartItem>().ToTable(DatabaseEx.GetTableName<ShoppingCartItem>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                         {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
               
 
-                modelBuilder.Entity<PriceRule>().ToTable(GetTableName<PriceRule>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<PriceRule>().ToTable(DatabaseEx.GetTableName<PriceRule>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                        {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
-                modelBuilder.Entity<PriceRuleLog>().ToTable(GetTableName<PriceRuleLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<PriceRuleLog>().ToTable(DatabaseEx.GetTableName<PriceRuleLog>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                        {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
-                modelBuilder.Entity<Order>().ToTable(GetTableName<Order>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<Order>().ToTable(DatabaseEx.GetTableName<Order>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                        {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
-                modelBuilder.Entity<OrderItem>().ToTable(GetTableName<OrderItem>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
+                modelBuilder.Entity<OrderItem>().ToTable(DatabaseEx.GetTableName<OrderItem>()).HasKey(o => o.Id).Property(p => p.UUID).HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new[]
                        {
                             new IndexAttribute("IX_UUID") { IsUnique = true }
                         }));
@@ -506,16 +565,12 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
                 {
-                    _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "OnModelCreating");
-                    Debug.Assert(false, ex.Message);
+                    _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "OnModelCreating");
+                    Debug.Assert(false, ex.DeserializeException(true));
                 }
          
         }
         #endregion
-
-   
-      
-
 
         #region  ---===  CRUD Async Functions  ===---
 
@@ -532,8 +587,8 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "GetAsync:" + typeof(T).ToString());
-                Debug.Assert(false, ex.Message);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "GetAsync:" + typeof(T).ToString());
+                Debug.Assert(false, ex.DeserializeException(true));
             }
             return res;
         }
@@ -553,8 +608,8 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "GetAllAsync:" + typeof(T).ToString());
-                Debug.Assert(false, ex.Message);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "GetAllAsync:" + typeof(T).ToString());
+                Debug.Assert(false, ex.DeserializeException(true));
             }
             return res;
         }
@@ -583,8 +638,8 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "SelectAsync:" + typeof(T).ToString());
-                Debug.Assert(false, ex.Message);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "SelectAsync:" + typeof(T).ToString());
+                Debug.Assert(false, ex.DeserializeException(true));
             }
 
             return res;
@@ -602,7 +657,7 @@ namespace TreeMon.Data
             }
             catch(Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "DeleteAsync:" + typeof(T).ToString());
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "DeleteAsync:" + typeof(T).ToString());
             }
 
             return res;
@@ -629,7 +684,7 @@ namespace TreeMon.Data
             catch (Exception ex)
             {
                 res = -1;
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "ExecuteNonQuery:" + sql);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "ExecuteNonQuery:" + sql);
             }
 
             return res;
@@ -645,7 +700,7 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "InsertAsync:" + typeof(T).ToString());
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "InsertAsync:" + typeof(T).ToString());
                 return res;
             }
             return res;
@@ -658,7 +713,7 @@ namespace TreeMon.Data
             }
             catch(Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "SaveAsync");
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "SaveAsync");
             }
             return 0;
         }
@@ -673,7 +728,7 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "UpdateAsync:" + typeof(T).ToString());
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "UpdateAsync:" + typeof(T).ToString());
                 return res;
             }
          
@@ -701,7 +756,7 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "ExecuteNonQuery:" + sql);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "ExecuteNonQuery:" + sql);
             }
             return res;
         }
@@ -728,7 +783,7 @@ namespace TreeMon.Data
             }
             catch(Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "ExecuteNonQuery:" + sql);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "ExecuteNonQuery:" + sql);
             }
 
             return res;
@@ -736,22 +791,129 @@ namespace TreeMon.Data
 
         public string Message { get; set; }
 
+        public IEnumerable<dynamic> GetAllOf(string type){
+
+            if (string.IsNullOrWhiteSpace(type))
+                return new List<object>();
+
+            IEnumerable<object> res = null;
+            switch (type.ToUpper()) {
+                #region General
+                case "TAG": return GetAll<Tag>();
+                case "ATTRIBUTE": return GetAll<TreeMon.Models.General.Attribute>();
+                case "CATEGORY": return GetAll<Category>();
+                case "UNITOFMEASURE": return GetAll<UnitOfMeasure>();
+                case "STATUSMESSAGE": return GetAll<StatusMessage>();
+                #endregion
+
+                #region App
+                case "APPINFO": return GetAll<AppInfo>();
+                case "SETTING": return GetAll<Setting>();
+                case "USERSESSION": return GetAll<UserSession>();
+                #endregion
+
+                #region Medical
+                case "ANATOMYTAG": return GetAll<AnatomyTag>();
+                case "ANATOMY": return GetAll<Anatomy>();
+                case "SIDEAFFECT": return GetAll<SideAffect>();
+                case "SYMPTOM": return GetAll<Symptom>();
+                case "SYMPTOMLOG": return GetAll<SymptomLog>();
+                case "DOSELOG": return GetAll<DoseLog>();
+                #endregion
+
+
+                #region Equipment
+                case "BALLAST": return GetAll<Ballast>();
+                case "BULB": return GetAll<Bulb>();
+                case "FAN": return GetAll<Fan>();
+                case "FILTER": return GetAll<Filter>();
+                case "PUMP": return GetAll<Pump>();
+                case "VEHICLE": return GetAll<Vehicle>();
+                case "INVENTORYITEM": return GetAll<InventoryItem>();
+                #endregion
+
+                #region Events
+                case "NOTIFICATION": return GetAll<Notification>();
+                case "REMINDER": return GetAll<Reminder>();
+                case "REMINDERRULE": return GetAll<ReminderRule>();
+                case "EVENT": return GetAll<Event>();
+                case "EVENTMEMBER": return GetAll<EventMember>();
+                case "EVENTITEM": return GetAll<EventItem>();
+                case "EVENTGROUP": return GetAll<EventGroup>();
+                case "EVENTLOCATION": return GetAll<EventLocation>();
+                    
+                #endregion
+
+                #region Finance
+                case "CURRENCY": return GetAll<Currency>();
+                case "FEE": return GetAll<Fee>();
+                case "FINANCEACCOUNT": return GetAll<FinanceAccount>();
+                case "FINANCEACCOUNTTRANSACTION": return GetAll<FinanceAccountTransaction>();
+                case "PAYMENTGATEWAYLOG": return GetAll<PaymentGatewayLog>();
+                #endregion
+
+                #region Geo
+                case "LOCATION": return GetAll<Location>();
+                #endregion
+
+                #region Logging
+                case "ACCESSLOG": return GetAll<AccessLog>();
+                case "LINEITEMLOG": return GetAll<LineItemLog>();
+                case "MEASUREMENTLOG": return GetAll<MeasurementLog>();
+                case "EMAILLOG": return GetAll<EmailLog>();
+                case "LOGENTRY": return GetAll<LogEntry>();
+                #endregion
+
+                #region Membership
+                case "ACCOUNT": return GetAll<Account>();
+                case "ACCOUNTMEMBER": return GetAll<AccountMember>();
+                case "APIKEY": return GetAll<ApiKey>();
+                case "CREDENTIAL": return GetAll<Credential>();
+                case "ROLEPERMISSION": return GetAll<RolePermission>();
+                case "PERSONALPROFILE": return GetAll<PersonalProfile>();
+                case "PROFILE": return GetAll<Profile>();
+                case "ROLE": return GetAll<Role>();
+                case "USER": return GetAll<User>();
+                case "USERROLE": return GetAll<UserRole>();
+                case "PERMISSION": return GetAll<Permission>();
+                #endregion
+
+                #region Plant
+                case "PLANT": return GetAll<Plant>();
+                case "STRAIN": return GetAll<Strain>();
+                #endregion
+
+                #region Store    
+                case "PRODUCT": return GetAll<Product>();
+                case "VENDOR": return GetAll<Vendor>();
+                case "SHOPPINGCART": return GetAll<ShoppingCart>();
+                case "SHOPPINGCARTITEM": return GetAll<ShoppingCartItem>();
+                case "PRICERULE": return GetAll<PriceRule>();
+                case "PRICERULELOG": return GetAll<PriceRuleLog>();
+                case "ORDER": return GetAll<Order>();
+                case "ORDERITEM": return GetAll<OrderItem>();
+                #endregion
+
+            }
+
+            return res;
+        }
+
         public IEnumerable<T> GetAll<T>() where T : class
         {
-            IEnumerable<T> res = null;
             try {
 
                 if (Database.Connection.State != ConnectionState.Open)
                     Database.Connection.Open();
 
-                res = Database.Connection?.GetList<T>();
+                return Database.Connection?.GetList<T>();
             }
             catch(Exception ex)
             {
-                Message = ex.Message;
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "GetAll:" + typeof(T).ToString());
+                Message = ex.DeserializeException(true);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "GetAll:" + typeof(T).ToString());
             }
-            return res;
+            return new List<T>();
         }
 
         public T Get<T>(int id) where T: class
@@ -765,7 +927,7 @@ namespace TreeMon.Data
             }
             catch(Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "Get:" + typeof(T).ToString());
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Get:" + typeof(T).ToString());
             }
  
             return res;
@@ -773,7 +935,7 @@ namespace TreeMon.Data
 
         public IEnumerable<T> Select<T>(string sql, object parameters) where T : class
         {
-            IEnumerable<T> res = null;
+            IEnumerable<T> res = new List<T>();
 
             try {
                 if (Database.Connection.State != ConnectionState.Open)
@@ -783,7 +945,7 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "Select:" + typeof(T).ToString() + " " + sql);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Select:" + typeof(T).ToString() + " " + sql);
                 
             }
  
@@ -809,7 +971,7 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "Select:" + sql);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Select:" + sql);
 
             }
             return res;
@@ -821,17 +983,29 @@ namespace TreeMon.Data
             {
                 return base.SaveChanges();
             }
-           
+            catch (DbEntityValidationException e)
+            {
+                foreach (var eve in e.EntityValidationErrors)
+                {
+                    this.Message += "Entity of type \"" + eve.Entry.Entity.GetType().Name +
+                        "\" in state \"" + eve.Entry.State + "\" has the following validation errors:";
+                    foreach (var ve in eve.ValidationErrors)
+                    {
+                        this.Message += "- Property: \"" + ve.PropertyName + "\", Error: \"" + ve.ErrorMessage + "\"";
+                    }
+                }
+            }
             catch (DbUpdateConcurrencyException cex)
             {
                 // Client wins update
                 var entry = cex.Entries.Single();
                 entry.OriginalValues.SetValues(entry.GetDatabaseValues());
-                _fileLogger.InsertError(cex.Message, "TreeMonDbContext", "SaveChanges:" );
+                _fileLogger.InsertError(cex.DeserializeException(true) + Environment.NewLine + this.Message, "TreeMonDbContext", "SaveChanges:");
             }
+            
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "SaveChanges:");
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "SaveChanges:");
             }
             return 0;
         }
@@ -854,7 +1028,7 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "ExecuteNonQuery:" + sql);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "ExecuteNonQuery:" + sql);
             }
             return res;
         }
@@ -891,12 +1065,12 @@ namespace TreeMon.Data
                     //    Client wins update
                    var entry = cex.Entries.Single();
                    entry.OriginalValues.SetValues(entry.GetDatabaseValues());
-                    _fileLogger.InsertError(cex.Message, "TreeMonDbContext", "Update.1:" + typeof(T).ToString());
+                    _fileLogger.InsertError(cex.DeserializeException(true), "TreeMonDbContext", "Update.1:" + typeof(T).ToString());
                 }
                 catch (Exception ex)
                 {
-                    Debug.Assert(false, ex.Message);
-                    _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "Update.2:" + typeof(T).ToString());
+                    Debug.Assert(false, ex.DeserializeException(true));
+                    _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Update.2:" + typeof(T).ToString());
                     res = 0;
                 }
  
@@ -917,7 +1091,7 @@ namespace TreeMon.Data
             }
             catch(Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "Delete:" + typeof(T).ToString());
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Delete:" + typeof(T).ToString());
             }
  
             return res;
@@ -945,14 +1119,14 @@ namespace TreeMon.Data
             {
                 if (Database.Connection.State != ConnectionState.Open)
                    Database.Connection.Open();
-                string sql = "DELETE FROM " + GetTableName<T>() + " " + whereStatement;
+                string sql = "DELETE FROM " + DatabaseEx.GetTableName<T>() + " " + whereStatement;
                 res = Database.Connection.Execute(sql, parameters);
 
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "Delete:" + typeof(T).ToString() + " " + "DELETE FROM " + GetTableName<T>() + " " + whereStatement);
-                Debug.Assert(false, ex.Message);
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Delete:" + typeof(T).ToString() + " " + "DELETE FROM " + DatabaseEx.GetTableName<T>() + " " + whereStatement);
+                Debug.Assert(false, ex.DeserializeException(true));
 
             }
 
@@ -961,6 +1135,7 @@ namespace TreeMon.Data
 
         public bool Insert<T>(T entity) where T : class
         {
+            this.Message = "";
             try {
                 base.Set<T>().Add(entity);
 
@@ -970,8 +1145,10 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                Debug.Assert(false, ex.Message);
-                _fileLogger.InsertError(ex.Message + ex.InnerException?.ToString(), "TreeMonDbContext", "Insert:" + typeof(T).ToString());
+
+                Debug.Assert(false, ex.DeserializeException(true));
+                this.Message += ex.DeserializeException(true);
+                _fileLogger.InsertError(this.Message  , "TreeMonDbContext", "Insert:" + typeof(T).ToString());
                 return false;
             }
         }
@@ -984,7 +1161,8 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message + ex.InnerException?.ToString(), "TreeMonDbContext", "Add:" + typeof(T).ToString());
+                
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Add:" + typeof(T).ToString());
             }
         }
 
@@ -996,7 +1174,7 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message + ex.InnerException?.ToString(), "TreeMonDbContext", "Add:" + typeof(T).ToString());
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "Add:" + typeof(T).ToString());
             }
         }
 
@@ -1026,6 +1204,8 @@ namespace TreeMon.Data
                         ConnectionSettings = new ConnectionStringSettings(appSettings.ActiveDbConnectionKey, connectionString);
                         this.Database.Connection.ConnectionString = connectionString;
                         Database.SetInitializer<TreeMonDbContext>(new CreateDatabaseIfNotExists<TreeMonDbContext>());
+                       
+
                         Database.Initialize(true);
                        //// this.Insert<LogEntry>(new LogEntry() { LogDate = DateTime.UtcNow, Level = SystemFlag.Level.Info, Source = "TreeMonDbContext.Initialize", Type = "LogEntry" });
                         SystemLogger sl = new SystemLogger(this.ConnectionKey, false);
@@ -1033,8 +1213,8 @@ namespace TreeMon.Data
                     }
                     catch (Exception ex)
                     {
-                        _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "InstallDatabase:");
-                        return new ServiceResult() { Code = 500, Status = "ERROR", Message = ex.Message };
+                        _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "InstallDatabase:");
+                        return new ServiceResult() { Code = 500, Status = "ERROR", Message = ex.DeserializeException(true) };
                     }
                     #endregion
                     res = ServiceResponse.OK( );
@@ -1076,307 +1256,12 @@ namespace TreeMon.Data
             }
             catch (Exception ex)
             {
-                _fileLogger.InsertError(ex.Message, "TreeMonDbContext", "CopyDefaultSQLiteDatabase:" + PathToDatabase);
-                return new ServiceResult() { Code = 500, Status = "ERROR", Message = "Error creating database: " + ex.Message };
+                _fileLogger.InsertError(ex.DeserializeException(true), "TreeMonDbContext", "CopyDefaultSQLiteDatabase:" + PathToDatabase);
+                return new ServiceResult() { Code = 500, Status = "ERROR", Message = "Error creating database: " + ex.DeserializeException(true) };
             }
             return new ServiceResult() { Code = 200, Status = "OK" };
         }
 
         #endregion
-
-        #region Table Functions 
-        public List<string> GetDataTypes()
-        {
-            if (TypeTables.Count == 0)
-                this.LoadTableNames();
-            List<string> res = new List<string>();
-            foreach (var typeEntry in TypeTables)
-            {
-                dynamic table = typeEntry.Value;
-                try
-                {
-                    res.Add(table?.UUIDType);
-                }
-                catch {//
-                }
-            }
-            #region future
-            ////if (ConnectionSettings == null)
-            ////    return res;
-            ////string sql = "";
-            ////switch (_providerType)
-            ////{
-            ////    case "SQLITE":
-            ////        Debug.Assert(false, "NOT IMPLEMENTED");
-            ////        //sql = "SELECT tbl_name FROM sqlite_master WHERE type='table'";
-            ////        //res = _sqliteContext.Table<sqlite_master>().AsQueryable().Select(s => s.tbl_name).ToList();
-            ////        ////using (SQLiteConnection conn = new SQLiteConnection(PathToDatabase))
-            ////        ////{ 
-            ////        ////    res = conn.Table<sqlite_master>().AsQueryable().Select(s => s.tbl_name).ToList();
-            ////        ////}
-            ////        break;
-            ////    case "MYSQL":
-            ////        Debug.Assert(false, "NOT IMPLEMENTED");
-            ////        //sql = "SELECT * FROM information_schema.tables";
-            ////        //res =  Select<string>(sql, new object[] { }).ToList();
-            ////        break;
-            ////    case "MSSQL":
-            ////        // Debug.Assert(false, "NOT IMPLEMENTED");
-            ////        //SQL Server 2005, 2008, 2012 or 2014:
-            ////        // sql = "SELECT * FROM information_schema.tables";                //SQL Server 2000: SELECT* FROM sysobjects WHERE xtype = 'U'
-            ////        //res = Select<string>(sql, new object[] { }).ToList();
-            ////        break;
-            ////}
-            #endregion
-
-            return res;
-        }
-
-        public List<string> GetTableNames()
-        {
-            List<string> res = TypeTables.Select(t => t.Key).ToList();
-            return res;
-        }
-
-        public string GetTableName<T>() where T : class
-        {
-            string name = "";
-            object[] attributes = typeof(T).GetCustomAttributes(true);
-
-            foreach (object attribute in attributes)
-            {
-                string typeName = attribute.GetType().Name;
-
-                if (typeName == "TableAttribute") //this is the [Table("Accounts")] at the top of the class, it tells what table to look at.
-                {
-                    System.ComponentModel.DataAnnotations.Schema.TableAttribute ta = (System.ComponentModel.DataAnnotations.Schema.TableAttribute)attribute;
-                    name = ta.Name;
-                }
-            }
-
-            //if no table attribute was found then create the table based on the name of the class.
-            //
-            if (string.IsNullOrEmpty(name))
-            {
-                name = typeof(T).Name;
-
-                //If it's namespaced then get the very last element in the namespace (class name).
-                if (name.Contains("."))
-                {
-                    string[] tokens = name.Split('.');
-                    name = tokens[tokens.Length - 1];
-                }
-            }
-            return name;
-        }
-
-        public string GetTableName(string typeName)
-        {
-            string res = string.Empty;
-            if (string.IsNullOrWhiteSpace(typeName))
-                return res;
-
-            if (TypeTables.Count == 0)
-                this.LoadTableNames();
-
-            foreach(dynamic typeEntry in TypeTables)
-            {
-                try
-                {
-                    string type = typeEntry.Value.UUIDType?.ToUpper();
-                    if (string.IsNullOrWhiteSpace(type))
-                        continue;
-
-                    //inside try cause not all objects use the uuidtype
-                    if (type.EqualsIgnoreCase(typeName))
-                    {
-                        res = typeEntry.Key;
-                        break;
-                    }
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-               
-            return res;
-        }
-
-        public object GetTableObject(string tableName)
-        {
-            if (TypeTables.Count == 0)
-                LoadTableNames();
-
-            if (TypeTables.ContainsKey(tableName))
-                    return TypeTables[tableName];
-
-            return null;
-        }
-
-        public string GetTableType(string tableName)
-        {
-            if (TypeTables.Count == 0)
-                LoadTableNames();
-
-            if (TypeTables.ContainsKey(tableName))
-                return ((dynamic) TypeTables[tableName])?.UUIDType.ToUpper();
-
-            return string.Empty;
-        }
-
-        public void LoadTableNames()
-        {
-            #region General
-          
-            if (!TypeTables.ContainsKey(this.GetTableName<TreeMon.Models.General.Attribute>())) { TypeTables.Add(this.GetTableName<TreeMon.Models.General.Attribute>(), new TreeMon.Models.General.Attribute()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Category>())) { TypeTables.Add(this.GetTableName<Category>(), new Category()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<UnitOfMeasure>())) { TypeTables.Add(this.GetTableName<UnitOfMeasure>(), new UnitOfMeasure()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<StatusMessage>())) { TypeTables.Add(this.GetTableName<StatusMessage>(), new StatusMessage()); }
-
-            #endregion
-
-            #region App
-
-            if (!TypeTables.ContainsKey(this.GetTableName<AppInfo>())) { TypeTables.Add(this.GetTableName<AppInfo>(), new AppInfo()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Setting>())) { TypeTables.Add(this.GetTableName<Setting>(), new Setting()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<UserSession>())) { TypeTables.Add(this.GetTableName<UserSession>(), new UserSession()); }
-
-            #endregion
-
-            #region Medical
-
-            if (!TypeTables.ContainsKey(this.GetTableName<AnatomyTag>())) { TypeTables.Add(this.GetTableName<AnatomyTag>(), new AnatomyTag()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Anatomy>())) { TypeTables.Add(this.GetTableName<Anatomy>(), new Anatomy()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<SideAffect>())) { TypeTables.Add(this.GetTableName<SideAffect>(), new SideAffect()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Symptom>())) { TypeTables.Add(this.GetTableName<Symptom>(), new Symptom()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<SymptomLog>())) { TypeTables.Add(this.GetTableName<SymptomLog>(), new SymptomLog()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<DoseLog>())) { TypeTables.Add(this.GetTableName<DoseLog>(), new DoseLog()); }
-
-            #endregion
-
-            #region Equipment
-            if (!TypeTables.ContainsKey(this.GetTableName<Ballast>())) { TypeTables.Add(this.GetTableName<Ballast>(), new Ballast()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Bulb>())) { TypeTables.Add(this.GetTableName<Bulb>(), new Bulb()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Fan>())) { TypeTables.Add(this.GetTableName<Fan>(), new Fan()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Filter>())) { TypeTables.Add(this.GetTableName<Filter>(), new Filter()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Pump>())) { TypeTables.Add(this.GetTableName<Pump>(), new Pump()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Vehicle>())) { TypeTables.Add(this.GetTableName<Vehicle>(), new Vehicle()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<InventoryItem>())) { TypeTables.Add(this.GetTableName<InventoryItem>(), new InventoryItem()); }
-            #endregion
-
-            #region Events
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Notification>())) { TypeTables.Add(this.GetTableName<Notification>(), new Notification()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Reminder>())) { TypeTables.Add(this.GetTableName<Reminder>(), new Reminder()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<ReminderRule>())) { TypeTables.Add(this.GetTableName<ReminderRule>(), new ReminderRule()); }
-
-            #endregion
-
-            #region Finance
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Currency>())) { TypeTables.Add(this.GetTableName<Currency>(), new Currency()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Fee>())) { TypeTables.Add(this.GetTableName<Fee>(), new Fee()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<FinanceAccount>())) { TypeTables.Add(this.GetTableName<FinanceAccount>(), new FinanceAccount()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<FinanceAccountTransaction>())) { TypeTables.Add(this.GetTableName<FinanceAccountTransaction>(), new FinanceAccountTransaction()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<PriceRule>())) { TypeTables.Add(this.GetTableName<PriceRule>(), new PriceRule()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<PaymentGatewayLog>())) { TypeTables.Add(this.GetTableName<PaymentGatewayLog>(), new PaymentGatewayLog()); }
-
-            #endregion
-
-            #region Geo
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Location>())) { TypeTables.Add(this.GetTableName<Location>(), new Location()); }
-
-            #endregion
-
-            #region Logging
-
-            if (!TypeTables.ContainsKey(this.GetTableName<AuthenticationLog>())) { TypeTables.Add(this.GetTableName<AuthenticationLog>(), new AuthenticationLog()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<LineItemLog>())) { TypeTables.Add(this.GetTableName<LineItemLog>(), new LineItemLog()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<MeasurementLog>())) { TypeTables.Add(this.GetTableName<MeasurementLog>(), new MeasurementLog()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<LogEntry>())) { TypeTables.Add(this.GetTableName<LogEntry>(), new LogEntry()); }
-
-            #endregion
-
-            #region Membership
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Account>())) { TypeTables.Add(this.GetTableName<Account>(), new Account()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<AccountMember>())) { TypeTables.Add(this.GetTableName<AccountMember>(), new AccountMember()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Credential>())) { TypeTables.Add(this.GetTableName<Credential>(), new Credential()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<RolePermission>())) { TypeTables.Add(this.GetTableName<RolePermission>(), new RolePermission()); }
-      
-            if (!TypeTables.ContainsKey(this.GetTableName<Profile>())) { TypeTables.Add(this.GetTableName<Profile>(), new Profile()); }
-            
-            if (!TypeTables.ContainsKey(this.GetTableName<Role>())) { TypeTables.Add(this.GetTableName<Role>(), new Role()); }
-            
-            if (!TypeTables.ContainsKey(this.GetTableName<User>())) { TypeTables.Add(this.GetTableName<User>(), new User()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<UserRole>())) { TypeTables.Add(this.GetTableName<UserRole>(), new UserRole()); }
-            
-            if (!TypeTables.ContainsKey(this.GetTableName<Permission>())) { TypeTables.Add(this.GetTableName<Permission>(), new Permission()); }
-
-            #endregion
-
-            #region Plant
-            
-            if (!TypeTables.ContainsKey(this.GetTableName<Plant>())) { TypeTables.Add(this.GetTableName<Plant>(), new Plant()); }
-            
-            if (!TypeTables.ContainsKey(this.GetTableName<Strain>())) { TypeTables.Add(this.GetTableName<Strain>(), new Strain()); }
-
-            #endregion
-
-            #region Store
-            
-            if (!TypeTables.ContainsKey(this.GetTableName<Product>())) { TypeTables.Add(this.GetTableName<Product>(), new Product()); }
-            
-            if (!TypeTables.ContainsKey(this.GetTableName<Vendor>())) { TypeTables.Add(this.GetTableName<Vendor>(), new Vendor()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<ShoppingCart>())) { TypeTables.Add(this.GetTableName<ShoppingCart>(), new ShoppingCart()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<ShoppingCartItem>())) { TypeTables.Add(this.GetTableName<ShoppingCartItem>(), new ShoppingCartItem()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<PriceRule>())) { TypeTables.Add(this.GetTableName<PriceRule>(), new PriceRule()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<PriceRuleLog>())) { TypeTables.Add(this.GetTableName<PriceRuleLog>(), new PriceRuleLog()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<Order>())) { TypeTables.Add(this.GetTableName<Order>(), new Order()); }
-
-            if (!TypeTables.ContainsKey(this.GetTableName<OrderItem>())) { TypeTables.Add(this.GetTableName<OrderItem>(), new OrderItem()); }
-       
-            #endregion
-        }
-
-        #endregion
-
     }
 }

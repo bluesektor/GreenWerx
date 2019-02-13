@@ -1,9 +1,15 @@
 ﻿// Copyright (c) 2017 TreeMon.org.
 //Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+using Newtonsoft.Json;
 using System;
+using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using TreeMon.Models.Flags;
 using TreeMon.Utilites.Security;
 
@@ -246,7 +252,8 @@ namespace TreeMon.Utilites.Extensions
 
         public static bool EqualsIgnoreCase(this string input, string data, bool currentCulture = true)
         {
-            if (string.IsNullOrWhiteSpace(data) == true )
+            
+            if (string.IsNullOrWhiteSpace(input) || string.IsNullOrWhiteSpace(data) == true )
                 return false;
 
             if (currentCulture)
@@ -296,6 +303,11 @@ namespace TreeMon.Utilites.Extensions
 
             string res = new string(arr);
             return res;
+        }
+
+        public static string[] Split(this string input, string splitToken)
+        {
+            return input.Split(new string[] { splitToken }, StringSplitOptions.RemoveEmptyEntries);
         }
 
         //alpha numeric id.
@@ -411,6 +423,17 @@ namespace TreeMon.Utilites.Extensions
         }
 
 
+        public static string ReplaceCaseInsensitive(this string input, string search, string replacement)
+        {
+            string result = Regex.Replace(
+                input,
+                Regex.Escape(search),
+                replacement.Replace("$", "$$"),
+                RegexOptions.IgnoreCase
+            );
+            return result;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -449,6 +472,32 @@ namespace TreeMon.Utilites.Extensions
             return ReplaceIncluding(startToken, endToken, data, replacement);//recurse through rest of string
         }
 
+        public static string Substring(this string input, string startToken, string endToken, bool includeTokens = false)
+        {
+            int startIdx = input.IndexOf(startToken);
+
+            if (startIdx < 0)
+                return string.Empty;
+
+
+            int endIdx = 0;
+            //if no end token go to the end of the string.
+            if (string.IsNullOrWhiteSpace(endToken))
+                endIdx = input.Length;
+            else
+                endIdx = input.IndexOf(endToken, startIdx) + endToken.Length;
+
+            if (!includeTokens)
+            {
+                startIdx++;
+                endIdx--;
+            }
+
+            if (endIdx < startIdx || endIdx - startIdx <= 0)
+                return string.Empty;
+
+            return input.Substring(startIdx, endIdx - startIdx);
+        }
 
         public static byte[] StreamToByte(Stream input)
         {
@@ -457,6 +506,109 @@ namespace TreeMon.Utilites.Extensions
                 input.CopyTo(ms);
                 return ms.ToArray();
             }
+        }
+
+        /// <summary>
+        /// must call .read() on the reader first, only returns the
+        /// current record as json object.
+        /// props: https://gist.github.com/syed-afraz-ali/05b31014a763662759d9
+        /// </summary>
+        /// <param name="rdr"></param>
+        /// <returns></returns>
+        public static String ToJson(this IDataReader rdr)
+        {
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+
+            using (JsonWriter jsonWriter = new JsonTextWriter(sw))
+            {
+                    jsonWriter.WriteStartObject();
+
+                    int fields = rdr.FieldCount;
+
+                    for (int i = 0; i < fields; i++)
+                    {
+                        jsonWriter.WritePropertyName(rdr.GetName(i));
+                        jsonWriter.WriteValue(rdr[i]);
+                    }
+
+                    jsonWriter.WriteEndObject();
+
+                return sw.ToString();
+            }
+        }
+
+        /// <summary>
+        /// do not call .read() before this. Will return the entire dataset
+        /// as json object array.
+        /// props: https://gist.github.com/syed-afraz-ali/05b31014a763662759d9
+        /// </summary>
+        /// <param name="rdr"></param>
+        /// <returns></returns>
+        public static String ToJsonArray(this IDataReader rdr)
+        {
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+
+            using (JsonWriter jsonWriter = new JsonTextWriter(sw))
+            {
+                jsonWriter.WriteStartArray();
+                while (rdr.Read())
+                {
+                jsonWriter.WriteStartObject();
+
+                int fields = rdr.FieldCount;
+
+                for (int i = 0; i < fields; i++)
+                {
+                    jsonWriter.WritePropertyName(rdr.GetName(i));
+                    jsonWriter.WriteValue(rdr[i]);
+                }
+
+                jsonWriter.WriteEndObject();
+                }
+                jsonWriter.WriteEndArray();
+
+                return sw.ToString();
+            }
+        }
+
+        public static string GetFileNameFromUrl(this string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return string.Empty;
+
+            Uri uri;
+            if (!Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out uri))
+                uri = new Uri(url);
+
+            return Path.GetFileName(uri.LocalPath);
+        }
+
+        public static DateTime? toDate(this string dateTimeStr, string[] dateFmt)
+        {
+            // example: var dt = "2011-03-21 13:26".toDate(new string[]{"yyyy-MM-dd HH:mm", 
+            //                                                  "M/d/yyyy h:mm:ss tt"});
+            const DateTimeStyles style = DateTimeStyles.AllowWhiteSpaces;
+            if (dateFmt == null)
+            {
+                var dateInfo = System.Threading.Thread.CurrentThread.CurrentCulture.DateTimeFormat;
+                dateFmt = dateInfo.GetAllDateTimePatterns();
+            }
+            DateTime? result = null;
+            DateTime dt;
+            if (DateTime.TryParseExact(dateTimeStr, dateFmt,
+               CultureInfo.InvariantCulture, style, out dt)) result = dt;
+            return result;
+        }
+
+        public static DateTime? toDate(this string dateTimeStr, string dateFmt = null)
+        {
+            // example:   var dt="2011-03-21 13:26".toDate("yyyy-MM-dd HH:mm");
+            // or simply  var dt="2011-03-21 13:26".toDate();        
+            // call overloaded function with string array param
+            string[] dateFmtArr = dateFmt == null ? null : new string[] { dateFmt };
+            return toDate(dateTimeStr, dateFmtArr);
         }
 
     }

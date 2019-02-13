@@ -136,13 +136,9 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
-    <Reference Include="WebApi.OutputCache.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Strathweb.CacheOutput.WebApi2.0.10.0\lib\net45\WebApi.OutputCache.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="WebApi.OutputCache.V2, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Strathweb.CacheOutput.WebApi2.0.10.0\lib\net45\WebApi.OutputCache.V2.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>3rdPartyBin\WebApi.OutputCache.V2.dll</HintPath>
     </Reference>
     <Reference Include="WebApiThrottle, Version=1.5.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WebApiThrottle.1.5.4\lib\net45\WebApiThrottle.dll</HintPath>
@@ -224,6 +220,9 @@
     <Compile Include="WebApplication.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="3rdPartyBin\readme..txt" />
+    <Content Include="3rdPartyBin\WebApi.OutputCache.V2.dll" />
+    <Content Include="3rdPartyBin\WebApi.OutputCache.V2.pdb" />
     <Content Include="api\index.html" />
     <Content Include="App_Data\SQLScripts\MS.Backup.sql" />
     <Content Include="App_Data\SQLScripts\MS.Restore.sql" />

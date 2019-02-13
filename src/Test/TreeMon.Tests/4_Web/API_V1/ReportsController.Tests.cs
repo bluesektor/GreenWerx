@@ -24,8 +24,9 @@ namespace TreeMon.Web.Tests.API.V1
     [TestClass]
     public class ReportsControllerTests
     {
-        private readonly string connectionKey = "MSSQL_TEST";
+        private string connectionKey = "MSSQL_TEST";
         private string _ownerAuthToken = "";
+        private string _captcha = "TESTCAPTCHA";
 
         [TestInitialize]
         public void TestSetup()
@@ -98,7 +99,7 @@ namespace TreeMon.Web.Tests.API.V1
         //    {
         //        #region filters
         //        ////the getfilters function gets distinct values from a table field that will
-        //        ////used to build the query to get the dataset. Controler only pulling from fireincidents for now. need to make it dynamic.
+        //        ////used to build the query to get the dataset. Controler only pulling from x for now. need to make it dynamic.
         //        List<QueryFilter> filters = new List<QueryFilter>();
         //        QueryFilter qf = new QueryFilter();
         //        qf.Field = "name";
@@ -155,7 +156,7 @@ namespace TreeMon.Web.Tests.API.V1
         //public void Api_ReportsController_GetDataset_Series_By_UOM_Between_Values()
         //{
         //    ////the getfilters function gets distinct values from a table field that will
-        //    ////used to build the query to get the dataset. Controler only pulling from fireincidents for now. need to make it dynamic.
+        //    ////used to build the query to get the dataset. Controler only pulling from x for now. need to make it dynamic.
         //    List<QueryFilter> filters = new List<QueryFilter>();
         //    QueryFilter qf = new QueryFilter();
         //    qf.Field = "UnitOfMeasure";

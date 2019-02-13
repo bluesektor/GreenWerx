@@ -36,7 +36,7 @@ namespace TreeMon.Web
                 {
                     PageResults = true,
                     PageSize = 25,
-                    StartIndex = 1,
+                    StartIndex = 0,
                     SortBy = "Name",
                     SortDirection = "ASC"
                 };

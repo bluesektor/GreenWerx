@@ -13,7 +13,7 @@ using TreeMon.Managers;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Store;
 using TreeMon.Models.App;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Models.Membership;
 using TreeMon.Models.Store;
 using TreeMon.Web.Tests;
@@ -24,9 +24,9 @@ namespace TreeMon.Web.Tests.API.V1
     [TestClass]
     public class ReminderControllerTests
     {
-        ////private string connectionKey = "MSSQL_TEST";
-        //private string _ownerAuthToken = "";
-        //private string _captcha = "TESTCAPTCHA";
+        private string connectionKey = "MSSQL_TEST";
+        private string _ownerAuthToken = "";
+        private string _captcha = "TESTCAPTCHA";
 
         //[TestInitialize]
         //public void TestSetup()

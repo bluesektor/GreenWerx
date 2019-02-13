@@ -6,14 +6,14 @@ namespace TreeMon.Models.Membership
 {
     public class UserRegister
     {
-        [Required]
+       // [Required]
         [Display(Name = "User name")]
         public string Name { get; set; }
             
         public string Email { get; set; }
         public bool UserIsPrivate { get; set; }
 
-        [Required]
+       // [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }

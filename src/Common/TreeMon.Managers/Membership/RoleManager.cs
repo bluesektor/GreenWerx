@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Transactions;
 using TreeMon.Data;
+using TreeMon.Data.Helpers;
 using TreeMon.Data.Logging;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Models;
@@ -25,7 +26,7 @@ namespace TreeMon.Managers.Membership
 
         private readonly SystemLogger _logger = null;
         private readonly List<string> _siteAdmins = null;
-        private readonly User _requestingUser = null;
+        private User _requestingUser = null;
         private readonly string _dbConnectionKey = null;
         private bool _runningInstall = false; //for bypassing the authorization when adding roles/permissions
 
@@ -171,7 +172,7 @@ namespace TreeMon.Managers.Membership
                         .Where(rrw => rrw.RoleUUID == roleUUID &&
                                rrw.AccountUUID == accountUUID)
                         .Join(
-                            context.GetAll<Permission>().Where(uw => uw.Deleted == false),
+                            context.GetAll<Permission>()?.Where(uw => uw.Deleted == false),
                             role => role.PermissionUUID,
                             perms => perms.UUID,
                             (role, perms) => new { role, perms }
@@ -190,7 +191,7 @@ namespace TreeMon.Managers.Membership
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                permissions = context.GetAll<Permission>().Where(pw => pw.AccountUUID == accountUUID && pw.Deleted == false).DistinctBy(d => d.Name).ToList();
+                permissions = context.GetAll<Permission>()?.Where(pw => pw.AccountUUID == accountUUID && pw.Deleted == false).DistinctBy(d => d.Name).ToList();
             }
 
             return permissions;
@@ -202,7 +203,7 @@ namespace TreeMon.Managers.Membership
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                allAccountPermissions = context.GetAll<Permission>().Where(w => w.AccountUUID == accountUUID && w.Deleted == false).DistinctBy(d => d.Name).ToList();
+                allAccountPermissions = context.GetAll<Permission>()?.Where(w => w.AccountUUID == accountUUID && w.Deleted == false).DistinctBy(d => d.Name).ToList();
             }
 
             //Selected permissions for role.
@@ -229,7 +230,7 @@ namespace TreeMon.Managers.Membership
                 IEnumerable<Permission> permissions;
                 using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                    permissions = context.GetAll<Permission>().Where(pw => pw?.Key == key).ToList();
+                    permissions = context.GetAll<Permission>()?.Where(pw => pw?.Key == key).ToList();
                 }
                 if (permissions == null || !permissions.Any())
                     return false;
@@ -268,7 +269,7 @@ namespace TreeMon.Managers.Membership
             List<UserRole> usersInRole;
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                usersInRole = context.GetAll<UserRole>().Where(w => w.AccountUUID == r.AccountUUID && w.RoleUUID == r.UUID).ToList();
+                usersInRole = context.GetAll<UserRole>()?.Where(w => w.AccountUUID == r.AccountUUID && w.RoleUUID == r.UUID).ToList();
             }
             List<RolePermission> rolePermissions = GetRolePermissions(r.UUID, r.AccountUUID);
 
@@ -354,7 +355,7 @@ namespace TreeMon.Managers.Membership
             Role r;
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                r = context.GetAll<Role>().FirstOrDefault(w => w.UUID == roleUUID);
+                r = context.GetAll<Role>()?.FirstOrDefault(w => w.UUID == roleUUID);
             }
             if (r == null)
                 return ServiceResponse.Error("Role not found.");
@@ -379,11 +380,13 @@ namespace TreeMon.Managers.Membership
             if (string.IsNullOrWhiteSpace(name))
                 return new List<Role>();
 
+            if (_requestingUser == null)
+                return new List<Role>();
             //// if (!_runningInstall && !this.DataAccessAuthorized(r, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<Role>().Where(rw => (rw.Name?.EqualsIgnoreCase(name) ?? false) && rw.AccountUUID == _requestingUser.AccountUUID).ToList();
+                return context.GetAll<Role>()?.Where(rw => (rw.Name?.EqualsIgnoreCase(name) ?? false) && rw.AccountUUID == _requestingUser.AccountUUID).ToList();
             }
         }
 
@@ -396,7 +399,7 @@ namespace TreeMon.Managers.Membership
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<Role>().FirstOrDefault(rw => (rw.Name?.EqualsIgnoreCase(name) ?? false) && rw.AccountUUID == accountUUID);
+                return context.GetAll<Role>()?.FirstOrDefault(rw => (rw.Name?.EqualsIgnoreCase(name) ?? false) && rw.AccountUUID == accountUUID);
             }
         }
 
@@ -410,9 +413,11 @@ namespace TreeMon.Managers.Membership
 
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<Role>().FirstOrDefault(rw => rw.UUID == uuid);
+                return context.GetAll<Role>()?.FirstOrDefault(rw => rw.UUID == uuid);
             }
         }
+
+        
 
 
         public List<Role> GetRoles(string accountUUID)
@@ -422,7 +427,7 @@ namespace TreeMon.Managers.Membership
             //// if (!_runningInstall && !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                roles = context.GetAll<Role>().Where(rw => rw.AccountUUID == accountUUID && rw.Deleted == false).OrderBy(ob => ob.Name).ToList();
+                roles = context.GetAll<Role>()?.Where(rw => rw.AccountUUID == accountUUID && rw.Deleted == false).OrderBy(ob => ob.Name).ToList();
             }
 
             return roles;
@@ -446,7 +451,7 @@ namespace TreeMon.Managers.Membership
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
            
-                    dbU = context.GetAll<Role>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(r.Name) && wu.AccountUUID == r.AccountUUID);
+                    dbU = context.GetAll<Role>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(r.Name) && wu.AccountUUID == r.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Role already exists.");
@@ -515,7 +520,7 @@ namespace TreeMon.Managers.Membership
                     List<RolePermission> rolePermissions;
                     using (var context = new TreeMonDbContext(_dbConnectionKey))
                     {
-                        rolePermissions = context.GetAll<RolePermission>().Where(w => w.AccountUUID == originalRole.AccountUUID && w.RoleUUID == originalRole.UUID).ToList();
+                        rolePermissions = context.GetAll<RolePermission>()?.Where(w => w.AccountUUID == originalRole.AccountUUID && w.RoleUUID == originalRole.UUID).ToList();
                     }
                     //assing the new roleUUID to the permissisons
                     rolePermissions.ForEach(x => x.RoleUUID = clonedRole.UUID);
@@ -674,7 +679,7 @@ namespace TreeMon.Managers.Membership
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
                 //// if (!_runningInstall &&  !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<RolePermission>().FirstOrDefault(w => w.AccountUUID == accountUUID && w.RoleUUID == roleUUID && w.PermissionUUID == permissionUUID);
+                return context.GetAll<RolePermission>()?.FirstOrDefault(w => w.AccountUUID == accountUUID && w.RoleUUID == roleUUID && w.PermissionUUID == permissionUUID);
             }
         }
 
@@ -683,7 +688,7 @@ namespace TreeMon.Managers.Membership
             //// if (!_runningInstall &&  !this.DataAccessAuthorized(r,_requestingUser, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<RolePermission>().Where(w => w.AccountUUID == accountUUID && w.RoleUUID == roleUUID).ToList();
+                return context.GetAll<RolePermission>()?.Where(w => w.AccountUUID == accountUUID && w.RoleUUID == roleUUID).ToList();
             }
         }
 
@@ -818,8 +823,8 @@ namespace TreeMon.Managers.Membership
             {
                 using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                    List<Role> userRoles = context.GetAll<Role>().Where(w => w.AccountUUID == accountUUID && w.Deleted == false)
-                                                    .Join(context.GetAll<UserRole>().Where(w => w.UserUUID == userUUID && w.AccountUUID == accountUUID && w.Deleted == false),
+                    List<Role> userRoles = context.GetAll<Role>()?.Where(w => w.AccountUUID == accountUUID && w.Deleted == false)
+                                                    .Join(context.GetAll<UserRole>()?.Where(w => w.UserUUID == userUUID && w.AccountUUID == accountUUID && w.Deleted == false),
                                                         role => role.UUID,
                                                         userRole => userRole.RoleUUID,
                                                         (role, userRole) => new { role, userRole }
@@ -855,7 +860,7 @@ namespace TreeMon.Managers.Membership
                         .Where(rrw => rrw.RoleUUID == roleUUID &&
                                rrw.AccountUUID == accountUUID)
                         .Join(
-                            context.GetAll<User>().Where(uw => uw.Deleted == false),
+                            context.GetAll<User>()?.Where(uw => uw.Deleted == false),
                             role => role.UserUUID,
                             users => users.UUID,
                             (role, users) => new { role, users }
@@ -872,7 +877,7 @@ namespace TreeMon.Managers.Membership
                     //GetAccountMembers
                 using (var context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                    usersInAccount = context.GetAll<AccountMember>().Where(w => w.AccountUUID == accountUUID)
+                    usersInAccount = context.GetAll<AccountMember>()?.Where(w => w.AccountUUID == accountUUID)
                                             .Join(
                                                 context.GetAll<User>()
                                                     .Where(w => w.Deleted == false),
@@ -908,13 +913,13 @@ namespace TreeMon.Managers.Membership
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
                 //1. Get the roles the user is assigned
-                userRoles = context.GetAll<UserRole>().Where(urw => urw.UserUUID == userUUID && urw.AccountUUID == accountUUID && urw.Deleted == false);
+                userRoles = context.GetAll<UserRole>()?.Where(urw => urw.UserUUID == userUUID && urw.AccountUUID == accountUUID && urw.Deleted == false);
 
                 if (userRoles == null || !userRoles.Any() )
                     return false;
 
                 //2. Get the permissions for the role
-                rolePermissions = context.GetAll<RolePermission>().Where(
+                rolePermissions = context.GetAll<RolePermission>()?.Where(
                     rpw => rpw.AccountUUID == accountUUID
                     && userRoles.Any(ura => ura.RoleUUID == rpw.RoleUUID) //2.A. Filter the role permissions based on the users roles (return only RolePermissions where the user is in it).
                     ).DistinctBy(db => db.PermissionUUID);
@@ -923,7 +928,7 @@ namespace TreeMon.Managers.Membership
                     return false;
 
                 //Get permissions  for the account and path and distinct Request
-                permissions = context.GetAll<Permission>().Where(
+                permissions = context.GetAll<Permission>()?.Where(
                     pw => (pw.AccountUUID == accountUUID  &&//Whether the permission was created by the account or if it was a system created permission doesn't matter, we'll match the true permission below.
                     pw.Request == requestPath && //get the permission for the request being made
                     pw.Deleted == false
@@ -937,7 +942,15 @@ namespace TreeMon.Managers.Membership
             return true;
         }
 
-
+        /// <summary>
+        /// Validate by individual object
+        ///  
+        /// </summary>
+        /// <param name="dataItem"></param>
+        /// <param name="requestingUser"></param>
+        /// <param name="verb"></param>
+        /// <param name="isSensitiveData"></param>
+        /// <returns></returns>
         public bool DataAccessAuthorized(INode dataItem, User requestingUser, string verb, bool isSensitiveData)
         {
             if (dataItem == null || requestingUser == null || requestingUser.Banned || requestingUser.LockedOut )
@@ -949,44 +962,69 @@ namespace TreeMon.Managers.Membership
             if (requestingUser.SiteAdmin)
                 return true;
 
-            if (dataItem.Private)
-                return false;
-
             if (isSensitiveData)
                 return false;
 
-            if(dataItem.AccountUUID == SystemFlag.Default.Account)
+            if (dataItem.AccountUUID == requestingUser.AccountUUID)
+            {
+                if (UserInAuthorizedRole(requestingUser, dataItem.RoleWeight, dataItem.RoleOperation))
+                    return true;
+            }
+
+            if (dataItem.AccountUUID == SystemFlag.Default.Account)
             {
                 switch (verb?.ToLower())
                 {
                     case "get":
+                        if (dataItem.Private)
+                        {  //todo check if user is in group.
+                            return false;
+                        }
                         return true;
                     case "delete":
-                        if (requestingUser.SiteAdmin)
-                            return true;
-
                          return false;
                     case "post":
-                        if (requestingUser.SiteAdmin)
-                            return true;
+
                         return false;
                     case "put":
-                        if (requestingUser.SiteAdmin)
-                            return true;
                         return false;
                     case "patch":
-                        if (requestingUser.SiteAdmin)
-                            return true;
                         return false;
                 }
             }
            
-            if (  dataItem.AccountUUID == requestingUser.AccountUUID ) {
-                 return UserInAuthorizedRole( requestingUser, dataItem.RoleWeight, dataItem.RoleOperation);
-            }
+            //if (  dataItem.AccountUUID == requestingUser.AccountUUID ) {
+            //     return UserInAuthorizedRole( requestingUser, dataItem.RoleWeight, dataItem.RoleOperation);
+            //}
 
             return false;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="requestingUser"></param>
+        /// <param name="allowSensitiveData"></param>
+        /// <param name="allowPrivateData"></param>
+        /// <returns></returns>
+        public bool DataAccessAuthorized(string type, User requestingUser,   bool allowSensitiveData, bool allowPrivateData)
+        {
+            if (string.IsNullOrWhiteSpace(type) == true || requestingUser == null || requestingUser.Banned || requestingUser.LockedOut)
+                return false;
+
+            if (requestingUser.SiteAdmin)
+                return true;
+
+            if (allowSensitiveData)
+                return false;
+
+            if (allowPrivateData)
+                return false; 
+
+            return true;
+        }
+
 
         /// <summary>
         /// Used in ApiAuthorization.
@@ -1003,39 +1041,30 @@ namespace TreeMon.Managers.Membership
             if (requestingUser == null || roleWeight < 0 || string.IsNullOrWhiteSpace(weightOperator))
                 return false;
 
+            _requestingUser = requestingUser;
             List<Role> allowedRoles = new List<Role>();
             switch (weightOperator)
             {
                 case ">="://role weight greater or equal to
                     allowedRoles = this.GetRoles(requestingUser.AccountUUID)
-                           .Where(w => w.RoleWeight >= roleWeight &&
-                                  w.AccountUUID == requestingUser.AccountUUID)
-                           .OrderBy(o => o.RoleWeight).ToList();
+                           .Where(w => w.Weight >= roleWeight  )?.ToList();
                     break;
                 case "=":
                     allowedRoles = this.GetRoles(requestingUser.AccountUUID)
-                        .Where(w => w.RoleWeight == roleWeight &&
-                               w.AccountUUID == requestingUser.AccountUUID)
-                        .OrderBy(o => o.RoleWeight).ToList();
+                        .Where(w => w.Weight == roleWeight )?.ToList();
                     break;
 
                 case ">":
                     allowedRoles = this.GetRoles(requestingUser.AccountUUID)
-                        .Where(w => w.RoleWeight > roleWeight &&
-                               w.AccountUUID == requestingUser.AccountUUID)
-                        .OrderBy(o => o.RoleWeight).ToList();
+                        .Where(w => w.Weight > roleWeight  )?.ToList();
                     break;
                 case "<=":
                     allowedRoles = this.GetRoles(requestingUser.AccountUUID)
-                        .Where(w => w.RoleWeight <= roleWeight &&
-                               w.AccountUUID == requestingUser.AccountUUID)
-                        .OrderBy(o => o.RoleWeight).ToList();
+                        .Where(w => w.Weight <= roleWeight  )?.ToList();
                     break;
                 case "<":
                     allowedRoles = this.GetRoles(requestingUser.AccountUUID)
-                        .Where(w => w.RoleWeight < roleWeight &&
-                               w.AccountUUID == requestingUser.AccountUUID)
-                        .OrderBy(o => o.RoleWeight).ToList();
+                        .Where(w => w.Weight < roleWeight  ).ToList();
                     break;
 
             }
@@ -1193,7 +1222,7 @@ namespace TreeMon.Managers.Membership
             List<string> tables;
             using (TreeMonDbContext context = new TreeMonDbContext(_dbConnectionKey))
             {
-                tables = context.GetTableNames();
+                tables = DatabaseEx.GetTableNames();
 
                 foreach (string verb in _verbs)
                 {
@@ -1242,8 +1271,8 @@ namespace TreeMon.Managers.Membership
             }
             try
             {
-                List<Role> tmpRoles = this.GetRoles(AccountUUID).Where(w => w.AppType == appType).ToList();
-                List<Permission> permissions = this.GetAccountPermissions(AccountUUID).Where(w => w.AppType == appType).ToList();
+                List<Role> tmpRoles = this.GetRoles(AccountUUID)?.Where(w => w.AppType == appType).ToList();
+                List<Permission> permissions = this.GetAccountPermissions(AccountUUID)?.Where(w => w.AppType == appType).ToList();
                 List<string> matrix = GetPermissionsMatrix();
 
                 foreach (string permissionsSet in matrix)
@@ -1293,7 +1322,7 @@ namespace TreeMon.Managers.Membership
                             RolePermission dbRp;
                             using (var context = new TreeMonDbContext(_dbConnectionKey))
                             {
-                                dbRp = context.GetAll<RolePermission>().FirstOrDefault(w => w.RoleUUID == r.UUID && w.PermissionUUID == p.UUID && w.AccountUUID == AccountUUID);
+                                dbRp = context.GetAll<RolePermission>()?.FirstOrDefault(w => w.RoleUUID == r.UUID && w.PermissionUUID == p.UUID && w.AccountUUID == AccountUUID);
 
                                 if (dbRp != null) { continue; }
 
@@ -1377,7 +1406,7 @@ namespace TreeMon.Managers.Membership
             matrix.Add("Permissions     |Manager{insert,update,delete,get } |Admin{insert,update,delete,purge,get }|Owner{insert,update,delete,purge,get }                                                                                                                                     ");
             matrix.Add("Products      |Customer{insert,update,delete,purge,get }|Patient{insert,update,delete,purge,get }|Employee{insert,update,delete,purge,get  }|Manager{insert,update,delete,purge,get }|Admin{insert,update,delete,purge,get } |Owner{insert,update,delete,purge,get }   ");
             matrix.Add("AppInfo           |Admin{insert,update,delete,get } |Owner{insert,update,delete,purge,get }                                                                                                                                                                            ");
-            matrix.Add("AuthenticationLog |Admin{get} |Owner{insert,update,delete,purge,get }                                                                                                                                                                                                  ");
+            matrix.Add("AccessLog |Admin{get} |Owner{insert,update,delete,purge,get }                                                                                                                                                                                                  ");
             matrix.Add("SystemLog         |Owner{insert,update,delete,purge,get }                                                                                                                                                                                                              ");
             matrix.Add("Settings          |Owner{insert,update,delete,purge,get }                                                                                                                                                                                                              ");
 

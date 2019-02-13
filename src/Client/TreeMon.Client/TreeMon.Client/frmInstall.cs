@@ -360,6 +360,10 @@ namespace TreeMon.Client
             if (string.IsNullOrWhiteSpace(appSettings.AccountName))
                 appSettings.AccountName = appSettings.SiteDomain;
 
+            ////if (string.IsNullOrWhiteSpace(appSettings.UserEmail))return ServiceResponse.Error("Email is empty.");
+
+            ////if (string.IsNullOrWhiteSpace(appSettings.AccountEmail))appSettings.AccountEmail = appSettings.UserEmail;
+
             if (string.IsNullOrWhiteSpace(appSettings.SecurityQuestion))
                 return ServiceResponse.Error("Security question is empty." );
 
@@ -400,10 +404,9 @@ namespace TreeMon.Client
             AppManager am = new AppManager(appSettings.ActiveDbConnectionKey, "FORMS", "");
             am.Installing = true;
 
-          
             am.SeedDataSetAccount(user.AccountUUID);
+            
 
-            ////ServiceResult res;
             ////  string appKey = appSettings.AppKey; //this should pull from config file. UseDatabaseConfig should be false.
 
             ////copy all the app settings to the database settings.

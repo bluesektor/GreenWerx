@@ -16,14 +16,14 @@ namespace TreeMon.Managers.Finance
 {
     public class PriceManager : BaseManager, ICrud
     {
-        private readonly string _sessionKey;
+       
         private readonly SystemLogger _logger;
 
         public PriceManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(connectionKey), "PriceRuleManager CONTEXT IS NULL!");
 
-            _sessionKey = sessionKey;
+            SessionKey = sessionKey;
             this._connectionKey = connectionKey;
 
             _logger = new SystemLogger(connectionKey);
@@ -83,7 +83,7 @@ namespace TreeMon.Managers.Finance
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<PriceRule>().ToList();
 
-                return context.GetAll<PriceRule>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<PriceRule>()?.Where(pw => pw.AccountUUID == accountUUID).ToList();
             }
         }
 
@@ -94,7 +94,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<PriceRule>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<PriceRule>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -106,7 +106,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<PriceRule>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<PriceRule>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -117,7 +117,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<PriceRule>().FirstOrDefault(sw => sw.Code.EqualsIgnoreCase(PriceRuleCode));
+                return context.GetAll<PriceRule>()?.FirstOrDefault(sw => sw.Code.EqualsIgnoreCase(PriceRuleCode));
             }
         }
         public List<PriceRule> GetPriceRules(string accountUUID, bool deleted = false)
@@ -126,7 +126,7 @@ namespace TreeMon.Managers.Finance
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 //todo check if asset class is returned if so delete the line below.
-                return context.GetAll<PriceRule>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<PriceRule>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
@@ -136,7 +136,7 @@ namespace TreeMon.Managers.Finance
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
 
-                    return context.GetAll<PriceRuleLog>().Where(sw => (sw.TrackingId == trackingId && (sw.TrackingType?.EqualsIgnoreCase(trackingType) ?? false)) && sw.Deleted == isDeleted).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<PriceRuleLog>()?.Where(sw => (sw.TrackingId == trackingId && (sw.TrackingType?.EqualsIgnoreCase(trackingType) ?? false)) && sw.Deleted == isDeleted).OrderBy(ob => ob.Name).ToList();
                 }
           
         }

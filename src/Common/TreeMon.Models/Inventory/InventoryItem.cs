@@ -12,6 +12,7 @@ namespace TreeMon.Models.Inventory
         public InventoryItem():base()
         {
             this.UUIDType = "InventoryItem";
+            this.DetailView = false;
         }
 
         public string LocationUUID { get; set; }
@@ -40,6 +41,10 @@ namespace TreeMon.Models.Inventory
         public string Link { get; set; }
 
         public string LinkProperties { get; set; }
+
+
+        [NotMapped]
+        public bool DetailView { get; set; }
 
         //TODO inventory log. show when items added, removed, etc. 
         ////public DateTime DateAdded { get; set; }

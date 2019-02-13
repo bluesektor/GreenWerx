@@ -16,14 +16,14 @@ namespace TreeMon.Managers.Store
 {
     public class OrderManager: BaseManager,ICrud
     {
-        private readonly  string _sessionKey = string.Empty;
+       
         private readonly SystemLogger _logger = null;
 
         public OrderManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(connectionKey), "OrderManager CONTEXT IS NULL!");
 
-            _sessionKey = sessionKey;
+            SessionKey = sessionKey;
             this._connectionKey = connectionKey;
             _logger = new SystemLogger(connectionKey);
         }
@@ -70,7 +70,7 @@ namespace TreeMon.Managers.Store
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Order>().Where(w => w.Name.EqualsIgnoreCase(name) && w.AccountUUID == _requestingUser?.AccountUUID).ToList();
+                return context.GetAll<Order>()?.Where(w => w.Name.EqualsIgnoreCase(name) && w.AccountUUID == _requestingUser?.AccountUUID).ToList();
             }
         }
 
@@ -79,7 +79,7 @@ namespace TreeMon.Managers.Store
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Order>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Order>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
@@ -92,7 +92,7 @@ namespace TreeMon.Managers.Store
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Order>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<Order>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -113,7 +113,7 @@ namespace TreeMon.Managers.Store
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                
-                    Order dbU = context.GetAll<Order>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name));
+                    Order dbU = context.GetAll<Order>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name));
 
                     if (dbU != null)
                         return ServiceResponse.Error("Order already exists.");

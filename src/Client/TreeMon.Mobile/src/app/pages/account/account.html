@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Account</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content >
+  <div padding-top text-center >
+    <img src="{{user.Image}}" alt="avatar">
+    <h2>{{user.Name}}</h2>
+
+    <ion-list inset *ngIf="processingRequest === false">
+      <ion-item (click)="changePassword()">Change Password</ion-item>
+      <ion-item (click)="support()">Support</ion-item>
+        <label for="file-1" class="lblButton" style="width:99%;" >Update Picture
+          <input  type="file"  style="display:none;height: 0px;width:0px;background-color: transparent;text-align: right;color: transparent;"
+            name="file-1[]" id="file-1" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple 
+            (change)="uploadImageEvent($event, 0)" />
+        </label>
+        <label *ngIf="hasCamera" (click)="getPicture()"  class="lblButton" >
+         <ion-icon name="camera" style="width:20px;height: 17px;" ></ion-icon>
+        </label>
+        <ion-item (click)="logout()">Logout</ion-item>
+    </ion-list>
+  </div>
+</ion-content>

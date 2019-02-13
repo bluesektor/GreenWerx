@@ -1,0 +1,21 @@
+page-about {
+  .about-header {
+    background-color:white; //var(--ion-color-dark);
+    width: 100%;
+    text-align: center;
+    padding-top: 5px;
+  }
+  
+  .about-info p {
+    color: var(--ion-color-medium);
+    text-align: left;
+  }
+
+  .about-info ion-icon {
+    color: var(--ion-color-primary);
+  }
+
+  .ios .about-info {
+    text-align: center;
+  }
+}

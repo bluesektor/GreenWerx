@@ -32,7 +32,7 @@ namespace TreeMon.Managers.Plant
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                Category c = context.GetAll<Category>().FirstOrDefault(w => w.UUID == p.CategoryUUID);
+                Category c = context.GetAll<Category>()?.FirstOrDefault(w => w.UUID == p.CategoryUUID);
                 if (c == null || c.UsesStrains == false)
                     return null;
             }
@@ -123,7 +123,7 @@ namespace TreeMon.Managers.Plant
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Strain>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<Strain>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -136,9 +136,9 @@ namespace TreeMon.Managers.Plant
             {
                 if (includeSystemAccount)
                 {
-                    return context.GetAll<Strain>().Where(sw => (sw.AccountUUID == accountUUID || sw.AccountUUID == SystemFlag.Default.Account) && sw.Deleted == deleted).GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<Strain>()?.Where(sw => (sw.AccountUUID == accountUUID || sw.AccountUUID == SystemFlag.Default.Account) && sw.Deleted == deleted).GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();
                 }
-                return context.GetAll<Strain>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Strain>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
@@ -149,17 +149,17 @@ namespace TreeMon.Managers.Plant
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Strain>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<Strain>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
-        public INode GetByGetBySyncKey(string syncKey)
+        public INode GetByGetByGUUID(string GUUID)
         {
-            if (string.IsNullOrWhiteSpace(syncKey))
+            if (string.IsNullOrWhiteSpace(GUUID))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Strain>().FirstOrDefault(sw => sw.SyncKey == syncKey);
+                return context.GetAll<Strain>()?.FirstOrDefault(sw => sw.GUUID == GUUID);
             }
         }
 
@@ -174,7 +174,7 @@ namespace TreeMon.Managers.Plant
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    res = context.GetAll<Strain>().Where(w => w.UUID == uuid || (w.Name?.EqualsIgnoreCase(name) ?? false)).ToList();
+                    res = context.GetAll<Strain>()?.Where(w => w.UUID == uuid || (w.Name?.EqualsIgnoreCase(name) ?? false)).ToList();
                 }
             }
 
@@ -202,7 +202,7 @@ namespace TreeMon.Managers.Plant
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
       
-                    Strain dbU = context.GetAll<Strain>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name) ?? false) && wu.AccountUUID == s.AccountUUID);
+                    Strain dbU = context.GetAll<Strain>()?.FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name) ?? false) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Strain already exists.");

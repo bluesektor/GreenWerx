@@ -86,8 +86,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Vendors/")]
-        public ServiceResult GetVendors(string filter = "")
+        [Route("api/Vendors")]
+        public ServiceResult GetVendors()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -96,8 +96,8 @@ namespace TreeMon.Web.api.v1
 
             List<dynamic> Vendors = vendorManager.GetVendors(CurrentUser.AccountUUID, false, true).Cast<dynamic>().ToList();
             int count;
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                Vendors = FilterEx.FilterInput(Vendors, tmpFilter, out count);
+            DataFilter tmpFilter = this.GetFilter(Request);
+            Vendors = Vendors.Filter(tmpFilter, out count);
             return ServiceResponse.OK("", Vendors, count);
         }
 

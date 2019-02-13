@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2017 TreeMon.org.
 //Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
 using Newtonsoft.Json;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using TreeMon.Models.Helpers;
 
@@ -15,10 +16,6 @@ namespace TreeMon.Models.Geo
 
         }
 
-        //This is to link an account to a location.
-        //Set this to the account.UUID
-        public string AccountReference { get; set; }
-
         //this replaces the Id field on the insert. the ParentId will reference this.
         public int RootId { get; set; }
 
@@ -30,9 +27,9 @@ namespace TreeMon.Models.Geo
 
         public string LocationType        { get; set; }
 
-        public float Latitude        { get; set; }
+        public double? Latitude        { get; set; }
 
-        public float Longitude        { get; set; }
+        public double? Longitude        { get; set; }
 
         public int TimeZoneUUID        { get; set; }
 
@@ -51,6 +48,8 @@ namespace TreeMon.Models.Geo
         public string Country { get; set; }
 
         public string Postal { get; set; }
+
+        public string Category { get; set; }
 
         public int Type { get; set; }
 
@@ -79,6 +78,15 @@ namespace TreeMon.Models.Geo
 
         public bool Retailer        { get; set; }
 
+        //public UInt64? IpNumStart { get; set; }
 
+        //public UInt64? IpNumEnd { get; set; }
+
+        public float IpNumStart { get; set; }
+
+        public float IpNumEnd { get; set; }
+
+
+        public float IpVersion { get; set; }
     }
 }

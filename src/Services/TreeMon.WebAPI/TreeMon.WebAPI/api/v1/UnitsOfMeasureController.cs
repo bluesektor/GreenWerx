@@ -19,9 +19,11 @@ using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Helpers;
 using TreeMon.Web.Filters;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class UnitsOfMeasureController : ApiBaseController
     {
 
@@ -149,8 +151,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/UnitsOfMeasure/")]
-        public ServiceResult GetUnitsOfMeasure(string filter = "")
+        [Route("api/UnitsOfMeasure")]
+        public ServiceResult GetUnitsOfMeasure()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -162,8 +164,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> UnitOfMeasures = UnitsOfMeasureManager.GetUnitsOfMeasure(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                UnitOfMeasures = FilterEx.FilterInput(UnitOfMeasures, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                UnitOfMeasures = UnitOfMeasures.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", UnitOfMeasures, count);
         }
 

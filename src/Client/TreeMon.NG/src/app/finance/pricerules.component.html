@@ -43,7 +43,8 @@ Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/lice
                     </div>
                     <div class="form-group">
                         <label for="Type">Type</label>
-                        <select class="form-control input-sm" id="cboPriceReferenceRuleTypes" name="cboPriceReferenceRuleTypes" [(ngModel)]="selectedItem.ReferenceType"
+                        <select class="form-control input-sm" id="cboPriceReferenceRuleTypes" name="cboPriceReferenceRuleTypes" 
+                            [(ngModel)]="selectedItem.ReferenceType"
                             (ngModelChange)="cboPriceRuleTypeChange($event)">
                             <option *ngFor="let priceRuleType of priceRuleTypes;" value="{{priceRuleType}}">
                                 {{priceRuleType}}

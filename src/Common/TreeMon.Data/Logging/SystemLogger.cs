@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using TreeMon.Data.Helpers;
 using TreeMon.Data.Logging.Models;
 
 namespace TreeMon.Data.Logging
@@ -65,7 +66,7 @@ namespace TreeMon.Data.Logging
         {
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                string table = context.GetTableName<LogEntry>();
+                string table = DatabaseEx.GetTableName<LogEntry>();
                 return context.ExecuteNonQuery("DELETE FROM " + table, null);
             }
         }
@@ -195,9 +196,6 @@ namespace TreeMon.Data.Logging
             return sb.ToString();
         }
 
-
-    
-        
         private static string GetFullException(System.Exception ex)
         {
             #region requires pdb. The line will be 0 if no pdb. See below for generating pdb in release build

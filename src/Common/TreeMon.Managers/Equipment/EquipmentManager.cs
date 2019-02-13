@@ -38,19 +38,19 @@ namespace TreeMon.Managers.Equipment
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    res.AddRange(context.GetAll<TreeMon.Models.Plant.Plant>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
-                    res.AddRange(context.GetAll<Ballast>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
-                    res.AddRange(context.GetAll<Bulb>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
-                    res.AddRange(context.GetAll<Fan>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
-                    res.AddRange(context.GetAll<Filter>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
-                    res.AddRange(context.GetAll<Pump>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
-                    res.AddRange(context.GetAll<Vehicle>().Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
+                    res.AddRange(context.GetAll<TreeMon.Models.Plant.Plant>()?.Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
+                    res.AddRange(context.GetAll<Ballast>()?.Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
+                    res.AddRange(context.GetAll<Bulb>()?.Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
+                    res.AddRange(context.GetAll<Fan>()?.Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
+                    res.AddRange(context.GetAll<Filter>()?.Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
+                    res.AddRange(context.GetAll<Pump>()?.Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
+                    res.AddRange(context.GetAll<Vehicle>()?.Where(w => w.AccountUUID == this._requestingUser.AccountUUID).Cast<dynamic>().ToList());
                 }
                 
                 return res;
             }
 
-            return this.GetEquipment(type).Where(w => w.AccountUUID == this._requestingUser.AccountUUID).ToList();
+            return this.GetEquipment(type)?.Where(w => w.AccountUUID == this._requestingUser.AccountUUID).ToList();
         }
 
 

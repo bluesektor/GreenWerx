@@ -16,13 +16,13 @@ namespace TreeMon.Managers.Finance
 {
     public class FinanceAccountTransactionsManager : BaseManager, ICrud
     {
-        private readonly string _sessionKey = string.Empty;
+       
         private readonly SystemLogger _logger = null;
         public FinanceAccountTransactionsManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(connectionKey), "FinanceAccountManager CONTEXT IS NULL!");
 
-            _sessionKey = sessionKey;
+            SessionKey = sessionKey;
             this._connectionKey = connectionKey;
 
             _logger = new SystemLogger(connectionKey);
@@ -73,7 +73,7 @@ namespace TreeMon.Managers.Finance
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<FinanceAccountTransaction>().ToList();
 
-                return context.GetAll<FinanceAccountTransaction>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<FinanceAccountTransaction>()?.Where(pw => pw.AccountUUID == accountUUID).ToList();
             }
         }
 
@@ -84,7 +84,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<FinanceAccountTransaction>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<FinanceAccountTransaction>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -96,7 +96,7 @@ namespace TreeMon.Managers.Finance
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<FinanceAccountTransaction>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<FinanceAccountTransaction>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -106,7 +106,7 @@ namespace TreeMon.Managers.Finance
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-                return context.GetAll<FinanceAccountTransaction>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<FinanceAccountTransaction>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 

@@ -25,7 +25,7 @@ export class WebApiService {
             this._url = 'http://dev.treemon.org/';
         }
         */
-       //this._url = 'http://localhost:51859/';
+       // this._url = 'http://localhost:51859/';
        this._url = 'https://localhost:44318/';
      // this._url = 'https://dev.treemon.org/';
     }
@@ -39,6 +39,8 @@ export class WebApiService {
             options = new RequestOptions({ headers: headers });
         }
         const url = this._url +  endPoint;
+
+        console.log('invoke:', url);
 
         switch (verb.toLowerCase()) {
             case 'get':

@@ -17,9 +17,11 @@ using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Helpers;
 using TreeMon.Web.Filters;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class RolesController : ApiBaseController
     {
         public RolesController()
@@ -238,15 +240,15 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Roles/{roleUUID}/Permissions/Unassigned/")]
-        public ServiceResult GetUnassignedPermissionsForRole(string roleUUID, string filter = "")
+        [Route("api/Roles/{roleUUID}/Permissions/Unassigned")]
+        public ServiceResult GetUnassignedPermissionsForRole(string roleUUID)
         {
             RoleManager rm = new RoleManager(Globals.DBConnectionKey, this.GetUser(Request.Headers?.Authorization?.Parameter));
             List<dynamic> availablePerms =rm.GetAvailablePermissions(roleUUID, CurrentUser.AccountUUID).OrderBy(ob => ob.Name).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                availablePerms = FilterEx.FilterInput(availablePerms, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                availablePerms = availablePerms.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", availablePerms, count);
 
@@ -255,8 +257,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Roles/{roleUUID}/Permissions/")]
-        public ServiceResult GetPermissionsForRole(string roleUUID, string filter = "")
+        [Route("api/Roles/{roleUUID}/Permissions")]
+        public ServiceResult GetPermissionsForRole(string roleUUID)
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -265,8 +267,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> permissions = rm.GetPermissionsForRole(roleUUID, CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                permissions = FilterEx.FilterInput(permissions, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                permissions = permissions.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", permissions, count);
         }
@@ -310,8 +312,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Roles/")]
-        public ServiceResult GetRoles(string filter = "")
+        [Route("api/Roles")]
+        public ServiceResult GetRoles()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -320,11 +322,23 @@ namespace TreeMon.Web.api.v1
 
             List<dynamic> roles = roleManager.GetRoles(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            roles = FilterEx.FilterInput(roles, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            roles = roles.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", roles, count);
         }
+
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
+        [HttpPost]
+        [HttpGet]
+        [Route("api/Roles/IsMember/{roleName}")]
+        public ServiceResult IsUserInRole( string roleName)
+        {
+            RoleManager rm = new RoleManager(Globals.DBConnectionKey, this.GetUser(Request.Headers?.Authorization?.Parameter));
+            bool isMember = rm.IsUserInRole(CurrentUser.UUID, roleName, CurrentUser.AccountUUID);
+            return ServiceResponse.OK("", isMember);
+        }
+
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpPost]
@@ -342,6 +356,21 @@ namespace TreeMon.Web.api.v1
             return ServiceResponse.OK("", role);
         }
 
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
+        [HttpGet]
+        [Route("api/Roles/User")]
+        public ServiceResult GetUserRoles()
+        {
+            if (CurrentUser == null)
+                return ServiceResponse.Error("You must be logged in to access this function.");
+
+            RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
+
+            List<Role> userRoles = roleManager.GetRolesForUser(CurrentUser.UUID, CurrentUser.AccountUUID);
+
+            return ServiceResponse.OK("", userRoles);
+        }
+
 
         /// <summary>
         /// if getUnassigned == true it will return
@@ -354,7 +383,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Roles/{roleUUID}/Users")]
-        public ServiceResult GetUsersInRole(string roleUUID,  string filter = "")
+        public ServiceResult GetUsersInRole(string roleUUID )
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -365,8 +394,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> usersInRole =rm.GetUsersInRole(roleUUID, CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            usersInRole = FilterEx.FilterInput(usersInRole, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            usersInRole = usersInRole.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", usersInRole, count);
         }
@@ -375,18 +404,18 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Roles/{roleUUID}/Users/Unassigned")]
-        public ServiceResult GetUnassignedUsersForRole(string roleUUID,string filter = "")
+        public ServiceResult GetUnassignedUsersForRole(string roleUUID)
         {
             RoleManager rm = new RoleManager(Globals.DBConnectionKey, CurrentUser);
      
             List<dynamic> availableUsers =rm.GetUsersNotInRole(roleUUID, CurrentUser.AccountUUID).OrderBy(ob => ob.Name).Cast<dynamic>().ToList();
          
             int count =0;
-
-            if (!string.IsNullOrWhiteSpace(filter))
+            DataFilter filter = GetFilter(Request);
+            if (filter != null)
             {
-                DataFilter tmpFilter = this.GetFilter(filter);
-                availableUsers = FilterEx.FilterInput(availableUsers, tmpFilter, out count);
+                 DataFilter tmpFilter = this.GetFilter(Request);
+                availableUsers = availableUsers.Filter( tmpFilter, out count);
             }
 
             return ServiceResponse.OK("", availableUsers, count);

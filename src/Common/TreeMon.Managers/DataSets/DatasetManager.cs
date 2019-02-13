@@ -1,14 +1,18 @@
 ﻿// Copyright (c) 2017 TreeMon.org.
 //Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using TreeMon.Data;
+using TreeMon.Data.Helpers;
 using TreeMon.Data.Logging;
 using TreeMon.Models.Datasets;
+using TreeMon.Models.Plant;
 using TreeMon.Utilites.Extensions;
 
 /// <summary>
@@ -31,59 +35,74 @@ namespace TreeMon.Managers.DataSets
                 _logger = new SystemLogger(_connectionKey);
         }
 
-        public List<DataPoint> GetData(string type, string field, List<DataScreen> screens)
+        public List<dynamic> GetData(string type)
         {
-            List<DataPoint> dataset = new List<DataPoint>();
-            DataQuery dq = BuildQuery(type, screens);
-            if (dq == null || dq.SQL.Contains("ERROR:"))
-            {
-                Debug.Assert(false, "Error building reports getdata query." + dq.SQL);
-                dataset.Add(new DataPoint() {
-                    Value = "Error building the query.",
-                    ValueType = "ERROR"
-                    });
-                _logger.InsertError("Error building query." + Environment.NewLine + dq.SQL, "DatasetManager", "GetData:" + type + Environment.NewLine + field);
-                return dataset;
-            }
-            IDataReader reader = null;
+            List<dynamic> dataset = new List<dynamic>();
 
             try
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    reader = context.Execute(dq.SQL, dq.Parameters);
-             
-                    if (reader == null || reader.FieldCount == 0)
-                        return dataset;
+                    dataset =  context.GetAllOf(type).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.Message);
+                _logger.InsertError(ex.Message , "DatasetManager", "GetData:" + type );
+            }
+          
+            return dataset;
+        }
 
-                    while (reader.Read())
+
+        public List<DataPoint> GetDataSet(string type, DataFilter filter)
+        {
+            var screens = filter.Screens.OrderBy(o => o.Order).ToList();
+
+            string accountUUID = this._requestingUser.AccountUUID;
+
+            List<DataPoint> dataset = new List<DataPoint>();
+
+            if (string.IsNullOrWhiteSpace(type))
+                return dataset;
+
+            try
+            {
+                using (var context = new TreeMonDbContext(this._connectionKey))
+                {
+                    var list = context.GetAllOf(type)?.Where(w => w.AccountUUID == accountUUID).ToList();
+
+                    int count = 0;
+                    list = list.Filter( filter, out count);
+
+                    foreach (dynamic item in list)
                     {
                         dataset.Add(new DataPoint()
                         {
-                            Value = reader[field].ToString(),
-                            ValueType = reader[field].GetType().Name
+                            Value = JsonConvert.SerializeObject(item),
+                            ValueType = type
                         });
                     }
                 }
             }
             catch (Exception ex)
             {
-                Debug.Assert(false, ex.Message);
-                dataset.Add(new DataPoint()
-                {
-                    Value = "Error getting report data.",
-                    ValueType = "ERROR"
-                });
-                _logger.InsertError(ex.Message + Environment.NewLine + dq.SQL, "DatasetManager", "GetData:" + type + ":" + field);
+                //Debug.Assert(false, ex.Message);
+                //dataset.Add(new DataPoint()
+                //{
+                //    Value = "Error getting report data.",
+                //    ValueType = "ERROR"
+                //});
+                //_logger.InsertError(ex.Message + Environment.NewLine + dq.SQL, "DatasetManager", "GetData:" + type + ":" + field);
             }
             finally
             {
-                if (reader != null) { reader.Close(); }
-                //if (conn != null) conn.Close();
+                //if (reader != null) { reader.Close(); }
+                ////if (conn != null) conn.Close();
             }
             return dataset;
         }
-
 
         /// <summary>
         /// returns a query based on the screens
@@ -94,7 +113,7 @@ namespace TreeMon.Managers.DataSets
         protected DataQuery BuildQuery<T>( List<DataScreen> screens) where T : class
         {
             DataQuery dq = new DataQuery();
-            string table = new TreeMonDbContext(this._connectionKey).GetTableName<T>();
+            string table = DatabaseEx.GetTableName<T>();  
             if (string.IsNullOrEmpty(table))
             {   dq.SQL = "ERROR: Table name could not be parsed.";
                 return dq;
@@ -116,7 +135,7 @@ namespace TreeMon.Managers.DataSets
         {
             DataQuery dq = new DataQuery();
 
-            string table = new TreeMonDbContext(this._connectionKey).GetTableName(typeName);
+            string table = DatabaseEx.GetTableName(typeName);
 
             if (string.IsNullOrEmpty(table))
             {
@@ -128,7 +147,7 @@ namespace TreeMon.Managers.DataSets
             dq.SQL = "SELECT * FROM " + table;
             dq.Parameters = null;
 
-            if (screens == null || screens.Count() == 0)
+            if (screens == null || screens.Count == 0)
                 return dq;
 
             //Check if we do a distinct query.
@@ -160,7 +179,7 @@ namespace TreeMon.Managers.DataSets
 
             foreach (DataScreen screen in screens)
             {
-                if (screen.Type != "sql" || screen.Command?.ToLower() == "distinct" )
+                if (screen.Type != "sql" || string.IsNullOrWhiteSpace(screen.Command) || screen.Command?.ToLower() == "distinct" )
                     continue;
 
                 #region range query

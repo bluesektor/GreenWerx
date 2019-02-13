@@ -1,5 +1,6 @@
 ﻿// Copyright (c) 2017 TreeMon.org.
 //Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -24,7 +25,7 @@ namespace TreeMon.Data
         #region CRUD
         IEnumerable<T> GetAll<T>() where T : class;
 
-        string GetTableName<T>() where T : class;
+        IEnumerable<dynamic> GetAllOf(string type);
 
         IEnumerable<T> Select<T>(string sql, object parameters) where T : class;
       
@@ -70,13 +71,15 @@ namespace TreeMon.Data
 
         #endregion
 
-        List<string> GetTableNames();
+        //string GetTableName<T>() where T : class;
 
-        string GetTableName(string typeName);
+        //List<string> GetTableNames();
 
-        object GetTableObject(string tableName);
+        //string GetTableName(string typeName);
 
-        void LoadTableNames();
+        //object GetTableObject(string tableName);
+
+        // void LoadTableNames();
 
     }
 }

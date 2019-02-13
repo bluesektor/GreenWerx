@@ -26,7 +26,7 @@ namespace TreeMon.Web.Tests.API.V1
     {
         private string connectionKey = "MSSQL_TEST";
         private string _ownerAuthToken = "";
-       // private string _captcha = "TESTCAPTCHA";
+        private string _captcha = "TESTCAPTCHA";
 
         [TestInitialize]
         public void TestSetup()
@@ -41,13 +41,15 @@ namespace TreeMon.Web.Tests.API.V1
         [TestMethod]
         public void Api_ToolController_Cipher_Encrypt()
         {
+            string forconfig = Cipher.Crypt(ConfigurationManager.AppSettings["AppKey"].ToString(), "yourpassword", true);
+
             Assert.IsNotNull(ConfigurationManager.AppSettings["AppKey"]);
 
-            string args = "?text=alpha&encrypt=true";
+            
 
             Task.Run(async () =>
             {
-                ServiceResult res = await TestHelper.SentHttpRequest("GET", "api/Tools/Cipher/alpha/Encrypt/true" , "", _ownerAuthToken);
+                ServiceResult res = await TestHelper.SentHttpRequest("GET", "api/Tools/Cipher/alpha/Encrypt/true", "", _ownerAuthToken);
 
                 Assert.IsNotNull(res);
                 Assert.AreEqual(res.Code, 200);

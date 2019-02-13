@@ -4,6 +4,7 @@
 //using Logging;
 namespace Omni.Managers.Services
 {
+    using Newtonsoft.Json;
     using System;
     using System.Net;
     using System.Net.Mail;
@@ -12,6 +13,7 @@ namespace Omni.Managers.Services
     using TreeMon.Data.Logging;
     using TreeMon.Models.App;
     using TreeMon.Models.Services;
+    using TreeMon.Utilites.Extensions;
     using TreeMon.Utilites.Security;
     public class SMTP 
     {
@@ -72,6 +74,7 @@ namespace Omni.Managers.Services
                 ErrorMessage = message;
         }
 
+       // public async Task<ServiceResult> SendMailAsync(MailMessage msg)
         public async Task<ServiceResult> SendMailAsync(MailMessage msg)
         {
             if (HasError)
@@ -82,33 +85,33 @@ namespace Omni.Managers.Services
                 if(string.IsNullOrWhiteSpace(_settings.EncryptionKey))
                     return ServiceResponse.Error("The encryption key is not set.");
 
-
-                //   
-                string hostPassword = Cipher.Crypt("1000Gxzd8pGraRQD0LLUc2ITQmWIw6AkuQ8V0BpDutnqiG/zpjZOss/EWUYtgXpKsKJw", "@Th3Dug#P4rty", true);
-
-                //this is dev.treemon.org
-                 hostPassword = Cipher.Crypt("1000Gxzd8pGraRQD0LLUc2ITQmWIw6AkuQ8V0BpDutnqiG/zpjZOss/EWUYtgXpKsKJw", "IpDbcT0hVCrCCJ/rS0gtx3NW47rVfDBsczRLVtCy/IS1xo/K/3aAOeQUgrpJv30LdZfeL40rFzp7W3tdkh31K5g0fKu2y4Oqv2IC+WY835oGyfIcgsFPxJaz+dN7TWf5", false);
-                // string hostPassword = Cipher.Crypt(_settings.EncryptionKey,_settings.HostPassword, false);
+                //Open buildall project and use test functions to enc/dec password
+                //Api_ToolController_Cipher_Encrypt
+                //Api_ToolController_Cipher_Decrypt
+                string hostPassword = Cipher.Crypt(_settings.EncryptionKey,_settings.HostPassword, false);
                 //to use gmail without oauth you need to turn on 2 step verification in gmail account and generate an app key.
 
                 SmtpClient smtp = new SmtpClient();
                 smtp.Host = _settings.MailHost;
                 smtp.Port = _settings.MailPort;
-                smtp.EnableSsl = _settings.UseSSL;
+                smtp.EnableSsl =   _settings.UseSSL;
                 if (smtp.Host.Contains("gmail"))//this wasn't needed for other hosts.
                     smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
                 //   smtp.Timeout = 20000
                 smtp.Credentials = new NetworkCredential(_settings.HostUser, hostPassword);
-                await smtp.SendMailAsync(msg);
+
+                smtp.Send(msg);
+                _logger.InsertInfo("104", "smtp.cs", "sendmailasync");
+                // await smtp.SendMailAsync(msg);
+
             }
             catch (Exception ex)
             {
-                ErrorMessage = ex.Message;
-                if (ex.InnerException != null)
-                    ErrorMessage += ex.InnerException;
 
-                _logger.InsertError(ErrorMessage, "SMTP", "SendMail(MailMessage)");
-                return ServiceResponse.Error(ErrorMessage);
+                ErrorMessage = ex.DeserializeException(true);
+                _logger.InsertError(ErrorMessage, "SMTP", "SendMail()");
+                _logger.InsertError(JsonConvert.SerializeObject(msg), "SMTP", "SendMail().Message:");
+                return ServiceResponse.Error("Error sending email.");
             }
 
            return ServiceResponse.OK();
@@ -117,7 +120,7 @@ namespace Omni.Managers.Services
         public ServiceResult SendMail(MailMessage msg)
         {
             if (HasError)
-                return ServiceResponse.Error(ErrorMessage);
+                return ServiceResponse.Error("Error sending email.");
 
             try
             {

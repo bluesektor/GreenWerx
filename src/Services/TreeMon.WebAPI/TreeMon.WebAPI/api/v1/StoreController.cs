@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web.Http;
 using TreeMon.Data.Logging;
 using TreeMon.Managers.Finance;
+using TreeMon.Managers.Geo;
 using TreeMon.Managers.Inventory;
 using TreeMon.Managers.Store;
 using TreeMon.Models.App;
@@ -19,9 +20,11 @@ using TreeMon.Web.api;
 using TreeMon.Web.api.Helpers;
 using TreeMon.Web.Filters;
 using TreeMon.WebAPI.Helpers;
+using WebApi.OutputCache.V2;
 
 namespace TreeMon.WebAPI.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class StoreController : ApiBaseController
     {
         public StoreController()
@@ -54,10 +57,10 @@ namespace TreeMon.WebAPI.api.v1
             CartView cv = this.GetCartView(cart);
             return ServiceResponse.OK("", cv);
         }
-
+        [HttpPost]
         [HttpGet]
         [Route("api/Store")]
-        public ServiceResult GetStoreItems(string filter = "")
+        public ServiceResult GetStoreItems()
         {
             LocationManager lm = new LocationManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
             Location location = lm.GetAll()?.FirstOrDefault(w => w.isDefault == true && w.LocationType.EqualsIgnoreCase("ONLINE STORE"));
@@ -77,10 +80,12 @@ namespace TreeMon.WebAPI.api.v1
 
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            Inventory = FilterEx.FilterInput(Inventory, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            Inventory = Inventory.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Inventory, count);
         }
+
+        
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 0)]
         [HttpGet]

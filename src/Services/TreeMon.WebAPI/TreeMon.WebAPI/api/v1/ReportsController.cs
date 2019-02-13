@@ -4,19 +4,25 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using TreeMon.Data.Helpers;
 using TreeMon.Data.Logging;
 using TreeMon.Managers.DataSets;
 using TreeMon.Managers.Membership;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
+using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Helpers;
 using TreeMon.Web.Filters;
+using WebApi.OutputCache.V2;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class ReportsController : ApiBaseController
     {
 
@@ -35,13 +41,15 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 5)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Reports/{category}/Dataset/{field}")]
-        public ServiceResult GetDataset(string category = "", string field = "")
+        [Route("api/Reports/{type}/Dataset/{field}")]
+        public ServiceResult GetDataset(string type = "", string field = "")
         {
+      
+
             List<DataPoint> dataSet;
 
-            if (string.IsNullOrWhiteSpace(category))
-                return ServiceResponse.Error("You must provide a category to get the datasets.");
+            if (string.IsNullOrWhiteSpace(type))
+                return ServiceResponse.Error("You must provide a type to get the datasets.");
 
             if (string.IsNullOrWhiteSpace(field))
                 return ServiceResponse.Error("You must provide a series to get the datasets.");
@@ -49,32 +57,26 @@ namespace TreeMon.Web.api.v1
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
+            //todo log all access to this.
+            //CurrentUser.RoleWeight
+            //CurrentUser.AccountUUID
 
-
-            if (category?.ToLower() == "users" && CurrentUser.SiteAdmin == false ) { //BACKLOG  turn on the flag to log permission routes to log this. add numeric value to roles sow we can include multiple roles by doing math >= roleWeight 
+            if (type?.ToLower() == "users" && CurrentUser.SiteAdmin == false ) {
+                //BACKLOG  turn on the flag to log permission routes to log this. 
+                //add numeric value to roles s we can include multiple roles by doing math >= roleWeight 
                 RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
 
                 if (!roleManager.IsUserInRole(CurrentUser.UUID, "Admin", CurrentUser.AccountUUID) || !roleManager.IsUserInRole(CurrentUser.UUID, "owner", CurrentUser.AccountUUID))
                 {
-                    return ServiceResponse.Error("You are not authorized to query the category:" + category);
+                    return ServiceResponse.Error("You are not authorized to query the type:" + type);
                 }
             }
 
             try
             {
-                Task<string> content = ActionContext.Request.Content.ReadAsStringAsync();
-                if (content == null)
-                    return ServiceResponse.Error("No screens were sent.");
-
-                string body = content.Result;
-
-                if (string.IsNullOrEmpty(body))
-                    return ServiceResponse.Error("No screens were sent.");
-
-                List<DataScreen> screens = JsonConvert.DeserializeObject<List<DataScreen>>(body);
-
+                 DataFilter tmpFilter = this.GetFilter(Request);
                 DatasetManager dm = new DatasetManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-                dataSet = dm.GetData(category, field, screens);
+                dataSet = dm.GetDataSet(type, tmpFilter);
                 return ServiceResponse.OK("", dataSet);
             }
             catch (Exception ex)
@@ -86,7 +88,6 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("Error retrieving dataset.");
             }
         }
-
 
     }
 }

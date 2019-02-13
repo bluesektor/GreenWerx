@@ -16,11 +16,14 @@ using Dapper;
 using System.Threading.Tasks;
 using System.Data.Entity;
 
+
 namespace TreeMon.Web.Tests.Data
 {
     [TestClass]
     public class TreeMonDbContextTests
     {
+       
+
         private User _user = TestHelper.GenerateTestUser(StringEx.GenerateAlphaNumId());
         private User _userAsync = TestHelper.GenerateTestUser(StringEx.GenerateAlphaNumId());
 
@@ -29,8 +32,28 @@ namespace TreeMon.Web.Tests.Data
         //Create Tables
         //When All tests are dones drop tables and database
 
+        //string pkgLocation = @"c:\test.dtsx";
+        //[TestMethod]
+        //public void TreeMonDbContext_CreateDatabase_MSSQL()
+        //{
+            //Package pkg;
+            //Application app;
+            //DTSExecResult pkgResults;
+            //Variables vars;
 
+            //app = new Application();
+            //pkg = app.LoadPackage(pkgLocation, null);
 
+            //vars = pkg.Variables;
+            //vars["A_Variable"].Value = "Some value";
+
+            //pkgResults = pkg.Execute(null, vars, null, null, null);
+
+            //if (pkgResults == DTSExecResult.Success)
+            //    Console.WriteLine("Package ran successfully");
+            //else
+            //    Console.WriteLine("Package failed");
+        //}
         //backlog after ALL the tests have run delete the database
 
         [TestMethod]
@@ -74,10 +97,11 @@ namespace TreeMon.Web.Tests.Data
             TreeMonDbContext context = new TreeMonDbContext("MSSQL_TEST");
             ServiceResult res = context.CreateDatabase(new AppInfo()
             {
-                ActiveDbProvider = ""
+                ActiveDbProvider = "MSSQL",
+                ActiveDbConnectionKey = "MYSQL_TEST"
             }, context.Database.Connection.ConnectionString);
 
-            Assert.AreEqual(res.Code, 500);
+            Assert.AreEqual(res.Code, 200);
         }
 
         [TestMethod]

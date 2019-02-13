@@ -45,7 +45,7 @@ namespace TreeMon.Managers.General
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<TMG.Attribute>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<TMG.Attribute>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -57,7 +57,7 @@ namespace TreeMon.Managers.General
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<TMG.Attribute>().Where(sw => sw.Status.EqualsIgnoreCase(status)).ToList();
+                return context.GetAll<TMG.Attribute>()?.Where(sw => sw.Status.EqualsIgnoreCase(status)).ToList();
             }
         }
 
@@ -66,7 +66,7 @@ namespace TreeMon.Managers.General
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<TMG.Attribute>().Where(sw => (sw.AccountUUID == accountUUID  && 
+                return context.GetAll<TMG.Attribute>()?.Where(sw => (sw.AccountUUID == accountUUID  && 
                                                                         sw.ReferenceUUID == referenceUUID && 
                                                                         (sw.ReferenceType?.EqualsIgnoreCase(referenceType)??false)))
                                                                         .OrderBy(ob => ob.Name).ToList();
@@ -78,7 +78,7 @@ namespace TreeMon.Managers.General
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
 
-                return context.GetAll<TMG.Attribute>().Where(sw => (sw.AccountUUID == accountUUID)).OrderBy(ob => ob.Status).ToList();
+                return context.GetAll<TMG.Attribute>()?.Where(sw => (sw.AccountUUID == accountUUID)).OrderBy(ob => ob.Status).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -94,7 +94,7 @@ namespace TreeMon.Managers.General
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
               
-                    TMG.Attribute dbU = context.GetAll<TMG.Attribute>().FirstOrDefault(wu => wu.Status.EqualsIgnoreCase(s.Status) && wu.AccountUUID == s.AccountUUID);
+                    TMG.Attribute dbU = context.GetAll<TMG.Attribute>()?.FirstOrDefault(wu => wu.Status.EqualsIgnoreCase(s.Status) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Attribute already exists.");

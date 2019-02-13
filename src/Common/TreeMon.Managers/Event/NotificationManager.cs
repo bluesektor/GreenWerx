@@ -7,7 +7,7 @@ using System.Linq;
 using TreeMon.Data;
 using TreeMon.Models;
 using TreeMon.Models.App;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Utilites.Extensions;
 
 namespace TreeMon.Managers.Event

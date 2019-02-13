@@ -288,7 +288,9 @@ export class StrainsComponent implements OnInit {
     cloneStrain(c: Strain): Strain {
         const strain = new Strain();
         for (const prop in c) {
+            if (prop != null) {
             strain[prop] = c[prop];
+        }
         }
         return strain;
     }
@@ -357,8 +359,10 @@ export class StrainsComponent implements OnInit {
         filter.StartIndex = 1;
         filter.PageSize = 25;
         const screen = new Screen();
-        screen.Command = 'Contains';
+        screen.Command = 'SearchBy';
+        screen.Operator = 'Contains';
         screen.Field = 'Name';
+        screen.Operator = 'CONTAINS';
         screen.Value = event.query.toLowerCase();
         filter.Screens.push(screen);
         this._accountService.getAllAccounts(filter).subscribe(response => {
@@ -407,7 +411,8 @@ export class StrainsComponent implements OnInit {
         this.searching = true; // switch when text is being searched for in table..
         this.searchStrains.Screens = [];
         const screen = new Screen();
-        screen.Command = 'Contains';
+        screen.Command = 'SearchBy';
+        screen.Operator = 'Contains';
         screen.Field = 'Name';
         screen.Value = searchText;
         this.searchStrains.Screens.push(screen);

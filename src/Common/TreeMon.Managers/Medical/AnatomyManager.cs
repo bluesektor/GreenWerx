@@ -61,7 +61,7 @@ namespace TreeMon.Models.Medical
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Anatomy>().Where(sw => sw.Name.EqualsIgnoreCase(name) && sw.AccountUUID == this._requestingUser.AccountUUID).ToList();
+                return context.GetAll<Anatomy>()?.Where(sw => sw.Name.EqualsIgnoreCase(name) && sw.AccountUUID == this._requestingUser.AccountUUID).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -70,7 +70,7 @@ namespace TreeMon.Models.Medical
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Anatomy>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Anatomy>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -82,7 +82,7 @@ namespace TreeMon.Models.Medical
                 return null;
                     using (var context = new TreeMonDbContext(this._connectionKey))
                     {
-                        return context.GetAll<Anatomy>().FirstOrDefault(sw => sw.UUID == uuid);
+                        return context.GetAll<Anatomy>()?.FirstOrDefault(sw => sw.UUID == uuid);
                     }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -98,7 +98,7 @@ namespace TreeMon.Models.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                
-                    Anatomy dbU = context.GetAll<Anatomy>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
+                    Anatomy dbU = context.GetAll<Anatomy>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Anatomy already exists.");
@@ -132,7 +132,7 @@ namespace TreeMon.Models.Medical
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<AnatomyTag>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<AnatomyTag>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -169,7 +169,7 @@ namespace TreeMon.Models.Medical
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<AnatomyTag>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<AnatomyTag>()?.FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -182,7 +182,7 @@ namespace TreeMon.Models.Medical
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<AnatomyTag>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<AnatomyTag>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -192,7 +192,7 @@ namespace TreeMon.Models.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
              
-                    AnatomyTag dbU = context.GetAll<AnatomyTag>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
+                    AnatomyTag dbU = context.GetAll<AnatomyTag>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("AnatomyTag already exists.");

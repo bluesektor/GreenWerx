@@ -11,8 +11,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using TreeMon.Data;
+using TreeMon.Data.Logging.Models;
 using TreeMon.Managers;
+using TreeMon.Managers.Geo;
 using TreeMon.Models.App;
+using TreeMon.Models.Geo;
+using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Helpers;
 using TreeMon.Utilites.Security;
 using TreeMon.Web.api.Helpers;
@@ -284,13 +289,254 @@ namespace TreeMon.Web.api.v1
 
        
         [HttpGet]
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [System.Web.Http.AllowAnonymous]
         [EnableThrottling(PerSecond = 2, PerDay = 500)]
         [Route("api/Tools/TestCode")]
         public ServiceResult Test()
         {
-            ///string authToken = Request.Headers?.Authorization?.Parameter;
+            string authToken = Request.Headers?.Authorization?.Parameter;
 
+
+            string directory = EnvironmentEx.AppDataFolder;
+            string root = EnvironmentEx.AppDataFolder;
+            string pathToFile = "";
+            int index = 0;
+
+            //PostalCodeManager pcm = new PostalCodeManager(Globals.DBConnectionKey, authToken);
+            //pcm.ImportZipCodes(Path.Combine(root, "geoip\\zip.txt"));
+
+            #region Country updates
+            // pathToFile = Path.Combine(root, "geoip\\countryinfo.csv");
+
+            // string[] countryLines = File.ReadAllLines(pathToFile);
+
+            // foreach (string countryLine in countryLines)
+            // {
+            //     if (index == 0)
+            //     {
+            //         index++;
+            //         continue; //skip headers.
+            //     }
+
+            //     string[] tokens = countryLine.Split(',');
+            //     if (tokens.Length < 2)
+            //         continue;
+
+            //     string name = tokens[0];
+            //     string code = tokens[1];
+
+            //     using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+            //     {
+            //        var location = context.GetAll<Location>()?.FirstOrDefault(w => w.LocationType == "country" && w.Name.EqualsIgnoreCase(name) && string.IsNullOrWhiteSpace(w.Abbr));
+            //         if (location == null)
+            //             continue;
+            //         location.Abbr = code;
+
+            //         context.Update<Location>(location);
+            //     }
+            //}
+            #endregion
+
+            #region US STates updates
+            //pathToFile = Path.Combine(root, "geoip\\usstates.csv");
+
+            //string[] stateLines = File.ReadAllLines(pathToFile);
+            //foreach (string state in stateLines)
+            //{
+            //    string[] tokens = state.Split(',');
+            //    if (tokens.Length < 2)
+            //        continue;
+
+            //    string name = tokens[0];
+            //    string code = tokens[1];
+
+            //    using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+            //    {
+            //        var location = context.GetAll<Location>()?.FirstOrDefault(w => w.LocationType == "state" && w.UUParentID  == "6e9e15bbe8d44cd2a77b1bf9d51e9f40" && w.Name.EqualsIgnoreCase(name) && string.IsNullOrWhiteSpace(w.Abbr));
+            //        if (location == null)
+            //            continue;
+            //        location.Abbr = code;
+
+            //        context.Update<Location>(location);
+            //    }
+            //}
+            #endregion
+
+            #region canada updates
+            //pathToFile = Path.Combine(root, "geoip\\canada.csv");
+
+            //string[] canadaLines = File.ReadAllLines(pathToFile);
+            //foreach (string region in canadaLines)
+            //{
+
+
+            //    string[] tokens = region.Split(',');
+            //    if (tokens.Length < 2)
+            //        continue;
+
+            //    string name = tokens[0];
+            //    string code = tokens[1];
+
+            //    using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+            //    {
+            //        var location = context.GetAll<Location>()?.FirstOrDefault(w => w.LocationType == "state" && w.UUParentID == "a3f8adc547be4da9a73b000cb36a1b76" && w.Name.EqualsIgnoreCase(name) && string.IsNullOrWhiteSpace(w.Abbr));
+            //        if (location == null)
+            //            continue;
+            //        location.Abbr = code;
+
+            //        context.Update<Location>(location);
+            //    }
+            //}
+            #endregion
+
+            #region geoip code
+
+            pathToFile = Path.Combine(root, "geoip\\blocks.csv");
+
+            string[] blockLines = File.ReadAllLines(pathToFile);
+
+            pathToFile = Path.Combine(root, "geoip\\location.csv");
+
+            string[] locationLines = File.ReadAllLines(pathToFile);
+
+            Dictionary<int, GeoIp> locations = new Dictionary<int, GeoIp>();
+
+            index = 0;
+            foreach (string block in blockLines)
+            {
+                if (index == 0)
+                {
+                    index++;
+                    continue; //skip headers.
+                }
+                string[] tokens = block.Split(',');
+                int locId = tokens[2].ConvertTo<int>();
+
+                if (locations.ContainsKey(locId))
+                    continue;
+
+                GeoIp gip = new GeoIp();
+                gip.LocationId = locId;
+                gip.StartIpNum = tokens[0].ConvertTo<float>();
+                gip.EndIpNum = tokens[1].ConvertTo<float>();
+                locations.Add(locId, gip);
+                index++;
+            }
+
+
+            index = 0;
+            foreach (string location in locationLines)
+            {
+                if (index == 0)
+                {
+                    index++;
+                    continue; //skip headers.
+                }
+
+                string[] tokens = location.Split(',');
+                int locId = tokens[0].ConvertTo<int>();
+
+                if (!locations.ContainsKey(locId))
+                    continue;
+
+                locations[locId].Country = tokens[1];
+                locations[locId].Region = tokens[2];
+                locations[locId].City = tokens[3];
+                locations[locId].PostalCode = tokens[4];
+                locations[locId].Latitude = tokens[5];
+                locations[locId].Longitude = tokens[6];
+                locations[locId].MetroCode = tokens[7];
+                locations[locId].AreaCode = tokens[8];
+
+                bool addCoordinate = false;
+
+                Location loc = new Location();
+                if (!string.IsNullOrWhiteSpace(locations[locId].City) && locations[locId].City.Contains("�"))
+                {
+                    loc = findCity(locations[locId].Country, locations[locId].City);
+
+                    if (loc == null)
+                        addCoordinate = true;
+                }
+                else if (!string.IsNullOrWhiteSpace(locations[locId].City))
+                {//regular city name (no accent in characters)
+                    using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+                    {
+                        loc = context.GetAll<Location>()?.FirstOrDefault(w => w.Abbr.EqualsIgnoreCase(locations[locId].Country) && w.Name.EqualsIgnoreCase(locations[locId].City));
+                        if (loc == null)
+                            addCoordinate = true;
+                    }
+                }
+                else //just the country
+                {
+                    using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+                    {
+                        loc = context.GetAll<Location>()?.FirstOrDefault(w => w.Abbr.EqualsIgnoreCase(locations[locId].Country));
+                        if (loc == null)
+                            addCoordinate = true;
+                    }
+                }
+
+                if (addCoordinate)
+                {
+                    loc = new Location();
+                    loc.Name = string.IsNullOrWhiteSpace(locations[locId].City) ? locations[locId].Country : locations[locId].City;
+                    loc.City = locations[locId].City;
+                    loc.Country = locations[locId].Country;
+                    loc.Postal = locations[locId].PostalCode;
+                    loc.Latitude = locations[locId].Latitude.ConvertTo<float>();
+                    loc.Longitude = locations[locId].Longitude.ConvertTo<float>();
+                    loc.LocationType = "coordinate";
+                    loc.RoleOperation = ">=";
+                    loc.RoleWeight = 1;
+                    loc.IpNumStart = locations[locId].StartIpNum;
+                    loc.IpNumEnd = locations[locId].EndIpNum;
+                    loc.DateCreated = DateTime.Now;
+                    loc.CreatedBy = SystemFlag.Default.Account;
+                    loc.AccountUUID = SystemFlag.Default.Account;
+                    loc.Active = true;
+
+                    using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+                    { context.Insert<Location>(loc); }
+                }
+                else
+                {   // sync loc fields and update
+
+                    //locId,country, latitude,longitude,metroCode,areaCode
+                    loc.City = string.IsNullOrWhiteSpace(loc.City) && !string.IsNullOrWhiteSpace(locations[locId].City) ? locations[locId].City : loc.City;
+                    loc.Postal = string.IsNullOrWhiteSpace(loc.Postal) && !string.IsNullOrWhiteSpace(locations[locId].PostalCode) ? locations[locId].PostalCode : loc.Postal;
+
+                    loc.Latitude = loc.Latitude == null ? locations[locId].Latitude.ConvertTo<float>() : loc.Latitude;
+                    loc.Longitude = loc.Longitude == null ?  locations[locId].Longitude.ConvertTo<float>() : loc.Longitude;
+                    loc.IpNumStart = loc.IpNumStart == null ? locations[locId].StartIpNum : loc.IpNumStart;
+                    loc.IpNumEnd = loc.IpNumEnd == null ? locations[locId].EndIpNum : loc.IpNumEnd;
+
+                    using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+                    { context.Update<Location>(loc); }
+
+                    //if any of these don't match then insert a coordinates record.
+                    if (loc.Latitude    !=  locations[locId].Latitude.ConvertTo<float>() ||
+                        loc.Longitude   != locations[locId].Longitude.ConvertTo<float>() ||
+                        loc.IpNumStart  != locations[locId].StartIpNum ||
+                        loc.IpNumEnd    != locations[locId].EndIpNum)
+                    {
+                        loc.UUID = Guid.NewGuid().ToString("N");
+                        loc.Latitude = locations[locId].Latitude.ConvertTo<float>();
+                        loc.Longitude = locations[locId].Longitude.ConvertTo<float>();
+                        loc.IpNumStart = locations[locId].StartIpNum;
+                        loc.IpNumEnd = locations[locId].EndIpNum;
+                        loc.IpVersion = NetworkHelper.GetIpVersion(loc.IpNumStart.ToString());
+                        loc.LocationType = "coordinate";
+                        using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+                        { context.Insert<Location>(loc); }
+                       
+                    }
+                }
+            }
+            #endregion
+
+            #region test code
             ////AppManager am = new AppManager(Globals.DBConnectionKey, "web", authToken);
             ////am.TestCode();
 
@@ -321,6 +567,7 @@ namespace TreeMon.Web.api.v1
             ////  AppManager am = new AppManager(Globals.DBConnectionKey, "web", authToken);
             ////string directory = EnvironmentEx.AppDataFolder;
             //// am.SeedDatabase(Path.Combine(directory, "Install\\SeedData\\"), u.AccountUUID);
+            #endregion
 
             #region location import
             ////LocationManager lm = new LocationManager(Globals.DBConnectionKey, authToken);
@@ -404,6 +651,26 @@ namespace TreeMon.Web.api.v1
             #endregion
 
             return ServiceResponse.OK();
+        }
+
+        public Location findCity(string countryAbbr, string cityName )
+        {
+            string[] vowels = new string[] { "a", "e", "i", "o", "u", "y" };
+
+            foreach (string vowel in vowels)
+            {
+                string name = cityName.Replace("�", vowel);
+
+                using (var context = new TreeMonDbContext(Globals.DBConnectionKey))
+                {
+                    var location = context.GetAll<Location>()?.FirstOrDefault(w => w.Abbr == countryAbbr && w.Name.EqualsIgnoreCase(name));
+                    if (location == null)
+                        continue;
+
+                    return location;
+                }
+            }
+            return null;
         }
      
     }

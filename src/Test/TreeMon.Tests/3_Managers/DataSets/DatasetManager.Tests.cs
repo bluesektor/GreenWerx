@@ -20,38 +20,38 @@ namespace TreeMon.Web.Tests.Managers
         {
             TreeMonDbContext context = new TreeMonDbContext(connectionKey);
 
-            Random rand = new Random();
-            //Seed AuthenticationLog
-            for (int i = 0; i < 100; i++)
-            {
-                context.Insert<AuthenticationLog>(new AuthenticationLog()
-                {
-                    Authenticated = i % 3 == 0 ? false : true,
-                    AuthenticationDate = DateTime.UtcNow.AddMonths(rand.Next(0, 12) * -1),
-                    UserName = "alpha",
-                    DateCreated = DateTime.Now
-                });
-            }
+            //Random rand = new Random();
+            ////Seed AuthenticationLog
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    context.Insert<AuthenticationLog>(new AuthenticationLog()
+            //    {
+            //        Authenticated = i % 3 == 0 ? false : true,
+            //        AuthenticationDate = DateTime.UtcNow.AddMonths(rand.Next(0, 12) * -1),
+            //        UserName = "alpha",
+            //        DateCreated = DateTime.Now
+            //    });
+            //}
 
-            context.Insert<AuthenticationLog>(new AuthenticationLog()
-            {
-                Authenticated = false,
-                AuthenticationDate = DateTime.UtcNow.AddMonths(-1),
-                UserName = "beta_fail_login",
-                DateCreated = DateTime.Now
-            });
+            //context.Insert<AuthenticationLog>(new AuthenticationLog()
+            //{
+            //    Authenticated = false,
+            //    AuthenticationDate = DateTime.UtcNow.AddMonths(-1),
+            //    UserName = "beta_fail_login",
+            //    DateCreated = DateTime.Now
+            //});
 
-            //Seed Measurements
-            for (int i = 0; i < 100; i++)
-            {
-                context.Insert<MeasurementLog>(new MeasurementLog()
-                {
-                    DateTaken = DateTime.UtcNow.AddMonths(rand.Next(0, 12) * -1),
-                    Measure = rand.Next(0, 100),
-                    UnitOfMeasure = "centimeters",
-                    DateCreated = DateTime.Now
-                });
-            }
+            ////Seed Measurements
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    context.Insert<MeasurementLog>(new MeasurementLog()
+            //    {
+            //        DateTaken = DateTime.UtcNow.AddMonths(rand.Next(0, 12) * -1),
+            //        Measure = rand.Next(0, 100),
+            //        UnitOfMeasure = "centimeters",
+            //        DateCreated = DateTime.Now
+            //    });
+            //}
         }
 
         [TestCleanup]
@@ -66,7 +66,7 @@ namespace TreeMon.Web.Tests.Managers
         //public void DatasetManager_GetScalarData_AuthenticationLog_Username_Field()
         //{
         //    //the getfilters function gets distinct values from a table field that will
-        //    //used to build the query to get the dataset. Controler only pulling from fireincidents for now. need to make it dynamic.
+        //    //used to build the query to get the dataset. Controler only pulling from x for now. need to make it dynamic.
         //    List<DataScreen> filters = new List<DataScreen>();
         //    DataScreen qf = new DataScreen();
         //    filters.Add(qf);
@@ -89,7 +89,7 @@ namespace TreeMon.Web.Tests.Managers
         //public void DatasetManager_GetScalarData_AuthenticationLog_Username_Field_FailedLogin()
         //{
         //    //the getfilters function gets distinct values from a table field that will
-        //    //used to build the query to get the dataset. Controler only pulling from fireincidents for now. need to make it dynamic.
+        //    //used to build the query to get the dataset. Controler only pulling from x for now. need to make it dynamic.
         //    List<DataScreen> filters = new List<DataScreen>();
         //    DataScreen qf = new DataScreen();
         //    qf.Field = "Authenticated";
@@ -138,47 +138,47 @@ namespace TreeMon.Web.Tests.Managers
         [TestMethod]
         public void DatasetManager_GetData_Measurements()
         {
-            DatasetManager dm = new DatasetManager(connectionKey, "TESTSESSION");
-            List<DataPoint> series = dm.GetData("MeasurementLog", "Measure", null);
+            //DatasetManager dm = new DatasetManager(connectionKey, "TESTSESSION");
+            //List<DataPoint> series = dm.GetData("MeasurementLog", "Measure", null);
 
-            Assert.IsTrue(series.Count > 0);
+            //Assert.IsTrue(series.Count > 0);
         }
 
         [TestMethod]
         public void DatasetManager_GetData_Measurements_DataScreens()
         {
             //the getfilters function gets distinct values from a table field that will
-            //used to build the query to get the dataset. Controler only pulling from fireincidents for now. need to make it dynamic.
-            List<DataScreen> filters = new List<DataScreen>();
-            DataScreen qf = new DataScreen();
-            qf.Field = "UnitOfMeasure";
-            qf.Operator = "=";
-            qf.Value = "centimeters";
-            qf.Type = "sql";//tell the parser is a sql query
-            qf.Junction = "AND"; //since more filters are to follow add a conjunction.
-            filters.Add(qf);
+            //used to build the query to get the dataset. Controler only pulling from x for now. need to make it dynamic.
+            //List<DataScreen> filters = new List<DataScreen>();
+            //DataScreen qf = new DataScreen();
+            //qf.Field = "UnitOfMeasure";
+            //qf.Operator = "=";
+            //qf.Value = "centimeters";
+            //qf.Type = "sql";//tell the parser is a sql query
+            //qf.Junction = "AND"; //since more filters are to follow add a conjunction.
+            //filters.Add(qf);
 
-            qf = new DataScreen();
-            qf.Field = "Measure";
-            qf.Operator = "BETWEEN";
-            qf.Type = "sql";//tell the parser is a sql query
-            qf.Value = "20";
-            qf.Order = 0;//this is the first part of the between statement
-            qf.Junction = "AND";
-            filters.Add(qf);
+            //qf = new DataScreen();
+            //qf.Field = "Measure";
+            //qf.Operator = "BETWEEN";
+            //qf.Type = "sql";//tell the parser is a sql query
+            //qf.Value = "20";
+            //qf.Order = 0;//this is the first part of the between statement
+            //qf.Junction = "AND";
+            //filters.Add(qf);
 
-            qf = new DataScreen();
-            qf.Field = "Measure";
-            qf.Operator = "BETWEEN";
-            qf.Type = "sql";//tell the parser is a sql query
-            qf.Value = "50";
-            qf.Order = 1;//second part of the between statement
-            filters.Add(qf);
+            //qf = new DataScreen();
+            //qf.Field = "Measure";
+            //qf.Operator = "BETWEEN";
+            //qf.Type = "sql";//tell the parser is a sql query
+            //qf.Value = "50";
+            //qf.Order = 1;//second part of the between statement
+            //filters.Add(qf);
 
-            DatasetManager dm = new DatasetManager(connectionKey,"TESTSESSION");
-            List<DataPoint> series = dm.GetData("MeasurementLog", "Measure", null);
+            //DatasetManager dm = new DatasetManager(connectionKey,"TESTSESSION");
+            //List<DataPoint> series = dm.GetData("MeasurementLog", "Measure", null);
 
-            Assert.IsTrue(series.Count > 0);
+            //Assert.IsTrue(series.Count > 0);
         }
     }
 

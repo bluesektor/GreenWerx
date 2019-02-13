@@ -60,7 +60,7 @@ namespace TreeMon.Managers
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
 
-                return context.GetAll<EmailLog>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.DateSent).ToList();
+                return context.GetAll<EmailLog>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.DateSent).ToList();
             }
         }
 
@@ -71,7 +71,7 @@ namespace TreeMon.Managers
 
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<EmailLog>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<EmailLog>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -82,7 +82,7 @@ namespace TreeMon.Managers
                 return null;
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<EmailLog>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<EmailLog>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 

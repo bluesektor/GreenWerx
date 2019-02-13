@@ -1,7 +1,7 @@
 ﻿[
   {
-    "SyncKey": "ac2c7fca855c45a8821d70aaa83c13df",
-    "SyncType": "Anatomy",
+    "GUUID": "ac2c7fca855c45a8821d70aaa83c13df",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "General",
@@ -14,8 +14,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "81484cfee6844eb590938c49caf8c708",
-    "SyncType": "Anatomy",
+    "GUUID": "81484cfee6844eb590938c49caf8c708",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Head",
@@ -28,8 +28,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "e375f6672e8f4dec90c7d0a9e0fc4809",
-    "SyncType": "Anatomy",
+    "GUUID": "e375f6672e8f4dec90c7d0a9e0fc4809",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Neck",
@@ -42,8 +42,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "68da3b50695a41209132bfbe242d1d28",
-    "SyncType": "Anatomy",
+    "GUUID": "68da3b50695a41209132bfbe242d1d28",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Shoulder",
@@ -56,8 +56,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "4602e48a54d74413858268c12a88b52b",
-    "SyncType": "Anatomy",
+    "GUUID": "4602e48a54d74413858268c12a88b52b",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Chest",
@@ -70,8 +70,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "42b700fcd86641de9f2714cb407aa194",
-    "SyncType": "Anatomy",
+    "GUUID": "42b700fcd86641de9f2714cb407aa194",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Back",
@@ -84,8 +84,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "a0a0b1556a694ac9867cbe68d81320f2",
-    "SyncType": "Anatomy",
+    "GUUID": "a0a0b1556a694ac9867cbe68d81320f2",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Abdominal",
@@ -98,8 +98,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "887786e92f804893a524ced358fefd61",
-    "SyncType": "Anatomy",
+    "GUUID": "887786e92f804893a524ced358fefd61",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Glute",
@@ -112,8 +112,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "f0f846e67a2e401384d93d3fc3282786",
-    "SyncType": "Anatomy",
+    "GUUID": "f0f846e67a2e401384d93d3fc3282786",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Tricep",
@@ -126,8 +126,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "380d7fedc8254ab7a28569c41f29a069",
-    "SyncType": "Anatomy",
+    "GUUID": "380d7fedc8254ab7a28569c41f29a069",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Bicep",
@@ -140,8 +140,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "27e6ab9a4aa04a078eeffb3d383f899c",
-    "SyncType": "Anatomy",
+    "GUUID": "27e6ab9a4aa04a078eeffb3d383f899c",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Forearm",
@@ -154,8 +154,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "b088c74d03044d5dba3bb5577e8095ba",
-    "SyncType": "Anatomy",
+    "GUUID": "b088c74d03044d5dba3bb5577e8095ba",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Foot",
@@ -168,8 +168,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "cae337df45d24d4d80eadb5b7ecaeacc",
-    "SyncType": "Anatomy",
+    "GUUID": "cae337df45d24d4d80eadb5b7ecaeacc",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Toe",
@@ -182,8 +182,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "29a40b09f4a54025b1d1995d92f350b3",
-    "SyncType": "Anatomy",
+    "GUUID": "29a40b09f4a54025b1d1995d92f350b3",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Hand",
@@ -196,8 +196,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "af3c74e8dd7f4ceb94ff278fdf678454",
-    "SyncType": "Anatomy",
+    "GUUID": "af3c74e8dd7f4ceb94ff278fdf678454",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Finger",
@@ -210,8 +210,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "46cf57c36c3f4b85a5758f42d033af37",
-    "SyncType": "Anatomy",
+    "GUUID": "46cf57c36c3f4b85a5758f42d033af37",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Upper Leg",
@@ -224,8 +224,8 @@
      "SortOrder": "0"
   },
   {
-    "SyncKey": "424f1f243abf4a78bba7a4e19dfb5f23",
-    "SyncType": "Anatomy",
+    "GUUID": "424f1f243abf4a78bba7a4e19dfb5f23",
+    "GuuidType": "Anatomy",
     "UUParentID": "0",
     "UUParentIDType": "Anatomy",
     "Name": "Lower Leg",

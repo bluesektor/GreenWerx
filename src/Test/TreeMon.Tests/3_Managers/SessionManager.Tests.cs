@@ -17,6 +17,16 @@ namespace TreeMon.Web.Tests._templates
     {
         private string connectionKey = "MSSQL_TEST";
 
+
+        [TestMethod]
+        public void SessionManager_GenerateToken_Hash()
+        {
+            //SessionManager m = new SessionManager(connectionKey);
+            //string hash  = m.GenerateToken("127.0.0.1");
+
+            //Assert.IsNotNull(hash);
+        }
+
         [TestMethod]
         public void SessionManager_GenerateToken_JWT()
         {

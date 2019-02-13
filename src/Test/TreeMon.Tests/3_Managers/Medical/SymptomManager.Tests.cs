@@ -13,7 +13,7 @@ namespace TreeMon.Web.Tests._templates
     [TestClass]
     public class SymptomManager_Tests
     {
-        ////private string connectionKey = "MSSQL_TEST";
+        private string connectionKey = "MSSQL_TEST";
 
 
         //#region Symptoms

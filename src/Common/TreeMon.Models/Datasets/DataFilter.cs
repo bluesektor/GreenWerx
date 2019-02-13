@@ -9,10 +9,12 @@ namespace TreeMon.Models.Datasets
         public DataFilter()
         {
             PageResults = true;
-            StartIndex = 1;
+            StartIndex = 0;
             PageSize = 25;
             Screens = new List<DataScreen>();
             UserRoleWeight = 0;
+            IncludeDeleted = false;
+            IncludeDeleted = false;
         }
         public bool PageResults { get; set; }
 
@@ -31,6 +33,11 @@ namespace TreeMon.Models.Datasets
         //NOTE:The requesting user RoleWeight should be set before calling FilterInput
         public int UserRoleWeight { get; set; }
 
+        public string TimeZone { get; set; } // todo
+
+        public bool IncludePrivate { get; set; }   // todo
+
+        public bool  IncludeDeleted { get; set; }  // todo
 
 
     }

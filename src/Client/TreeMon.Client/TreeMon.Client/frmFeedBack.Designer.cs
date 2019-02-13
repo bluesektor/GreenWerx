@@ -143,6 +143,7 @@
             this.MinimizeBox = false;
             this.Name = "frmFeedback";
             this.Text = "Plugin Feedback:";
+            this.Load += new System.EventHandler(this.frmFeedback_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);

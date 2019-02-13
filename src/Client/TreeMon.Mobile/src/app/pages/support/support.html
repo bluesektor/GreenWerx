@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Support</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <div class="support-logo">
+    <img src="assets/img/treemon_header.png" alt="TreeMon Logo">
+  </div>
+ 
+
+  <ion-spinner *ngIf="sendingMessage === true"  style="display: block;margin: auto;"  ></ion-spinner>
+  <div *ngIf="submitted === true && sendingMessage === false" >
+      <div  innerHtml="{{result}}" style="display: block;margin: auto;"></div>
+  </div>
+
+  <form *ngIf="sendingMessage === false && submitted === false" #submitForm="ngForm" novalidate (ngSubmit)="submit(submitForm)">
+    <ion-list lines="none">
+        <ion-item>
+            <ion-label position="stacked" color="primary">Your Email</ion-label>
+              <ion-input [(ngModel)]="message.SentFrom" name="email" type="text" #email="ngModel" required>
+              </ion-input>
+            <ion-text color="danger">
+              <p [hidden]="hideEmailError()" padding-left>
+                Email is required
+              </p>
+            </ion-text>
+          </ion-item>
+      <ion-item>
+        <ion-label position="stacked" color="primary">Enter your support message below</ion-label>
+        <ion-textarea [(ngModel)]="message.Comment" name="supportQuestion" #supportQuestion="ngModel" rows="6" required></ion-textarea>
+      </ion-item>
+    </ion-list>
+    <ion-text color="danger">
+      <p [hidden]="hideCommentError()" padding-left>
+        Support message is required
+      </p>
+    </ion-text>
+    <div padding>
+      <ion-button expand="block" type="submit">Submit</ion-button>
+    </div>
+  </form>
+</ion-content>

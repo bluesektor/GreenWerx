@@ -5,17 +5,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
-using TreeMon.Managers.Event;
+using TreeMon.Managers.Events;
 using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Utilites.Extensions;
 using TreeMon.Web.Filters;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 
 namespace TreeMon.Web.api.v1
 {
+   [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class NotificationsController : ApiBaseController
     {
         public NotificationsController()
@@ -92,8 +94,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Notifications/")]
-        public ServiceResult GetNotifications(string filter = "")
+        [Route("api/Notifications")]
+        public ServiceResult GetNotifications()
         {
             if (Request.Headers.Authorization == null || string.IsNullOrWhiteSpace(Request.Headers?.Authorization?.Parameter))
                 return ServiceResponse.Error("You must be logged in to access this functionality.");
@@ -105,8 +107,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> Notifications = NotificationManager.GetNotifications(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                Notifications = FilterEx.FilterInput(Notifications, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                Notifications = Notifications.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", Notifications, count);
         }

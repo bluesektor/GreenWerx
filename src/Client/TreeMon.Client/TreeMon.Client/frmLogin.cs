@@ -77,7 +77,10 @@ namespace TreeMon.Client
             this.DialogResult = DialogResult.OK;
         }
 
-      
+        private void frmLogin_Load(object sender, EventArgs e)
+        {
+
+        }
 
         private void frmLogin_FormClosing(object sender, FormClosingEventArgs e)
         {

@@ -112,7 +112,8 @@ export class UserProfileComponent implements OnInit {
 
             if (this.newUser) {
                 // TODO re-implement when server is fixed.
-               // this.msgBox.ShowMessage('info', 'You have been sent a confirmation email. Please check our inbox or spam folders and click the link to proceed.', 20); 
+               // this.msgBox.ShowMessage('info', 'You have been sent a confirmation email.
+               // Please check our inbox or spam folders and click the link to proceed.', 20);
                this.msgBox.ShowMessage('info', 'Registration successful, you will be redirected to the login page.', 20);
                 this.user = new User();
                setTimeout(() => {

@@ -29,11 +29,6 @@ namespace TreeMon.Managers.Membership
                    // Debug.Assert(false, "NOT IMPLEMENTED");
                     // if(ApiKeyExists(res)){return GenerateKey(type, keyLength);}backlog implement
                     break;
-
-                case "USERKEY":
-                    //Debug.Assert(false, "NOT IMPLEMENTED");//backlog
-                    //            if (UserKeyExists(res)){return GenerateKey(type, keyLength);}
-                    break;
             }
 
             return res;

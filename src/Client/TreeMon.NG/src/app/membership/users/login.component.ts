@@ -63,13 +63,12 @@ export class LoginComponent {
         } else {
             this._cookieService.remove('userName');
         }
-
+        console.log('login..        ');
         const result = this._userService.login(this.form.value);
-        result.subscribe(
-            response => {
+        result.subscribe( response => {
             this.authorizing = false;
             if (response.Code !== 200) {
-
+                console.log('login        ', response.Message);
                 this.msgBox.ShowMessage(response.Status, response.Message, 10);
                 return false;
             }
@@ -83,7 +82,7 @@ export class LoginComponent {
             this._sessionService.SaveSessionState();
             if (!this.returnUrl) {
                 window.location.href  = '../';
-            }else {
+            } else {
                 window.location.href  = this.returnUrl;
             }
             // this._router.navigate([this.returnUrl ], { relativeTo: this._route });

@@ -85,7 +85,7 @@ namespace TreeMon.Managers.Store
                     return context.GetAll<Product>()
                         .OrderBy(o => o.Name).ToList();
                 }
-                return context.GetAll<Product>().Where(pw => pw.CategoryUUID == category)
+                return context.GetAll<Product>()?.Where(pw => pw.CategoryUUID == category)
                                                  .OrderBy(po => po.Name).ToList();
             }
         }
@@ -99,7 +99,7 @@ namespace TreeMon.Managers.Store
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Product>().ToList();
 
-                return context.GetAll<Product>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<Product>()?.Where(pw => pw.AccountUUID == accountUUID).ToList();
             }
         }
 
@@ -129,7 +129,7 @@ namespace TreeMon.Managers.Store
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Product>().ToList();
 
-                return context.GetAll<Product>().Where(pw => pw.AccountUUID == accountUUID && pw.CreatedBy == userUUID).ToList();
+                return context.GetAll<Product>()?.Where(pw => pw.AccountUUID == accountUUID && pw.CreatedBy == userUUID).ToList();
             }
         }
 
@@ -141,7 +141,7 @@ namespace TreeMon.Managers.Store
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Product>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<Product>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -152,7 +152,7 @@ namespace TreeMon.Managers.Store
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Product>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<Product>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -161,7 +161,7 @@ namespace TreeMon.Managers.Store
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Product>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Product>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
@@ -183,7 +183,7 @@ namespace TreeMon.Managers.Store
                     //Get the product from the database because when we update the framework will update all fields, and the products
                     //passed in may not be complete.
                     //
-                    var dbP = context.GetAll<Product>().FirstOrDefault(pw => pw.UUID == p.UUID);
+                    var dbP = context.GetAll<Product>()?.FirstOrDefault(pw => pw.UUID == p.UUID);
                     if (dbP == null)
                     {
                         if (res.Code == 200)

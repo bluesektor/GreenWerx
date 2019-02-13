@@ -84,8 +84,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/AnatomyTags/")]
-        public ServiceResult GetAnatomyTags(string filter = "")
+        [Route("api/AnatomyTags")]
+        public ServiceResult GetAnatomyTags()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -98,8 +98,8 @@ namespace TreeMon.Web.api.v1
 
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                AnatomyTags = FilterEx.FilterInput(AnatomyTags, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                AnatomyTags = AnatomyTags.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", AnatomyTags, count);
         }
 

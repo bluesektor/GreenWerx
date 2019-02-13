@@ -1,0 +1,79 @@
+
+<app-messageboxes></app-messageboxes>
+<div id="pnlApiKey">
+ 
+        <div *ngIf="deletingData" style="width:100%; text-align: center;"> <i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+        <div class="row">
+            <p-dataTable [value]="apiKeys"
+                         selectionMode="single"
+                         [(selection)]="selectedApiKey"
+                         [loading]="loadingData"
+                         [lazy]="true"
+                         (onLazyLoad)="lazyLoadKeysList($event)"
+                         [totalRecords]="totalRecords">
+                <p-header>API Keys</p-header>
+                <p-column field="Name" header="Application" [sortable]="false"   [style]="{'width':'20%'}" ></p-column>
+                <p-column field="Expires" header="Expires" [sortable]="false" [style]="{'width':'15%'}"   ></p-column>
+                <p-column field="Email" header="Email" [sortable]="false" [style]="{'width':'30%'}" ></p-column>
+                <p-column field="Key" header="Key" [sortable]="false" [style]="{'width':'30%'}" ></p-column>
+                <p-column field="Active" header="Active" [sortable]="false" [style]="{'width':'5%'}" ></p-column>
+                <p-column header="Action" [style]="{'overflow':'visible', 'width': '10%'}">
+                    <ng-template let-apiKey="rowData" pTemplate="body">
+                        <button (click)="onEdit( $event );"    type="button" class="cell-block">
+                            <i class="fa fa-edit" style="color:rgb(78, 78, 17);"></i>
+                        </button>
+                        <button (click)="onShowUsage( apiKey )"   type="button" class="cell-block">
+                            <i class="fa fa-line-chart" style="color:black;"></i>
+                        </button>
+                    </ng-template>
+                </p-column>
+                <p-footer>
+                    <div class="ui-helper-clearfix" style="width:25%">
+                        <button type="button" class="form-control input-sm" value="Add"
+                                (click)="showDialogToAdd()" label="Add">
+                            <i class="fa fa-plus" style="color:green;"></i> Add
+                        </button>
+                    </div>
+                </p-footer>
+            </p-dataTable>
+
+            <!--Dialog for  crud actions -->
+  
+            <p-dialog header="API Key Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+                <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="selectedApiKey">
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input pInputText id="Name" [(ngModel)]="selectedApiKey.Name" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Email">Email</label>
+                        <input pInputText id="Email" [(ngModel)]="selectedApiKey.Email" class="input-sm form-control" />
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input name="Active" id="Active"  [value]="Active" [checked]="Active" (click)="toggleActive($event)"
+                                 type="checkbox"  [(ngModel)]="selectedApiKey.Active"   >Active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <p-footer>
+                    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix" style="text-align:center;">
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px;" pButton class="form-control input-sm" (click)="SaveKey()" label="Save"><i class="fa fa-check" style="color:green;"></i> Save</button>
+                        <button type="button" style="display: block; margin: 0 auto;  margin-top:10px; margin-bottom:10px;" pButton class="form-control input-sm" (click)="cancel()" label="Cancel"><i class="fa fa-close"></i> Cancel</button>
+                        <button *ngIf="!newApiKey" type="button" style="display: block; margin: 0 auto;" pButton class="form-control input-sm" (click)="onClickDeleteApiKey()" label="Delete"><i class="fa fa-trash" style="color:red;"></i> Delete</button>
+                    </div>
+                </p-footer>
+            </p-dialog>
+
+            <div *ngIf="showUsage" style="padding-top: 10px;" >
+                
+                <app-graphs></app-graphs>  
+                 
+            </div>
+
+        </div>
+   
+</div>
+

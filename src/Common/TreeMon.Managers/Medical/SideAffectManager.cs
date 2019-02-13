@@ -60,7 +60,7 @@ namespace TreeMon.Managers.Medical
                 return new List<SideAffect>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<SideAffect>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<SideAffect>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -70,7 +70,7 @@ namespace TreeMon.Managers.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
 
-                return context.GetAll<SideAffect>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<SideAffect>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -80,9 +80,9 @@ namespace TreeMon.Managers.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (string.IsNullOrWhiteSpace(parentUUID) || parentUUID == "0")
-                    return context.GetAll<SideAffect>().Where(sw => (sw.UUParentID == "" || sw.UUParentID == null) && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<SideAffect>()?.Where(sw => (sw.UUParentID == "" || sw.UUParentID == null) && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
 
-                return context.GetAll<SideAffect>().Where(sw => sw.UUParentID == parentUUID && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<SideAffect>()?.Where(sw => sw.UUParentID == parentUUID && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -92,9 +92,9 @@ namespace TreeMon.Managers.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (string.IsNullOrWhiteSpace(parentUUID) || parentUUID == "0")
-                    return context.GetAll<SideAffect>().Where(sw => sw.DoseUUID == doseUUID && (sw.UUParentID == "" || sw.UUParentID == null) && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<SideAffect>()?.Where(sw => sw.DoseUUID == doseUUID && (sw.UUParentID == "" || sw.UUParentID == null) && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
 
-                return context.GetAll<SideAffect>().Where(sw => sw.DoseUUID == doseUUID && sw.UUParentID == parentUUID && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<SideAffect>()?.Where(sw => sw.DoseUUID == doseUUID && sw.UUParentID == parentUUID && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -106,7 +106,7 @@ namespace TreeMon.Managers.Medical
         return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<SideAffect>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<SideAffect>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -122,7 +122,7 @@ namespace TreeMon.Managers.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
               
-                    SideAffect dbU = context.GetAll<SideAffect>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID) ;
+                    SideAffect dbU = context.GetAll<SideAffect>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID) ;
 
                     if (dbU != null)
                         return ServiceResponse.Error("SideAffect already exists.");

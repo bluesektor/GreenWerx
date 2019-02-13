@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TreeMon.Models.Membership;
 
 namespace TreeMon.Web.Models
 {
@@ -13,6 +14,7 @@ namespace TreeMon.Web.Models
             Content = new List<KeyValuePair<string, string>>();
             SideMenuItems = new List<WebAPI.Models.MenuItem>();
             TopMenuItems = new List<WebAPI.Models.MenuItem>();
+            Profile = new Profile();
         }
 
         public string View { get; set; }
@@ -25,7 +27,9 @@ namespace TreeMon.Web.Models
 
         public string Authorization { get; set; }
 
-        public string DefaultLocationUUID { get; set; }
+        public string Location { get; set; }
+
+        public string LocationType { get; set; }
 
         [StringLength(32)]
         public string UserUUID { get; set; }
@@ -38,6 +42,13 @@ namespace TreeMon.Web.Models
         public bool IsAdmin { get; set; }
 
 
+        public string CartTrackingId { get; set; }
+
+        public string ShoppingCartUUID { get; set; }
+
+        public Profile Profile { get; set; }
+
+
         [NotMapped]
         public List<WebAPI.Models.MenuItem> SideMenuItems { get; set; }
 
@@ -47,5 +58,8 @@ namespace TreeMon.Web.Models
 
         [NotMapped]
         public List<KeyValuePair<string,string>>  Content { get; set; }
+
+        [NotMapped]
+        public List<Role> UserRoles { get; set; }
     }
 }

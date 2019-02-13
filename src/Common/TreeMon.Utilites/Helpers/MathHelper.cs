@@ -95,5 +95,25 @@ namespace TreeMon.Utilites.Helpers
             return res;
 
         }
+
+        public static double Distance(double startLatitude, double startLongitude, double endLatitude, double endLongitude, bool returnMiles = true)
+        {
+            double startCosLatitude = Math.Cos(startLatitude);
+            double endCosLatitude = Math.Cos(endLatitude);
+
+            double dLat = endLatitude - startLatitude;
+            double dLon = endLongitude - startLongitude;
+
+
+            double a = Math.Pow(Math.Sin(dLat / 2.0), 2) +
+                    startCosLatitude *
+                    endCosLatitude *
+                    Math.Pow(Math.Sin(dLon / 2.0), 2.0);
+
+            double c = 2 * Math.Asin(Math.Min(1.0, Math.Sqrt(a)));
+            double d = (returnMiles ? 3956 : 6367) * c;
+
+            return d;
+        }
     }
 }

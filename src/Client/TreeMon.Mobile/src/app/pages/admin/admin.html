@@ -1,0 +1,128 @@
+  <div padding>
+    <ion-segment  [(ngModel)]="selectedTab" name="selectedTab" (ionChange)="onSegmentChange()" >
+      <ion-segment-button value="event">Events({{dataImport.length}})</ion-segment-button>
+      <ion-segment-button value="host">Hosts</ion-segment-button>
+    </ion-segment>
+  </div>
+  <ion-content>
+        <ion-spinner *ngIf="processing === true"  style="display: block;margin: auto;"  ></ion-spinner>
+    <div  *ngIf="processing === false">      
+    <div [ngSwitch]="selectedTab">
+  
+  <div  *ngSwitchCase="'event'">
+      <table border="1" *ngIf="dataImport !== undefined && dataImport.length > 0" >
+          <thead>
+          <tr >
+              <th></th>
+              <th>Name</th>
+              <th>Starts</th>
+              <th>Ends</th>
+              <th>Location</th>
+              <th>Action</th>
+          </tr>
+        </thead>
+          <tr *ngFor="let data of dataImport" (click)="selectItem(data.StagedItem.UUID)"  >
+              <td>{{data.ActiveItems.length}}</td>
+              <td>{{data.StagedItem.Name}}</td>
+              <td><span>{{formatDate(data.StagedItem.StartDate,'MMM-DD-YY') }}</span></td>
+              <td><span>{{formatDate(data.StagedItem.EndDate,'MMM-DD-YY') }}</span></td>
+              <td>{{data.StagedItem.Location}}</td>
+              <td>
+                <div class="cell-block" style="float:right;"    >
+                  <ion-button fill="clear" size="small" color="primary" (click)="queueStagedItem(data.StagedItem, false)">
+                     <ion-icon name='add' slot="start"></ion-icon>
+                  </ion-button>
+                </div>
+                <div class="cell-block" style="float:right;"    >
+                    <ion-button fill="clear" size="small" color="red" (click)="queueStagedItem(data.StagedItem, true)">
+                        <ion-icon name='eye' slot="start"></ion-icon>
+                       
+                    </ion-button>
+                  </div>
+              </td>
+          </tr>
+          
+      
+        </table>
+        <h5 *ngIf="showSelectedItem === true" >Selected Item</h5>
+        <table border="1" *ngIf="showSelectedItem === true"  >
+            <thead>
+            <tr >
+                <th></th>
+                <th>Name</th>
+                <th>Starts</th>
+                <th>Ends</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+          </thead>
+          <tr >
+              <td>{{selectedItem.ActiveItems?.length}}</td>
+              <td>{{selectedItem.StagedItem.Name}}</td>
+              <td><span>{{formatDate(selectedItem.StagedItem.StartDate,'MMM-DD-YY') }}</span></td>
+              <td><span>{{formatDate(selectedItem.StagedItem.EndDate,'MMM-DD-YY') }}</span></td>
+              <td>{{selectedItem.StagedItem.EventLocationUUID}}</td>
+              <td><div class="cell-block" style="float:right;"    >
+                  <ion-button fill="clear" size="small" color="primary" (click)="queueStagedItem(selectedItem.StagedItem)">
+                      <ion-icon name='add' slot="start"></ion-icon>
+                      </ion-button>
+                </div>
+              </td>
+          </tr>
+            <tr  *ngFor="let activeData of selectedItem?.ActiveItems" style="background-color:lightgray;"  >
+                <td>active</td>
+                <td>{{activeData.Name}}</td>
+                <td><span>{{formatDate(activeData.StartDate,'MMM-DD-YY') }}</span></td>
+                <td><span>{{formatDate(activeData.EndDate,'MMM-DD-YY') }}</span></td>
+                <td>{{activeData.EventLocationUUID}}</td>
+                <td><div class="cell-block" style="float:right;"    >
+                      <ion-button fill="clear" size="small" color="primary" (click)="queueStagedItem(activeData)">
+                            <ion-icon name='add' slot="start"></ion-icon>
+                           
+                      </ion-button>
+                    </div>
+                </td>
+            </tr>
+            
+          <!--    <tr  *ngFor="let activeItem of data.ActiveItems"  >
+                <td colspan="5" style="background-color: red;">{{activeItem.Name}}</td>
+            </tr>
+           
+            -->
+          </table>
+  </div>
+      <ion-list *ngSwitchCase="'host'">
+        <ion-item>
+          <ion-thumbnail item-start>
+            <img src="assets/img/speakers/kitten.jpg">
+          </ion-thumbnail>
+          <h2>Luna</h2>
+        </ion-item>
+        <ion-item>
+          <ion-thumbnail item-start>
+            <img src="assets/img/speakers/bear.jpg">
+          </ion-thumbnail>
+          <h2>Milo</h2>
+        </ion-item>
+        <ion-item>
+          <ion-thumbnail item-start>
+            <img src="assets/img/speakers/eagle.jpg">
+          </ion-thumbnail>
+          <h2>Bandit</h2>
+        </ion-item>
+        <ion-item>
+          <ion-thumbnail item-start>
+            <img src="assets/img/speakers/iguana.jpg">
+          </ion-thumbnail>
+          <h2>Nala</h2>
+        </ion-item>
+      </ion-list>
+      <div class="cell-block" style="float:left;"    >
+            <ion-button fill="clear" size="small" color="primary" (click)="saveStagedItems()">
+                   <ion-icon name='md-cloud-upload' slot="start"></ion-icon>
+                    Save</ion-button>
+      </div>
+   
+  </div>
+</div>  
+</ion-content>

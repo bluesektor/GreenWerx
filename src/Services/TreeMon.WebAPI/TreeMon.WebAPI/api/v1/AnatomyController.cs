@@ -64,8 +64,8 @@ namespace TreeMon.Web.api.v1
     [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
     [HttpGet]
-    [Route("api/Anatomy/")]
-    public ServiceResult Get( string filter = "")
+    [Route("api/Anatomy")]
+    public ServiceResult Get( )
     {
         if (CurrentUser == null)
             return ServiceResponse.Error("You must be logged in to access this function.");
@@ -73,8 +73,8 @@ namespace TreeMon.Web.api.v1
         AnatomyManager anatomyManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
         List<dynamic> anatomy = anatomyManager.GetAnatomies(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
         int count;
-        DataFilter tmpFilter = this.GetFilter(filter);
-        anatomy = FilterEx.FilterInput(anatomy, tmpFilter, out count);
+         DataFilter tmpFilter = this.GetFilter(Request);
+        anatomy = anatomy.Filter( tmpFilter, out count);
         return ServiceResponse.OK("", anatomy, count);
     }
 

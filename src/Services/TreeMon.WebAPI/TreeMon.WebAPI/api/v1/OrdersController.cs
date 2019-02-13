@@ -49,7 +49,7 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult Get(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide a name for the order.");
 
             OrderManager orderManager = new OrderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
@@ -68,7 +68,7 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult GetBy(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide an id for the order.");
 
             OrderManager orderManager = new OrderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
@@ -83,8 +83,8 @@ namespace TreeMon.WebAPI.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Orders/")]
-        public ServiceResult GetOrders(string filter = "")
+        [Route("api/Orders")]
+        public ServiceResult GetOrders()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -94,9 +94,9 @@ namespace TreeMon.WebAPI.api.v1
             List<dynamic> Orders = (List<dynamic>)orderManager.GetOrders(CurrentUser.AccountUUID, false).Cast<dynamic>().ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
+             DataFilter tmpFilter = this.GetFilter(Request);
 
-            Orders = FilterEx.FilterInput(Orders, tmpFilter, out count);
+            Orders = Orders.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Orders, count);
 
         }

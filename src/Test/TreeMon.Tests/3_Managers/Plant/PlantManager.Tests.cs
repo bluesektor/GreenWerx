@@ -14,7 +14,7 @@ namespace TreeMon.Web.Tests._templates
     [TestClass]
     public class PlantManager_Tests
     {
-        //private string connectionKey = "MSSQL_TEST";
+        private string connectionKey = "MSSQL_TEST";
 
         //[TestMethod]
         //public void PlantManager_AddStrainFromProduct()

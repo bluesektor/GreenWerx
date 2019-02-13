@@ -12,6 +12,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using TreeMon.Data.Logging;
+using TreeMon.Managers.Inventory;
 using TreeMon.Managers.Membership;
 
 using TreeMon.Models.App;
@@ -188,15 +189,15 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Users/")]
-        public ServiceResult GetUsers(string filter = "")
+        [Route("api/Users")]
+        public ServiceResult GetUsers()
         {
             AccountManager ac = new AccountManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
             List<dynamic> users = (List<dynamic>)ac.GetAccountMembers(this.GetUser(Request.Headers?.Authorization?.Parameter).AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                users = FilterEx.FilterInput(users, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                users = users.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("",users, count);
         }
@@ -276,7 +277,7 @@ namespace TreeMon.Web.api.v1
             dbAcct.Banned           = u.Banned;
             dbAcct.Deleted           = u.Deleted;
             dbAcct.LockedOut         = u.LockedOut;
-            dbAcct.Email             = u.Email;
+            dbAcct.Email = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), u.Email, true);
             dbAcct.PasswordQuestion = u.PasswordQuestion;
             dbAcct.PasswordAnswer = u.PasswordAnswer;
             //ParentId 
@@ -297,64 +298,189 @@ namespace TreeMon.Web.api.v1
             return updateResult;
         }
 
+        //this is from another app
+        //[ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
+        //[HttpPost]
+        //[HttpPatch]
+        //[Route("api/Users/Profile/Update")]
+        //public ServiceResult UpdateProfile(ProfileForm p)
+        //{
+        //    if(p == null)
+        //        return ServiceResponse.Error("Invalid form sent to server.");
+
+        //    UserManager userManager = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
+
+        //    TreeMon.Models.Membership.PersonalProfile dbProfile = userManager.GetCurrentProfile(p.UserUUID);
+        //    if (dbProfile == null)
+        //        return ServiceResponse.Error("Profile not found.");
+
+        //    var config = new MapperConfiguration(cfg =>
+        //    {
+        //        cfg.CreateMap<ProfileForm, TreeMon.Models.Membership.PersonalProfile>();
+        //    });
+
+        //    IMapper mapper = config.CreateMapper();
+        //    var dest = mapper.Map<ProfileForm, TreeMon.Models.Membership.PersonalProfile>(p);
+
+        //    return userManager.LogUserProfile(dest);
+        //}
+
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpPost]
         [HttpPatch]
-        [Route("api/Users/Profile/Update")]
-        public ServiceResult UpdateProfile(ProfileForm p)
+        [Route("api/Users/Profile/Save")]
+        public ServiceResult SaveProfile(TreeMon.Models.Membership.Profile p)
         {
-            if(p == null)
+            if (p == null)
                 return ServiceResponse.Error("Invalid form sent to server.");
 
+            UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+
+            TreeMon.Models.Membership.Profile dbProfile = userManager.GetProfile(p.UUID);
+            if (dbProfile == null)
+            {
+                if (string.IsNullOrWhiteSpace(p.CreatedBy))
+                    p.UUID = CurrentUser.UUID;
+
+                return userManager.InsertProfile(p);
+            }
+            return userManager.UpdateProfile(p);
+        }
+
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
+        [HttpGet]
+        [Route("api/Users/Profile/{profileUUID}")]
+        public ServiceResult GetUserProfileBy(string profileUUID)
+        {
             UserManager userManager = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            TreeMon.Models.Membership.Profile dbProfile = userManager.GetCurrentProfile(p.UserUUID);
-            if (dbProfile == null)
-                return ServiceResponse.Error("Profile not found.");
-
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<ProfileForm, TreeMon.Models.Membership.Profile>();
-            });
-
-            IMapper mapper = config.CreateMapper();
-            var dest = mapper.Map<ProfileForm, TreeMon.Models.Membership.Profile>(p);
-
-            return userManager.LogUserProfile(dest);
+            TreeMon.Models.Membership.Profile profile = userManager.GetProfile(profileUUID); //.GetProfile(CurrentUser.UUID, CurrentUser.AccountUUID);
+            return ServiceResponse.OK("", profile);
         }
+
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpGet]
         [Route("api/Users/Profile")]
         public ServiceResult GetUserProfile()
         {
-            UserManager userManager = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
+            UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            TreeMon.Models.Membership.Profile profile =userManager.GetCurrentProfile(GetUser(Request.Headers?.Authorization?.Parameter)?.UUID);
-
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap< TreeMon.Models.Membership.Profile, ProfileForm>();
-            });
-
-            IMapper mapper = config.CreateMapper();
-            var p = mapper.Map< TreeMon.Models.Membership.Profile, ProfileForm>(profile);
-
-            if (p == null)
-            {
-                p = new ProfileForm();
-                p.UserUUID = CurrentUser.UUID;
-                p.AccountUUID = CurrentUser.AccountUUID;
-            }
-      
-            return ServiceResponse.OK("",p);
+            TreeMon.Models.Membership.Profile profile = userManager.GetProfile(CurrentUser.UUID, CurrentUser.AccountUUID);
+            return ServiceResponse.OK("", profile);
         }
 
-     
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
+        [HttpGet]
+        [Route("api/Users/Profiles")]
+        public ServiceResult GetUserProfiles()
+        {
+            UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+
+            List<TreeMon.Models.Membership.Profile> profiles = userManager.GetProfiles(CurrentUser.UUID, CurrentUser.AccountUUID);
+            return ServiceResponse.OK("", profiles);
+        }
+
+        
+
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
+        [HttpPatch]
+        [Route("api/Users/Profile/{profileUUID}/SetActive")]
+        public ServiceResult SetActiveProfile(string profileUUID)
+        {
+            UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+
+            TreeMon.Models.Membership.Profile profile = userManager.SetActiveProfile(profileUUID, CurrentUser.UUID, CurrentUser.AccountUUID);
+            return ServiceResponse.OK("", profile);
+        }
+
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
+        [HttpDelete]
+        [Route("api/Users/Profile/{profileUUID}")]
+        public ServiceResult DeleteProfile(string profileUUID)
+        {
+            UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+
+             userManager.DeleteProfile(profileUUID);
+            return ServiceResponse.OK("" );
+        }
+
+
+        /// <summary>
+        /// This is from the app. sends just a basic message body.
+        /// subject etc. are generated.
+        /// </summary>
+        /// <returns></returns>
         [EnableThrottling(PerHour = 5, PerDay = 20)]
         [HttpPost]
-        [Route("api/Users/SendMessageAsync/")]
+        [Route("api/Users/Send/Message/{itemUUID}/{itemType}")]
+        public async Task<ServiceResult> SendMessageAsync(string itemUUID, string itemType)
+        {
+            if(string.IsNullOrWhiteSpace(itemUUID))
+                return ServiceResponse.Error("You must send an item id for the message.");
+
+            if (string.IsNullOrWhiteSpace(itemType))
+                return ServiceResponse.Error("You must send an item type for the message.");
+
+            if(!itemType.EqualsIgnoreCase("item"))
+                return ServiceResponse.Error("You must send a supported item type.");
+
+
+            if (CurrentUser == null)
+                return ServiceResponse.Error("You must be logged in to access this function.");
+
+
+            
+            try
+            {
+                string message = await ActionContext.Request.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrEmpty(message))
+                    return ServiceResponse.Error("You must send valid email info.");
+
+                InventoryManager inventoryManager = new InventoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+                var item = inventoryManager.Get(itemUUID);
+                if (item == null)
+                    return ServiceResponse.Error("Invalid item id.");
+
+                UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+                var toUser =   (User)userManager.GetUser(item.CreatedBy, false);
+
+                if (toUser == null)
+                    return ServiceResponse.Error("User not found for item.");
+
+                //decrypt to send
+                string emailTo = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), toUser.Email, false);
+
+                EmailSettings settings = new EmailSettings();
+                settings.EncryptionKey = Globals.Application.AppSetting("AppKey");
+                settings.HostPassword = Globals.Application.AppSetting("EmailHostPassword");
+                settings.HostUser = Globals.Application.AppSetting("EmailHostUser");
+                settings.MailHost = Globals.Application.AppSetting("MailHost");
+                settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
+                settings.SiteDomain = Globals.Application.AppSetting("SiteDomain");
+                settings.EmailDomain = Globals.Application.AppSetting("EmailDomain");
+                settings.SiteEmail = Globals.Application.AppSetting("SiteEmail");
+                settings.UseSSL = StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
+
+                string ip = network.GetClientIpAddress(this.Request);
+                string Subject =  CurrentUser.Name + " sent a message about " + item.Name;
+                string msg = message;
+                string emailFrom = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), CurrentUser.Email, false);
+                return await userManager.SendEmailAsync(ip, emailTo, emailFrom, Subject, msg, settings);
+            }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.Message);
+                return ServiceResponse.Error(ex.Message);
+            }
+            return ServiceResponse.OK();
+        }
+
+        [EnableThrottling(PerHour = 5, PerDay = 20)]
+        [HttpPost]
+        [Route("api/Users/SendMessage")]
         public async Task<ServiceResult> SendMessageAsync()
         {
             if (CurrentUser == null)
@@ -390,6 +516,7 @@ namespace TreeMon.Web.api.v1
                 settings.MailHost = Globals.Application.AppSetting("MailHost");
                 settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
                 settings.SiteDomain = Globals.Application.AppSetting("SiteDomain");
+                settings.EmailDomain = Globals.Application.AppSetting("EmailDomain");
                 settings.SiteEmail = Globals.Application.AppSetting("SiteEmail");
                 settings.UseSSL = StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
 
@@ -397,8 +524,93 @@ namespace TreeMon.Web.api.v1
                 string Subject = formData.Subject.ToString();
                 string msg = formData.Message.ToString();
                 UserManager userManager = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
+                string emailFrom = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), CurrentUser.Email, false);
+                return await  userManager.SendEmailAsync(ip, emailTo, emailFrom, Subject, msg, settings);
+            }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.Message);
+                return ServiceResponse.Error(ex.Message);
+            }
+        }
 
-                return await  userManager.SendEmailAsync(ip, emailTo, CurrentUser.Email, Subject, msg, settings);
+
+
+        [EnableThrottling(PerHour = 5, PerDay = 20)]
+        [HttpPost]
+        [Route("api/Users/Message")]
+        public async Task<ServiceResult> SendMessageToUserAsync( )
+        {
+          
+            if (CurrentUser == null)
+                return ServiceResponse.Error("You must be logged in to access this function.");
+
+
+
+            try
+            {
+                string content = await ActionContext.Request.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrEmpty(content))
+                    return ServiceResponse.Error("You must send valid email info.");
+
+               
+                var message = JsonConvert.DeserializeObject<Message>(content);
+
+                if (string.IsNullOrWhiteSpace(message.SendTo))
+                    return ServiceResponse.Error("You must send a user id for the message.");
+
+                if (string.IsNullOrWhiteSpace(message.Comment))
+                    return ServiceResponse.Error("You must send comment in the message.");
+
+                string emailTo = "";
+
+                UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+
+                switch (message.Type?.ToUpper())
+                {
+                    case "ACCOUNT":
+                        var am = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+                        Account account = (Account)am.Get(message.SendTo);
+                        if (account == null)
+                            return ServiceResponse.Error("Account not found.");
+                        emailTo = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), account.Email, false);
+                        break;
+                    case "SUPPORT":
+                        //todo call api/Site/SendMessage
+
+                        break;
+                    default:
+                        var toUser = (User)userManager.GetUser(message.SendTo, false);
+
+                        if (toUser == null)
+                            return ServiceResponse.Error("User not found.");
+
+                        emailTo = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), toUser.Email, false);
+                        break;
+                }
+              
+                if(string.IsNullOrWhiteSpace(emailTo))
+                    return ServiceResponse.Error("Members email is not set.");
+
+
+
+                EmailSettings settings = new EmailSettings();
+                settings.EncryptionKey = Globals.Application.AppSetting("AppKey");
+                settings.HostPassword = Globals.Application.AppSetting("EmailHostPassword");
+                settings.HostUser = Globals.Application.AppSetting("EmailHostUser");
+                settings.MailHost = Globals.Application.AppSetting("MailHost");
+                settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
+                settings.SiteDomain = Globals.Application.AppSetting("SiteDomain");
+                settings.EmailDomain = Globals.Application.AppSetting("EmailDomain");
+                settings.SiteEmail = Globals.Application.AppSetting("SiteEmail");
+                settings.UseSSL = StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
+
+                string ip = network.GetClientIpAddress(this.Request);
+                string Subject = message.Subject;
+                string msg = message.Comment;
+                string emailFrom = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), CurrentUser.Email, false);
+                return await userManager.SendEmailAsync(ip, emailTo, emailFrom, Subject, msg, settings);
             }
             catch (Exception ex)
             {
@@ -419,20 +631,21 @@ namespace TreeMon.Web.api.v1
         ///
         [AllowAnonymous]
         [HttpPost]
-        [EnableThrottling(PerSecond = 1, PerHour = 5, PerDay = 50)]
+        [EnableThrottling(PerSecond = 1, PerHour = 5, PerDay = 10)]
+        [Route("api/Membership/Validate/type/{type}/operation/{operation}/code/{code}")]
         [Route("api/Users/Validate/type/{type}/operation/{operation}/code/{code}")]
         public ServiceResult Validate(string type = "", string operation = "", string code = "")
         {
             ServiceResult res;
        
-#if DEBUG
+//#if DEBUG
           
-            res = ServiceResponse.OK("Code validated.");
-#else
+//            res = ServiceResponse.OK("Code validated.");
+//#else
              string ip = network.GetClientIpAddress(this.Request);
             UserManager userManager = new UserManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
             res = userManager.Validate(type, operation, code, ip, CurrentUser);
-#endif
+//#endif
             return res;
           
         }

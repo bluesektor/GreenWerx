@@ -68,7 +68,7 @@ namespace TreeMon.Managers.Medical
                 return new List<Symptom>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Symptom>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
+                return context.GetAll<Symptom>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -77,7 +77,7 @@ namespace TreeMon.Managers.Medical
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Symptom>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Symptom>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -89,7 +89,7 @@ namespace TreeMon.Managers.Medical
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Symptom>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<Symptom>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -104,7 +104,7 @@ namespace TreeMon.Managers.Medical
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                    Symptom dbU = context.GetAll<Symptom>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
+                    Symptom dbU = context.GetAll<Symptom>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Symptom already exists.");
@@ -176,7 +176,7 @@ namespace TreeMon.Managers.Medical
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<SymptomLog>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<SymptomLog>()?.FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -185,7 +185,7 @@ namespace TreeMon.Managers.Medical
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<SymptomLog>().Where(sw => (sw.AccountUUID == accountUUID) &&
+                return context.GetAll<SymptomLog>()?.Where(sw => (sw.AccountUUID == accountUUID) &&
                 (string.IsNullOrWhiteSpace(sw.UUParentID) == true || sw.UUParentID == null) &&
                  sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
@@ -197,9 +197,9 @@ namespace TreeMon.Managers.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (string.IsNullOrWhiteSpace(parentUUID) || parentUUID == "0")
-                    return context.GetAll<SymptomLog>().Where(sw => (sw.UUParentID == "" || sw.UUParentID == null) && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<SymptomLog>()?.Where(sw => (sw.UUParentID == "" || sw.UUParentID == null) && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
 
-                return context.GetAll<SymptomLog>().Where(sw => sw.UUParentID == parentUUID && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<SymptomLog>()?.Where(sw => sw.UUParentID == parentUUID && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -209,9 +209,9 @@ namespace TreeMon.Managers.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (string.IsNullOrWhiteSpace(parentUUID) || parentUUID == "0")
-                    return context.GetAll<SymptomLog>().Where(sw => sw.DoseUUID == doseUUID && (sw.UUParentID == "" || sw.UUParentID == null) && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<SymptomLog>()?.Where(sw => sw.DoseUUID == doseUUID && (sw.UUParentID == "" || sw.UUParentID == null) && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
 
-                return context.GetAll<SymptomLog>().Where(sw => sw.DoseUUID == doseUUID && sw.UUParentID == parentUUID && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<SymptomLog>()?.Where(sw => sw.DoseUUID == doseUUID && sw.UUParentID == parentUUID && sw.AccountUUID == accountUUID && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
             ///if (!this.DataAccessAuthorized(s, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -222,7 +222,7 @@ namespace TreeMon.Managers.Medical
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<SymptomLog>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<SymptomLog>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
             ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
@@ -232,7 +232,7 @@ namespace TreeMon.Managers.Medical
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                
-                    SymptomLog dbU = context.GetAll<SymptomLog>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
+                    SymptomLog dbU = context.GetAll<SymptomLog>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("SymptomLog already exists.");

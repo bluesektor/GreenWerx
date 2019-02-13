@@ -14,7 +14,9 @@ namespace TreeMon.Client
 {
     public partial class frmMain : Form
     {
+#pragma warning disable CS0414 // The field 'frmMain._firstRun' is assigned but its value is never used
         bool _firstRun = false;
+#pragma warning restore CS0414 // The field 'frmMain._firstRun' is assigned but its value is never used
 
         #region  CONTROLS 
 
@@ -33,10 +35,7 @@ namespace TreeMon.Client
 
         #endregion
 
-        private string _appPath = string.Empty;
         private string _currentPlugin = string.Empty;
-        private string _procLogFile = string.Empty;
-        private string _initFile = string.Empty;
         private SplitContainer splitContainer1;
         private Label lblStatus;
 

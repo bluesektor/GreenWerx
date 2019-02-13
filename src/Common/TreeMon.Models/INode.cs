@@ -29,9 +29,9 @@ namespace TreeMon.Models
 
         int SortOrder { get; set;  }
 
-        string SyncKey { get; set; }
+        string GUUID { get; set; }
 
-        string SyncType{ get; set; }
+        string GuuidType{ get; set; }
 
         string Name { get; set; }
 

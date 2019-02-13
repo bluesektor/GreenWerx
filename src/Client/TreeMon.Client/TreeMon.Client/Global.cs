@@ -4,7 +4,7 @@ namespace TreeMon.Client
 {
     public class Global
     {
-        protected Global() { } //Constructor
+        public Global() { } //Constructor
         //http://www.codeproject.com/Articles/6334/Plug-ins-in-C
         //What have we done here?	
         public static PluginServices Plugins = new PluginServices();

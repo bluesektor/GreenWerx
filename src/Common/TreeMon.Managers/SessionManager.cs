@@ -5,8 +5,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+
 using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using TreeMon.Data;
@@ -24,7 +26,6 @@ namespace TreeMon.Managers
         readonly string _connectionKey;
 
         readonly AppManager _app;
-        readonly UserManager _userManager;
 
         public int SessionLength { get; set; }
 
@@ -35,7 +36,7 @@ namespace TreeMon.Managers
 
             SessionLength = GetSessionLength();
             _app = new AppManager(_connectionKey, "web", "");
-            _userManager = new UserManager(_connectionKey, "");
+          
         }
 
         private int GetSessionLength()
@@ -46,7 +47,7 @@ namespace TreeMon.Managers
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    Setting s = context.GetAll<Setting>().FirstOrDefault(sw => (sw.Name?.EqualsIgnoreCase("SESSIONLENGTH") ?? false));
+                    Setting s = context.GetAll<Setting>()?.FirstOrDefault(sw => (sw.Name?.EqualsIgnoreCase("SESSIONLENGTH") ?? false));
                     return StringEx.ConvertTo<int>(s?.Value ?? "30");
                 }
             }
@@ -64,18 +65,21 @@ namespace TreeMon.Managers
         /// <param name="userUUID"></param>
         /// <param name="userData">This is the User objec serialized in json</param>
         /// <returns></returns>
-        public UserSession SaveSession(string ipAddress, string userUUID, string userData, bool persistSession=false)
+        public UserSession SaveSession(string ipAddress, string userUUID, string accountUUID, string userData, bool persistSession=false)
         {
             UserSession us = new UserSession();
             us.IsPersistent = persistSession;
+            us.SessionLength = GetSessionLength();
             us.Issued = DateTime.UtcNow;
-            User u = string.IsNullOrWhiteSpace(userData) ? (User)_userManager.Get(userUUID) : JsonConvert.DeserializeObject<User>(userData);
+            us.Expires = DateTime.UtcNow.AddMinutes(us.SessionLength);
+            User u = string.IsNullOrWhiteSpace(userData) ? null : JsonConvert.DeserializeObject<User>(userData);
             string secret = _app.GetSetting("AppKey")?.Value;
             string issuer = _app.GetSetting("SiteDomain")?.Value;
 
             us.AuthToken = CreateJwt(secret, u, issuer);
             us.UserData = userData;
             us.UserUUID = userUUID;
+            us.AccountUUID = accountUUID;
             return SaveSession(us);
         }
 
@@ -95,13 +99,16 @@ namespace TreeMon.Managers
             {
                 string secret = _app.GetSetting("AppKey")?.Value;
                 string issuer = _app.GetSetting("SiteDomain")?.Value;
-                User u = string.IsNullOrWhiteSpace(us.UserData) ? (User)_userManager.Get(us.UserUUID) : JsonConvert.DeserializeObject<User>(us.UserData);
+                User u = string.IsNullOrWhiteSpace(us.UserData) ? null : JsonConvert.DeserializeObject<User>(us.UserData);
                 us.AuthToken = CreateJwt(secret,u , issuer);
             }
             if (us.SessionLength != SessionLength)
                 us.SessionLength = this.SessionLength;
 
             us.Expires = DateTime.UtcNow.AddMinutes(us.SessionLength);
+            //make sure other sessions for this user in this account are cleared so there's no confusion.
+            this.DeleteByUserId(us.UserUUID, us.AccountUUID,false);
+
             using (var context = new TreeMonDbContext(_connectionKey))
             {
                 if (context.Insert<UserSession>(us))
@@ -134,9 +141,13 @@ namespace TreeMon.Managers
             RoleManager roleManager = new RoleManager(this._connectionKey);
             List<Role> userRoles = roleManager.GetRolesForUser(user.UUID, user.AccountUUID);
 
-            if(userRoles != null && userRoles.Count > 0)
-                payload.roleWeights = userRoles.Select(s => s.Weight.ToString()).Aggregate((current, next) => current  + "," + next);
-            
+            if (userRoles != null && userRoles.Count > 0)
+            {
+                payload.roleWeights = userRoles.Select(s => s.Weight.ToString()).Aggregate((current, next) => current + "," + next);
+                payload.roleNames = userRoles.Select(s => s.Name?.ToUpper()).Aggregate((current, next) => current + "," + next);
+            }
+
+            //NOTE: This uses bouncy castle portable, specifically version 1.8.1. Runtime error occures with other versions.
             string token = JWT.JsonWebToken.Encode(payload, secretKey, JWT.JwtHashAlgorithm.HS256);
 
             return token;
@@ -172,7 +183,8 @@ namespace TreeMon.Managers
 
             try
             {
-                string jsonPayload = JWT.JsonWebToken.Decode(jwt, secretKey); // JWT.SignatureVerificationException
+                string jsonPayload = "";
+               jsonPayload = JWT.JsonWebToken.Decode(jwt, secretKey); // JWT.SignatureVerificationException
                 JwtClaims claims = JsonConvert.DeserializeObject<JwtClaims>(jsonPayload);
 
                 if (claims.iss != _app.GetSetting("SiteDomain")?.Value)
@@ -202,7 +214,7 @@ namespace TreeMon.Managers
             {
                 try
                 {
-                    us = context.GetAll<UserSession>().OrderByDescending(ob => ob.Issued).FirstOrDefault(w => w.AuthToken == authToken);
+                    us = context.GetAll<UserSession>().OrderByDescending(ob => ob.Issued)?.FirstOrDefault(w => w.AuthToken == authToken);
                 }
                 catch (Exception ex)
                 {
@@ -214,7 +226,7 @@ namespace TreeMon.Managers
                 if (us == null)
                     return false;
 
-                 double secondsLeft =  us.Expires.Subtract( DateTime.UtcNow ).TotalSeconds;
+                double secondsLeft =  us.Expires.Subtract( DateTime.UtcNow ).TotalSeconds;
 
                 if (us.IsPersistent == false && secondsLeft <= 0 )
                 {
@@ -231,40 +243,38 @@ namespace TreeMon.Managers
             return true;
         }
 
-        public UserSession GetSessionByUser( string userUUID)
+        public UserSession GetSessionByUser( string userUUID, string accountUUID)
         {
             if (string.IsNullOrEmpty(userUUID))
                 return new UserSession();
             using (var context = new TreeMonDbContext(_connectionKey))
             {
-                return context.GetAll<UserSession>().FirstOrDefault(w => w.UserUUID == userUUID);
+                return context.GetAll<UserSession>()
+                    .FirstOrDefault(w => w.UserUUID == userUUID
+                    && w.AccountUUID == accountUUID);
             }
         }
 
-        public UserSession GetSessionByUserName(string userName)
+        public UserSession GetSessionByUserName(string userName, string accountUUID)
         {
             if (string.IsNullOrEmpty(userName))
                 return new UserSession();
             using (var context = new TreeMonDbContext(_connectionKey))
             {
-                return context.GetAll<UserSession>().FirstOrDefault(w => (w.UserName?.EqualsIgnoreCase(userName)?? false));
+                return context.GetAll<UserSession>().
+                    FirstOrDefault(w => (w.UserName?.EqualsIgnoreCase(userName)?? false)
+                                        && w.AccountUUID == accountUUID);
             }
         }
 
-        public UserSession GetSession(string authToken, bool validate = true)
+        public UserSession GetSession(string authToken)//, bool validate = true)
         {
-            try {
+            try
+            {
+
                 using (var context = new TreeMonDbContext(_connectionKey))
                 {
-                    if (!validate)
-                        return context.GetAll<UserSession>().OrderByDescending(ob => ob.Issued).FirstOrDefault(w => w.AuthToken == authToken);
-
-                    if (!IsValidSession(authToken))
-                    {
-                        return null;
-                    }
-
-                    return context.GetAll<UserSession>().OrderByDescending(ob => ob.Issued).FirstOrDefault(w => w.AuthToken == authToken);
+                    return context.GetAll<UserSession>().OrderByDescending(ob => ob.Issued)?.FirstOrDefault(w => w.AuthToken == authToken);
                 }
             }
             catch(Exception ex)
@@ -294,13 +304,18 @@ namespace TreeMon.Managers
         /// </summary>
         /// <param name="userUUID"></param>
         /// <returns>true for successful delete</returns>
-        public bool DeleteByUserId(string userUUID)
+        public bool DeleteByUserId(string userUUID, string accountUUID, bool deleteIfPersisted )
         {
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("@USERID", userUUID);
+            parameters.Add("@ACCOUNTID", accountUUID);
+
             using (var context = new TreeMonDbContext(_connectionKey))
             {
-                return context.Delete<UserSession>("WHERE UserUUID=@USERID", parameters) > 0 ? true : false;
+                if(deleteIfPersisted)
+                    return context.Delete<UserSession>("WHERE UserUUID=@USERID AND AccountUUID=@ACCOUNTID AND IsPersistent=0", parameters) > 0 ? true : false;
+                else
+                    return context.Delete<UserSession>("WHERE UserUUID=@USERID AND AccountUUID=@ACCOUNTID AND IsPersistent=0", parameters) > 0 ? true : false;
             }
         }
 

@@ -584,6 +584,7 @@ export class InventoryComponent implements OnInit {
         if (this.selectedCategoryUUID !== '') {
             screen.Command = 'SearchBy';
             screen.Field = searchBy;
+            screen.Operator = 'CONTAINS';
             screen.Value = this.selectedCategoryUUID;
             this.productFilter.Screens.push(screen);
         }
@@ -592,6 +593,7 @@ export class InventoryComponent implements OnInit {
         if (this.nameFilter !== '' && this.nameFilter.length > 2) {
             screen.Command = 'SearchBy';
             screen.Field = 'NAME';
+            screen.Operator = 'CONTAINS';
             screen.Value = this.nameFilter;
             this.productFilter.Screens.push(screen);
         }
