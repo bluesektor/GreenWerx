@@ -93,6 +93,7 @@ export class AppComponent implements OnInit {
             const screen = new Screen();
             screen.Command = 'SearchBy';
             screen.Field = 'Name';
+            screen.Operator = 'CONTAINS';
             screen.Value = 'SiteDomain'; // for now we just need domain name.
             filter.Screens.push(screen);
             this._appService.getPublicSettings(filter).subscribe(settingResponse => {

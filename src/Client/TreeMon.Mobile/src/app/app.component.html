@@ -1,0 +1,110 @@
+<ion-app>
+  <ion-split-pane>
+      <ion-menu>
+          <ion-header>
+            <ion-toolbar>
+              <ion-title>Menu</ion-title>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content>
+    
+            <ion-list>
+              <ion-list-header>
+                Navigate
+              </ion-list-header>
+              <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
+                <ion-item [routerLink]="p.url">
+                  <ion-icon slot="start" id='icoComp{{p.title}}' [name]="p.icon"></ion-icon>
+                  <ion-label id='lblComp{{p.title}}' >
+                    {{p.title}}
+                  </ion-label>
+                </ion-item>
+    
+              </ion-menu-toggle>
+            </ion-list>
+    
+            <ion-list *ngIf="loggedIn">
+              <ion-list-header>
+                Account
+              </ion-list-header>
+    
+              <ion-menu-toggle auto-hide="false">
+                <ion-item routerLink="/account">
+                  <ion-icon slot="start" name="person"></ion-icon>
+                  <ion-label>
+                    Account
+                  </ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+    
+              <ion-menu-toggle auto-hide="false">
+                <ion-item routerLink="/support">
+                  <ion-icon slot="start" name="help"></ion-icon>
+                  <ion-label>
+                    Support
+                  </ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+    
+              <ion-menu-toggle auto-hide="false">
+                <ion-item button (click)="logout()">
+                  <ion-icon slot="start" name="log-out"></ion-icon>
+                  <ion-label>
+                    Logout
+                  </ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+    
+            </ion-list>
+    
+            <ion-list *ngIf="!loggedIn">
+              <ion-list-header>
+                Account
+              </ion-list-header>
+    
+              <ion-menu-toggle auto-hide="false">
+                <ion-item routerLink="/login">
+                  <ion-icon slot="start" name="log-in"></ion-icon>
+                  <ion-label>
+                    Login
+                  </ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+    
+              <ion-menu-toggle auto-hide="false">
+                <ion-item routerLink="/support">
+                  <ion-icon slot="start" name="help"></ion-icon>
+                  <ion-label>
+                    Support
+                  </ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+    
+              <ion-menu-toggle auto-hide="false">
+                <ion-item routerLink="/signup">
+                  <ion-icon slot="start" name="person-add"></ion-icon>
+                  <ion-label>
+                    Signup
+                  </ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+            </ion-list>
+          <!--  slides are not working in ionic 4
+            <ion-list>
+              <ion-list-header>
+                Tutorial
+              </ion-list-header>
+              <ion-menu-toggle auto-hide="false">
+                <ion-item button (click)="openTutorial()">
+                  <ion-icon slot="start" name="hammer"></ion-icon>
+                  <ion-label>Show Tutorial</ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+            </ion-list>
+            -->
+          </ion-content>
+        </ion-menu>
+    <ion-router-outlet main></ion-router-outlet>
+  
+  </ion-split-pane>
+</ion-app>

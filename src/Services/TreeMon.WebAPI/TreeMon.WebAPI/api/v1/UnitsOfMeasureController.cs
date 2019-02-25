@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using TreeMon.Data.Logging;
@@ -18,9 +19,11 @@ using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Helpers;
 using TreeMon.Web.Filters;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class UnitsOfMeasureController : ApiBaseController
     {
 
@@ -40,7 +43,7 @@ namespace TreeMon.Web.api.v1
 
             ServiceResult res = new ServiceResult();
             res.Code = 200;
-
+            StringBuilder msg = new StringBuilder();
             try
             {
                 Task<string> content = ActionContext.Request.Content.ReadAsStringAsync();
@@ -61,11 +64,11 @@ namespace TreeMon.Web.api.v1
                     u.DateCreated = DateTime.UtcNow;
                     UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-                    ServiceResult tmpRes = UnitsOfMeasureManager.Insert(u,false);
+                    ServiceResult tmpRes = UnitsOfMeasureManager.Insert(u);
                     if (tmpRes.Code != 200)
                     {
                         res.Code = tmpRes.Code;
-                        res.Message += tmpRes.Message + "<br/>";
+                        msg.AppendLine(tmpRes.Message );
                     }
                 }
             }
@@ -77,6 +80,7 @@ namespace TreeMon.Web.api.v1
 
                 logger.InsertError(ex.Message, "UnitsOfMeasureController", "AssignUOMsToProductCategories");
             }
+            res.Message = msg.ToString();
             return res;
         }
 
@@ -102,7 +106,7 @@ namespace TreeMon.Web.api.v1
 
             UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            return UnitsOfMeasureManager.Insert(n, true);
+            return UnitsOfMeasureManager.Insert(n);
             }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -116,9 +120,9 @@ namespace TreeMon.Web.api.v1
 
             UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            UnitOfMeasure s = (UnitOfMeasure)UnitsOfMeasureManager.Get(name);
+            List<UnitOfMeasure> s = UnitsOfMeasureManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("UnitsOfMeasure could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -135,7 +139,7 @@ namespace TreeMon.Web.api.v1
 
             UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            UnitOfMeasure s = (UnitOfMeasure)UnitsOfMeasureManager.GetBy(uuid);
+            UnitOfMeasure s = (UnitOfMeasure)UnitsOfMeasureManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("UnitsOfMeasure could not be located for the uuid " + uuid);
@@ -147,8 +151,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/UnitsOfMeasure/")]
-        public ServiceResult GetUnitsOfMeasure(string filter = "")
+        [Route("api/UnitsOfMeasure")]
+        public ServiceResult GetUnitsOfMeasure()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -160,8 +164,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> UnitOfMeasures = UnitsOfMeasureManager.GetUnitsOfMeasure(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                UnitOfMeasures = FilterEx.FilterInput(UnitOfMeasures, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                UnitOfMeasures = UnitOfMeasures.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", UnitOfMeasures, count);
         }
 
@@ -192,7 +196,7 @@ namespace TreeMon.Web.api.v1
 
             UnitOfMeasureManager UnitsOfMeasureManager = new UnitOfMeasureManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            UnitOfMeasure fa = (UnitOfMeasure)UnitsOfMeasureManager.GetBy(uuid);
+            UnitOfMeasure fa = (UnitOfMeasure)UnitsOfMeasureManager.Get(uuid);
             if (fa == null)
                 return ServiceResponse.Error("Could not find measure.");
 
@@ -223,7 +227,7 @@ namespace TreeMon.Web.api.v1
 
           
 
-            var dbS = (UnitOfMeasure)UnitsOfMeasureManager.GetBy(s.UUID);
+            var dbS = (UnitOfMeasure)UnitsOfMeasureManager.Get(s.UUID);
 
                     if (dbS == null)
                         return ServiceResponse.Error("UnitsOfMeasure was not found.");

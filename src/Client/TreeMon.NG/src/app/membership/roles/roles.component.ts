@@ -96,6 +96,7 @@ export class RolesComponent implements OnInit {
         const screen = new Screen();
         screen.Command = 'SearchBy';
         screen.Field = 'Name';
+        screen.Operator = 'CONTAINS';
         screen.Value = 'Name';
         this.filterAvailablePermissions.Screens.push(screen);
     }
@@ -329,7 +330,7 @@ export class RolesComponent implements OnInit {
         }
         this.loadingData = true;
         this.msgBox.closeMessageBox();
-        let resNonMembers = this._roleService.getNonMembers(roleUUID);
+        const resNonMembers = this._roleService.getNonMembers(roleUUID);
 
         resNonMembers.subscribe(response => {
 
@@ -611,6 +612,7 @@ export class RolesComponent implements OnInit {
         const screen = new Screen();
         screen.Command = 'SearchBy';
         screen.Field = 'Name';
+        screen.Operator = 'CONTAINS';
         screen.Value = filterText;
         this.filterAvailablePermissions.Screens.push(screen);
 
@@ -631,6 +633,7 @@ export class RolesComponent implements OnInit {
         const screen = new Screen();
         screen.Command = 'SearchBy';
         screen.Field = 'Name';
+        screen.Operator = 'CONTAINS';
         screen.Value = filterText;
         this.filterSelectedPermissions.Screens.push(screen);
 

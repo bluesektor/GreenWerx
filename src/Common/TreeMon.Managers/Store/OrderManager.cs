@@ -16,14 +16,14 @@ namespace TreeMon.Managers.Store
 {
     public class OrderManager: BaseManager,ICrud
     {
-        private string _sessionKey = string.Empty;
-        private SystemLogger _logger = null;
+       
+        private readonly SystemLogger _logger = null;
 
         public OrderManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(connectionKey), "OrderManager CONTEXT IS NULL!");
 
-            _sessionKey = sessionKey;
+            SessionKey = sessionKey;
             this._connectionKey = connectionKey;
             _logger = new SystemLogger(connectionKey);
         }
@@ -38,7 +38,6 @@ namespace TreeMon.Managers.Store
 
             var s = (Order)n;
 
-            List<Order> pms = new List<Order>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (purge)
@@ -50,7 +49,7 @@ namespace TreeMon.Managers.Store
                 }
 
                 //get the Order from the table with all the data so when its updated it still contains the same data.
-                s = (Order)this.GetBy(s.UUID);
+                s = (Order)this.Get(s.UUID);
                 if (s == null)
                     return ServiceResponse.Error("Could not find order.");
 
@@ -62,42 +61,42 @@ namespace TreeMon.Managers.Store
             }
         }
 
-        public INode Get( string name)
+        public List<Order> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Order>();
 
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-               return context.GetAll<Order>().FirstOrDefault(w => w.Name.EqualsIgnoreCase(name) && w.AccountUUID == _requestingUser?.AccountUUID);
+                return context.GetAll<Order>()?.Where(w => w.Name.EqualsIgnoreCase(name) && w.AccountUUID == _requestingUser?.AccountUUID).ToList();
             }
         }
 
         public List<Order> GetOrders(string accountUUID, bool deleted = false)
         {
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Order>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Order>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
 
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Order>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<Order>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (n == null)
                 return ServiceResponse.Error("No record sent.");
@@ -113,13 +112,12 @@ namespace TreeMon.Managers.Store
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    Order dbU = context.GetAll<Order>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name));
+               
+                    Order dbU = context.GetAll<Order>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name));
 
                     if (dbU != null)
                         return ServiceResponse.Error("Order already exists.");
-                }
+                
     
                 if (context.Insert<Order>(s))
                     return ServiceResponse.OK("",s);

@@ -24,5 +24,18 @@ namespace TreeMon.Web.Tests.Managers
             Assert.IsNotNull(res.Result);
             Assert.IsTrue(res.Result.ToString().Contains("[DOMAIN]"));
         }
+
+        [TestMethod]
+        public void DocManager_Parse()
+        {
+
+            //  <add key="TemplateEmailNewMember" value="App_Data\Templates\Site\EmailNewMember.html" />
+            DocumentManager dm = new DocumentManager(connectionKey, sessionKey);
+            ServiceResult res = dm.GetTemplate("TemplateEmailNewMember");
+
+            Assert.IsTrue(res.Code == 200);
+            Assert.IsNotNull(res.Result);
+            Assert.IsTrue(res.Result.ToString().Contains("[DOMAIN]"));
+        }
     }
 }

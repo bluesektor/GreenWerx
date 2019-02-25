@@ -12,6 +12,9 @@ using TreeMon.Utilites.Security;
 using System.Configuration;
 using Omni.Managers.Services;
 using TreeMon.Models.Flags;
+using System.Linq;
+using TreeMon.Models.Services;
+using TreeMon.Utilites.Extensions;
 
 namespace TreeMon.Web.Tests._templates
 {
@@ -19,7 +22,17 @@ namespace TreeMon.Web.Tests._templates
     public class UserManager_Tests
     {
         private string connectionKey = "MSSQL_TEST";
+        private string _ownerAuthToken = "";
+        private string _providerUserKey = Cipher.RandomString(12);
+        private string _userUUID = Guid.NewGuid().ToString("N");
 
+        [TestInitialize]
+        public void TestSetup()
+        {
+            _ownerAuthToken = TestHelper.InitializeControllerTestData(connectionKey, "OWNER").Result.ToString();
+        }
+
+        #region reimplement
         //[TestMethod]
         //public void UserManager_SendEmailValidationAsync()
         //{
@@ -141,7 +154,7 @@ namespace TreeMon.Web.Tests._templates
         //    ug.Name = "test";
         //    ug.Password = "pwd";
         //    ug.Email = name + "@test.com";
-   
+
         //    User u = m.GetUser("test");
         //    if (u != null)
         //        m.DeleteUser(u.UUID, true);
@@ -166,64 +179,180 @@ namespace TreeMon.Web.Tests._templates
         //    Assert.AreEqual(res.Code, 500);
         //    Assert.IsTrue(res.Message.Contains("email account you provided is already on registered"));
         //}
+        #endregion
 
-        //[TestMethod]
-        //public void UserManager_RegisterUserAsync()
-        //{
-        //    bool sendValidationEmail = false; //Make true to test email send.
-        //    string name = Guid.NewGuid().ToString();
+        [TestMethod]
+        public void UserManager_RegisterUserAsync()
+        {
+            string name = Guid.NewGuid().ToString();
 
-        //    //Check for supporting keys since it sends email
-        //    Assert.IsNotNull(ConfigurationManager.AppSettings["SiteDomain"]);
-        //    Assert.IsNotNull(ConfigurationManager.AppSettings["SiteEmail"]);
-        //    Assert.IsNotNull(ConfigurationManager.AppSettings["AppKey"]);
-        //    Assert.IsNotNull(ConfigurationManager.AppSettings["MailHost"]);
-        //    Assert.IsNotNull(ConfigurationManager.AppSettings["MailPort"]);
-        //    Assert.IsNotNull(ConfigurationManager.AppSettings["EmailHostUser"]);
-        //    Assert.IsNotNull(ConfigurationManager.AppSettings["EmailHostPassword"]);
-        //    Assert.IsNotNull(ConfigurationManager.AppSettings["UseSSL"]);
+            Task.Run(async () =>
+            {
+                UserManager m = new UserManager(connectionKey, _ownerAuthToken);
 
-        //    Task.Run(async () =>
-        //    {
-        //        UserManager m = new UserManager(connectionKey);
-    
-        //        UserRegister ug = new UserRegister();
+                UserRegister ug = new UserRegister();
 
-        //        ServiceResult res = await m.RegisterUserAsync(ug, true, "127.1.1.8", sendValidationEmail);
-        //        Assert.AreEqual(res.Code, 500);
-        //        Assert.IsTrue(res.Message.Contains("Name"));
+                ServiceResult res = await m.RegisterUserAsync(ug, true, "127.1.1.8");
+                Assert.AreEqual( 500, res.Code);
+                
+                ug.Name = "test";
+                ug.Password = "pwd";
+                ug.Email = ConfigurationManager.AppSettings["SiteEmail"].ToString();
+                User u = m.Search("test").FirstOrDefault();
+                if (u != null)
+                    m.Delete(u.UUID, true);
 
-        //        ug.Name = "test";
-        //        ug.Password = "pwd";
-        //        ug.Email = ConfigurationManager.AppSettings["SiteEmail"].ToString();
-        //        User u = m.GetUser("test");
-        //        if(u != null)
-        //            m.DeleteUser(u.UUID,true);
+                ug.ConfirmPassword = "pwdc";
 
-        //        ug.ConfirmPassword = "pwdc";
+                res = await m.RegisterUserAsync(ug, true, "127.1.1.9");
+                Assert.AreEqual( 500, res.Code);
+                Assert.IsTrue(res.Message.Contains("Passwords"));
 
-        //        res = await m.RegisterUserAsync(ug, true, "127.1.1.9", sendValidationEmail);
-        //        Assert.AreEqual(res.Code, 500);
-        //        Assert.IsTrue(res.Message.Contains("Passwords"));
+                ug.ConfirmPassword = "pwd";
 
-        //        ug.ConfirmPassword = "pwd";
+                res = await m.RegisterUserAsync(ug, true, "127.1.1.10");
 
-        //        if (sendValidationEmail)
-        //            ug.Email = ConfigurationManager.AppSettings["SiteEmail"].ToString();
+                Assert.AreEqual( 200, res?.Code);
+                
+                ug.Name = name;
+                res = await m.RegisterUserAsync(ug, true, "127.1.1.11");
+                Assert.AreEqual( 500, res?.Code);
+                Assert.IsTrue(res.Message.Contains("already registered"));
 
+            }).GetAwaiter().GetResult();
+        }
 
-        //        res = await m.RegisterUserAsync(ug, true, "127.1.1.10", sendValidationEmail );
+        [TestMethod]
+        public void UserManager_SendUserEmailValidationAsync()
+        {
+            Assert.IsNotNull(ConfigurationManager.AppSettings["SiteDomain"]);
+            Assert.IsNotNull(ConfigurationManager.AppSettings["SiteEmail"]);
+            Assert.IsNotNull(ConfigurationManager.AppSettings["AppKey"]);
+            Assert.IsNotNull(ConfigurationManager.AppSettings["MailHost"]);
+            Assert.IsNotNull(ConfigurationManager.AppSettings["MailPort"]);
+            Assert.IsNotNull(ConfigurationManager.AppSettings["EmailHostUser"]);
+            Assert.IsNotNull(ConfigurationManager.AppSettings["EmailHostPassword"]);
+            Assert.IsNotNull(ConfigurationManager.AppSettings["UseSSL"]);
+            Task.Run(async () =>
+            {
+                EmailSettings settings = new EmailSettings();
 
+                string appKey = ConfigurationManager.AppSettings["AppKey"];
+                string emailPassword = ConfigurationManager.AppSettings["EmailHostPassword"];
+                // var testHostPassword = Cipher.Crypt(appKey,emailPassword, false);
+                settings.HostPassword = ConfigurationManager.AppSettings["EmailHostPassword"];
+                settings.EncryptionKey = appKey;
+                settings.HostUser = ConfigurationManager.AppSettings["EmailHostUser"];
+                settings.MailHost = ConfigurationManager.AppSettings["MailHost"];
+                settings.MailPort = StringEx.ConvertTo<int>(ConfigurationManager.AppSettings["MailPort"]);
+                settings.SiteDomain = ConfigurationManager.AppSettings["SiteDomain"];
+                settings.SiteEmail = ConfigurationManager.AppSettings["SiteEmail"];
+                settings.UseSSL = StringEx.ConvertTo<bool>(ConfigurationManager.AppSettings["UseSSL"]);
 
-        //        Assert.AreEqual(res?.Code, 200);
+                UserManager userManager = new UserManager(connectionKey, _ownerAuthToken);
+                userManager.DeleteByEmail("bluesektor@hotmail.com", true);
+                UserRegister ug = new UserRegister();
+                ug.Name = Guid.NewGuid().ToString();  
+                ug.Password = "pwd";
+                ug.ConfirmPassword = "pwd";
+                ug.Email = "bluesektor@hotmail.com";
+                
+                ServiceResult res = await userManager.RegisterUserAsync(ug, false, "127.1.1.10");
 
-        //        ug.Name = name;
-        //        res = await m.RegisterUserAsync(ug, true, "127.1.1.11", sendValidationEmail);
-        //        Assert.AreEqual(res?.Code, 500);
-        //        Assert.IsTrue(res.Message.Contains("email account you provided is already on registered"));
+                Assert.IsNotNull( res.Result);
 
-        //    }).GetAwaiter().GetResult();
-        //}
+                User u = (User)res.Result;
+                u.ProviderUserKey = _providerUserKey;
+                userManager.Update(u);
+
+                ServiceResult emailRes = await userManager.SendUserEmailValidationAsync(u, u.ProviderUserKey, "127.0.0.11", settings);
+
+                if (emailRes.Code != 200)
+                {
+                    Assert.Fail();
+                }
+            }).GetAwaiter().GetResult();
+        }
+
+        [TestMethod]
+        public void UserManager_Validate()
+        {
+            UserManager userManager = new UserManager(connectionKey, _ownerAuthToken);
+            string name = Guid.NewGuid().ToString("N");
+
+            //Task.Run(async () =>
+            //{
+                User u = new User()
+                {
+                    Name = name,
+                    ProviderUserKey = _providerUserKey,
+                    ProviderName = UserFlags.ProviderName.SendAccountInfo,
+                    Email = ConfigurationManager.AppSettings["SiteEmail"].ToString(),
+                    Banned = true,
+                    Approved = true
+                };
+
+                ////this should fail because couldn't find user
+             ServiceResult res = userManager.Validate("type", "action", "validationcode", "127.1.1.21", u);
+            Assert.AreEqual(500,res.Code);
+            Assert.IsTrue(res.Message.Contains("Invalid verification code"));
+
+            res = userManager.Insert(u);
+
+            Assert.AreEqual(200,res.Code,  res.Message);
+
+            res = userManager.Validate("mbr", "mreg", u.ProviderUserKey, "127.1.1.22",u);
+            Assert.AreEqual(500,res.Code, res.Message);
+            Assert.IsTrue(res.Message.Contains("banned"));
+
+            u.Banned = false;
+            Assert.IsTrue(userManager.Update(u).Code == 200);
+
+            res =  userManager.Validate("mbr", "mreg", u.ProviderUserKey, "127.1.1.23",u);
+            Assert.AreEqual(200,res.Code, res.Message);//should be ok. already approved
+            Assert.IsTrue(res.Message.Contains("approved"));
+
+            u.Approved = false;
+            Assert.IsTrue(userManager.Update(u).Code == 200);
+
+            //checks the case logic
+            res = userManager.Validate("XSDFQ", "DW#$SDFA", u.ProviderUserKey, "127.1.1.24", u);
+            Assert.AreEqual(500,res.Code, res.Message);
+            Assert.IsTrue(res.Message.Contains("invalid url"));
+
+            res = userManager.Validate("XSDFQ", "DdfesSDFA", u.ProviderUserKey, "127.1.1.25", u);
+            Assert.AreEqual(500,res.Code, res.Message);
+            Assert.IsTrue(res.Message.Contains("Invalid code"));
+
+            res = userManager.Validate("mbr", "mreg", u.ProviderUserKey, "127.1.1.26", u);
+            Assert.AreEqual(200,res.Code, res.Message);
+
+            User approvedUser = (User)userManager.Get(u.UUID);
+            Assert.IsNotNull(approvedUser);
+            Assert.IsTrue(approvedUser.Approved);
+
+            //make sure the table has the right data.
+            u.ProviderName = UserFlags.ProviderName.SendAccountInfo;
+            u.UserKey = _providerUserKey;
+            Assert.IsTrue(userManager.Update(u).Code == 200);
+            //password reset. This will always be 200 cause it does a redirect to the password reset page in the controller.
+            res =  userManager.Validate("mbr", "pwdr", u.ProviderUserKey, "127.1.1.27", u);
+            Assert.AreEqual(200, res.Code, res.Message);
+
+            //resend verification email..
+            res = userManager.Validate("mbr", "resend", u.ProviderUserKey, "127.1.1.28", u);
+            Assert.AreEqual(200, res.Code, res.Message);
+
+            res = userManager.Validate("mbr", "mdel", u.ProviderUserKey, "127.1.1.29", u);
+            Assert.AreEqual(200, res.Code, res.Message);
+            Assert.IsTrue(res.Message.Contains("deleted"));
+
+            User deletedUser = (User)userManager.Get(u.UUID);
+            Assert.IsNotNull(deletedUser);
+            Assert.IsTrue(deletedUser.Deleted);
+
+            //}).GetAwaiter().GetResult();
+        }
 
         //[TestMethod]
         //public void UserManager_SendEmailAsync()
@@ -454,7 +583,7 @@ namespace TreeMon.Web.Tests._templates
         //    Assert.IsNotNull(pt);
         //    Assert.AreEqual(pt.UserUUID, u.UUID);
         //    Assert.AreEqual(pt.UserUUID, p.UUID);
-            
+
         //}
 
         //public void UserManager_GetCurrentProfile()
@@ -510,7 +639,7 @@ namespace TreeMon.Web.Tests._templates
         //    Assert.IsNotNull(m.GetUser(name));
 
         //}
-      
+
         //[TestMethod]
         //public void UserManager_Insert_UserAsync()
         //{
@@ -689,85 +818,6 @@ namespace TreeMon.Web.Tests._templates
         //    Assert.IsNull(d);
         //}
 
-        //[TestMethod]
-        //public void UserManager_ValidateAsync()
-        //{
-        //    string name = Guid.NewGuid().ToString("N");
-        //    string userKey = Cipher.RandomString(12);
-        //    Assert.Fail();
-        //    //Task.Run(async () =>
-        //    //{
-        //    //    UserManager m = new UserManager(connectionKey);
-        //    //    User u = new User()
-        //    //    {
-        //    //        Name = name,
-        //    //        ProviderUserKey = userKey,
-        //    //        ProviderName = UserFlags.ProviderName.SendAccountInfo,
-        //    //        Email = ConfigurationManager.AppSettings["SiteEmail"].ToString(),
-        //    //        Banned = true,
-        //    //        Approved = true
-        //    //    };
 
-        //        ////this should fail because couldn't find user
-        //        //ServiceResult res = await m.ValidateAsync("type", "action", "validationcode", "127.1.1.21");
-        //        //Assert.AreEqual(res.Code, 500);
-        //        //Assert.IsTrue(res.Message.Contains("Invalid verification code"));
-
-        //        //res = m.InsertUser(u);
-
-        //        //Assert.AreEqual(res.Code, 200, res.Message);
-
-        //        //res = await m.ValidateAsync("mbr", "mreg", u.ProviderUserKey, "127.1.1.22");
-        //        //Assert.AreEqual(res.Code, 500, res.Message);
-        //        //Assert.IsTrue(res.Message.Contains("banned"));
-
-        //        //u.Banned = false;
-        //        //Assert.IsTrue(m.Update(u) > 0);
-
-        //        //res = await m.ValidateAsync("mbr", "mreg", u.ProviderUserKey, "127.1.1.23");
-        //        //Assert.AreEqual(res.Code, 200, res.Message);//should be ok. already approved
-        //        //Assert.IsTrue(res.Message.Contains("approved"));
-
-        //        //u.Approved = false;
-        //        //Assert.IsTrue(m.Update(u) > 0);
-
-        //        ////checks the case logic
-        //        //res = await m.ValidateAsync("XSDFQ", "DW#$SDFA", u.ProviderUserKey, "127.1.1.24");
-        //        //Assert.AreEqual(res.Code, 500, res.Message);
-        //        //Assert.IsTrue(res.Message.Contains("invalid url"));
-
-        //        //res = await m.ValidateAsync("XSDFQ", "DdfesSDFA", u.ProviderUserKey, "127.1.1.25");
-        //        //Assert.AreEqual(res.Code, 500, res.Message);
-        //        //Assert.IsTrue(res.Message.Contains("Invalid code"));
-
-        //        //res = await m.ValidateAsync("mbr", "mreg", u.ProviderUserKey, "127.1.1.26");
-        //        //Assert.AreEqual(res.Code, 200, res.Message);
-
-        //        //User approvedUser = m.GetUserBy(u.UUID);
-        //        //Assert.IsNotNull(approvedUser);
-        //        //Assert.IsTrue(approvedUser.Approved);
-
-        //        ////make sure the table has the right data.
-        //        //u.ProviderName = UserFlags.ProviderName.SendAccountInfo;
-        //        //u.UserKey = userKey;
-        //        //Assert.IsTrue(m.Update(u) > 0);
-        //        ////password reset. This will always be 200 cause it does a redirect to the password reset page in the controller.
-        //        //res = await m.ValidateAsync("mbr", "pwdr", u.ProviderUserKey, "127.1.1.27");
-        //        //Assert.AreEqual(res.Code, 200, res.Message);
-
-        //        ////resend verification email..
-        //        //res = await m.ValidateAsync("mbr", "resend", u.ProviderUserKey, "127.1.1.28");
-        //        //Assert.AreEqual(res.Code, 200, res.Message);
-
-        //        //res = await m.ValidateAsync("mbr", "mdel", u.ProviderUserKey, "127.1.1.29");
-        //        //Assert.AreEqual(res.Code, 200, res.Message);
-        //        //Assert.IsTrue(res.Message.Contains("deleted"));
-
-        //    //    User deletedUser = m.GetUserBy(u.UUID);
-        //    //    Assert.IsNotNull(deletedUser);
-        //    //    Assert.IsTrue(deletedUser.Deleted);
-
-        //    //}).GetAwaiter().GetResult();
-        //}
     }
 }

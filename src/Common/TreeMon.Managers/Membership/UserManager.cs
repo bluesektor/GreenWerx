@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using System.Transactions;
 using TreeMon.Data;
 using TreeMon.Data.Logging;
 using TreeMon.Data.Logging.Models;
@@ -24,8 +25,8 @@ namespace TreeMon.Managers.Membership
 {
     public  class UserManager : BaseManager,ICrud
     {
-        private RoleManager _roleManager = null;
-        SystemLogger _logger = null;
+        private readonly RoleManager _roleManager = null;
+        readonly SystemLogger _logger = null;
 
 
         public UserManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
@@ -35,7 +36,7 @@ namespace TreeMon.Managers.Membership
             this._connectionKey = connectionKey;
 
             _logger = new SystemLogger(connectionKey);
-            _roleManager = new RoleManager(connectionKey,this.GetUser(SessionKey));
+            _roleManager = new RoleManager(connectionKey,(User)this.GetUser(SessionKey,true));
         }
 
         public ServiceResult AuthenticateUser(string userName, string password, string ip)
@@ -44,7 +45,7 @@ namespace TreeMon.Managers.Membership
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    context.Insert<AuthenticationLog>(new AuthenticationLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Blank Username", UserName = userName, UUIDType = "AuthenticationLog", Vector = "UserManager.AuthenticateUser" });
+                    context.Insert<AccessLog>(new AccessLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Blank Username", UserName = userName, UUIDType = "AccessLog", Vector = "UserManager.AuthenticateUser" });
                 }
                 return ServiceResponse.Error("Invalid username or password.");
             }
@@ -55,7 +56,7 @@ namespace TreeMon.Managers.Membership
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
                  
-                    user = context.GetAll<User>().FirstOrDefault(uw => (uw.Name?.EqualsIgnoreCase(userName)?? false));
+                    user = context.GetAll<User>()?.FirstOrDefault(uw => (uw.Name?.EqualsIgnoreCase(userName)?? false));
 
                     if (user == null)
                         return ServiceResponse.Error("Invalid username or password.");
@@ -64,11 +65,11 @@ namespace TreeMon.Managers.Membership
 
                     if (!PasswordHash.ValidatePassword(password, user.PasswordHashIterations + ":" + user.PasswordSalt + ":" + user.Password))
                     {
-                        context.Insert<AuthenticationLog>(new AuthenticationLog() {
+                        context.Insert<AccessLog>(new AccessLog() {
                             Authenticated = false,
                             AuthenticationDate = DateTime.UtcNow,
                             IPAddress = ip, FailType = "Invalid Password",
-                            UserName = userName, UUIDType = "AuthenticationLog",
+                            UserName = userName, UUIDType = "AccessLog",
                             Vector = "UserManager.AuthenticateUser",
                              DateCreated = DateTime.UtcNow
                         });
@@ -111,7 +112,7 @@ namespace TreeMon.Managers.Membership
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    await context.InsertAsync<AuthenticationLog>(new AuthenticationLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Blank Username", UserName = userName, UUIDType = "AuthenticationLog", Vector = "UserManager.AuthenticateUser" });
+                    await context.InsertAsync<AccessLog>(new AccessLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Blank Username", UserName = userName, UUIDType = "AccessLog", Vector = "UserManager.AuthenticateUser" });
                 }
                 return ServiceResponse.Error("Invalid username or password.");
             }
@@ -121,7 +122,7 @@ namespace TreeMon.Managers.Membership
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    user = (await context.GetAllAsync<User>()).FirstOrDefault(uw => (uw.Name?.EqualsIgnoreCase(userName)??false));
+                    user = (await context.GetAllAsync<User>())?.FirstOrDefault(uw => (uw.Name?.EqualsIgnoreCase(userName)??false));
 
                     if (user == null)
                         return ServiceResponse.Error("Invalid username or password.");
@@ -130,7 +131,7 @@ namespace TreeMon.Managers.Membership
 
                     if (!PasswordHash.ValidatePassword(password, user.PasswordHashIterations + ":" + user.PasswordSalt + ":" + user.Password))
                     {
-                        context.Insert<AuthenticationLog>(new AuthenticationLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Invalid Password", UserName = userName, UUIDType = "AuthenticationLog", Vector = "UserManager.AuthenticateUser" });
+                        context.Insert<AccessLog>(new AccessLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Invalid Password", UserName = userName, UUIDType = "AccessLog", Vector = "UserManager.AuthenticateUser" });
                         user.FailedPasswordAttemptCount++;
                         context.Update<User>(user);
                         return ServiceResponse.Error("Invalid username or password.");
@@ -201,7 +202,7 @@ namespace TreeMon.Managers.Membership
             User dbU;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                dbU = context.GetAll<User>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(u.Name)??false));
+                dbU = context.GetAll<User>()?.FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(u.Name)??false));
 
                 if (dbU != null)
                     return ServiceResponse.Error("Username already exists.");
@@ -217,12 +218,12 @@ namespace TreeMon.Managers.Membership
             return ServiceResponse.Error("Database failed to save user information.");
         }
 
-        public ServiceResult Insert(INode n , bool ignoreAuthorization)
+        public ServiceResult Insert(INode n)
         {
-            return this.Insert(n, "", ignoreAuthorization);
+            return this.Insert(n, "");
         }
 
-        public  ServiceResult Insert(INode n, string ipAddress = "", bool ignoreAuthorization = false)
+        public  ServiceResult Insert(INode n, string ipAddress, bool ignoreAuthorization = false)
         {
 
             if (n == null)
@@ -232,14 +233,15 @@ namespace TreeMon.Managers.Membership
 
             var u = (User)n;
 
-            if (!ignoreAuthorization) //we ignore authorization when a new user is registering.
+            //we ignore authorization when a new user is registering.
+            if (!ignoreAuthorization) 
             {
                 if (!this.DataAccessAuthorized(u, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
             }
-            User dbU = new User();
+            User dbU;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                dbU = context.GetAll<User>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(u.Name)?? false));
+                dbU = context.GetAll<User>()?.FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(u.Name)?? false));
 
                 if (dbU != null)
                     return ServiceResponse.Error("Username already exists.");
@@ -257,10 +259,10 @@ namespace TreeMon.Managers.Membership
         {
             try
             {
-                User u = new User();
+                User u;
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    u = context.GetAll<User>().FirstOrDefault(w => w.UUID == userUUID);
+                    u = context.GetAll<User>()?.FirstOrDefault(w => w.UUID == userUUID);
                     if (u == null)
                         return ServiceResponse.Error("User not found.");
 
@@ -286,6 +288,41 @@ namespace TreeMon.Managers.Membership
             }
             return ServiceResponse.OK();
         }
+
+        public ServiceResult DeleteByEmail(string email, bool purge = false)
+        {
+            try
+            {
+                User u;
+                using (var context = new TreeMonDbContext(this._connectionKey))
+                {
+                    u = context.GetAll<User>()?.FirstOrDefault(w => w.Email == email);
+                    if (u == null)
+                        return ServiceResponse.Error("Email not found.");
+
+                    if (!this.DataAccessAuthorized(u, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
+
+                    if (!DataAccessAuthorized(u, "delete", false))
+                        return ServiceResponse.Error("You are not authorized access to ." + u.Name);
+
+                    if (!purge)
+                    {
+                        u.Deleted = true;
+                        return Update(u);
+                    }
+                    context.Delete<User>(u);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.InsertError(ex.Message, "UserManager", "DeleteUser:" + email);
+
+                Debug.Assert(false, ex.Message);
+                return ServiceResponse.Error(ex.Message);
+            }
+            return ServiceResponse.OK();
+        }
+
 
         public ServiceResult Delete(INode n, bool purge = false)
         {
@@ -318,20 +355,21 @@ namespace TreeMon.Managers.Membership
             return ServiceResponse.OK();
         }
 
-        public INode Get(string name)
+
+        public List<User> Search(string name)
         {
-            return this.Get(name, true);
+            return this.Search(name, true);
         }
 
-        public INode Get( string userName, bool clearSensitiveData)
+        public List<User> Search( string userName, bool clearSensitiveData)
         {
             //   if (!this.DataAccessAuthorized(u, "GET", false)) return null; //todo fix this so log it or something
 
-            User u;
+            List<User> u;
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                u = context.GetAll<User>().FirstOrDefault(uw => ( uw.Name?.EqualsIgnoreCase(userName)?? false));
+                u = context.GetAll<User>()?.Where(uw => ( uw.Name?.EqualsIgnoreCase(userName)?? false)).ToList();
             }
             if (clearSensitiveData)
             {
@@ -347,13 +385,13 @@ namespace TreeMon.Managers.Membership
             if (string.IsNullOrWhiteSpace(email))
                 return new User();
 
-            // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (clearSensitiveData)
-                    return ClearSensitiveData(context.GetAll<User>().FirstOrDefault(uw => (uw.Email?.EqualsIgnoreCase(email)??false)));
+                    return ClearSensitiveData(context.GetAll<User>()?.FirstOrDefault(uw => (uw.Email == email)));
 
-                return context.GetAll<User>().FirstOrDefault(uw => (uw.Email?.EqualsIgnoreCase(email)??false));
+                return context.GetAll<User>()?.FirstOrDefault(uw => (uw.Email == email));
             }
         }
 
@@ -365,47 +403,46 @@ namespace TreeMon.Managers.Membership
         /// <returns></returns>
         public List<User> GetUsers(string AccountUUID, bool clearSensitiveData = true)
         {
-            // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-            List<User> usrs = new List<User>();
+            //// if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (clearSensitiveData)
-                    return ClearSensitiveData(context.GetAll<User>().Where(w => w.AccountUUID == AccountUUID && w.Deleted == false).ToList());
+                    return ClearSensitiveData(context.GetAll<User>()?.Where(w => w.AccountUUID == AccountUUID && w.Deleted == false).ToList());
 
-                return context.GetAll<User>().Where(w => w.AccountUUID == AccountUUID && w.Deleted == false).ToList();
+                return context.GetAll<User>()?.Where(w => w.AccountUUID == AccountUUID && w.Deleted == false).ToList();
             }
         }
 
         public List<User> GetUsers(bool clearSensitiveData = true)
         {
-            // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-            List<User> usrs = new List<User>();
+            //// if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            List<User> usrs;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (clearSensitiveData)
                 {
-                    usrs = ClearSensitiveData(context.GetAll<User>().Where(w => w.Deleted == false).ToList());
+                    usrs = ClearSensitiveData(context.GetAll<User>()?.Where(w => w.Deleted == false).ToList());
                     return usrs;
                 }
 
-                return context.GetAll<User>().Where(w => w.Deleted == false).ToList();
+                return context.GetAll<User>()?.Where(w => w.Deleted == false).ToList();
             }
         }
 
-        public INode GetBy(string UUID)
+        public INode Get(string uuid)
         {
-            return this.GetBy(UUID, true);
+            return this.GetUser(uuid, true);
         }
 
-        public INode GetBy(string UUID, bool clearSensitiveData = true)
+        public INode GetUser(string UUID, bool clearSensitiveData = true)
         {
-            // if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //// if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (clearSensitiveData)
-                    return ClearSensitiveData(context.GetAll<User>().Where(uw => uw.UUID == UUID).FirstOrDefault());
-
-                return context.GetAll<User>().FirstOrDefault(uw => uw.UUID == UUID);
+                    return ClearSensitiveData(context.GetAll<User>()?.FirstOrDefault(uw => uw.UUID == UUID));
+                User n = context.GetAll<User>()?.FirstOrDefault(uw => uw.UUID == UUID);
+                return n;
             }
         }
 
@@ -415,7 +452,7 @@ namespace TreeMon.Managers.Membership
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                u = context.GetAll<User>().FirstOrDefault(uw => uw.UUID == userUUID);
+                u = context.GetAll<User>()?.FirstOrDefault(uw => uw.UUID == userUUID);
             }
 
             if (u == null)
@@ -481,17 +518,20 @@ namespace TreeMon.Managers.Membership
             return ServiceResponse.OK("User " + u.Name + " updated.");
         }
 
-        public ServiceResult Update(INode n)
+        public ServiceResult Update(INode n )
         {
-            return this.Update(n, true);
+            return this.UpdateUser(n);
         }
 
-        public ServiceResult Update(INode n, bool authorize = true)
+        public ServiceResult UpdateUser(INode n, bool authorize = true)
         {
             if (n == null)
                 return ServiceResponse.Error("No record was sent.");
 
             var u = (User)n;
+
+            if (u.DateCreated == DateTime.MinValue)
+                u.DateCreated = DateTime.UtcNow;
 
             if (authorize)
             {
@@ -513,7 +553,7 @@ namespace TreeMon.Managers.Membership
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public ServiceResult LogUserProfile(Profile p)
+        public ServiceResult LogUserProfile(PersonalProfile p)
         {
             if (p == null)
                 return ServiceResponse.Error("Invalid profile.");
@@ -521,19 +561,19 @@ namespace TreeMon.Managers.Membership
             p.DateCreated = DateTime.UtcNow;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (context.Insert<Profile>(p))
+                if (context.Insert<PersonalProfile>(p))
                     return ServiceResponse.OK();
             }
             return ServiceResponse.Error("Failed to save profile.");
         }
 
-        public Profile GetCurrentProfile(string userUUID)
+        public PersonalProfile GetCurrentProfile(string userUUID)
         {
             if (string.IsNullOrWhiteSpace(userUUID))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Profile>().OrderByDescending(po => po.DateCreated).FirstOrDefault(pw => pw.UserUUID == userUUID);
+                return context.GetAll<PersonalProfile>().OrderByDescending(po => po.DateCreated)?.FirstOrDefault(pw => pw.UserUUID == userUUID);
             }
         }
 
@@ -550,26 +590,26 @@ namespace TreeMon.Managers.Membership
             {
                 if (user.Deleted)
                 {
-                    context.Insert<AuthenticationLog>(new AuthenticationLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Deleted User", UserName = user.Name, UUIDType = "AuthenticationLog", Vector = "UserManager.AuthenticateUser" });
+                    context.Insert<AccessLog>(new AccessLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Deleted User", UserName = user.Name, UUIDType = "AccessLog", Vector = "UserManager.AuthenticateUser" });
                     return ServiceResponse.Error("User was deleted.");
                 }
 
                 //this is set by clicking the validation email.
                 if (!user.Approved)
                 {
-                    context.Insert<AuthenticationLog>(new AuthenticationLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Unapproved User", UserName = user.Name, UUIDType = "AuthenticationLog", Vector = "UserManager.AuthenticateUser" });
+                    context.Insert<AccessLog>(new AccessLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Unapproved User", UserName = user.Name, UUIDType = "AccessLog", Vector = "UserManager.AuthenticateUser" });
                     return ServiceResponse.Error("Account has not been approved. You must activate the account with the confirmation email before logging in. Check your spam/junk folder for the confirmation email if you have not received it. <a href=\"/Account/SendValidationEmail/?userUUID=" + user.UUID + "\">Resend Validation Email</a><br/>");
                 }
 
                 if (user.LockedOut)
                 {
-                    context.Insert<AuthenticationLog>(new AuthenticationLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Locked User", UserName = user.Name, UUIDType = "AuthenticationLog", Vector = "UserManager.AuthenticateUser" });
+                    context.Insert<AccessLog>(new AccessLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Locked User", UserName = user.Name, UUIDType = "AccessLog", Vector = "UserManager.AuthenticateUser" });
                     return ServiceResponse.Error("User is locked out.");
                 }
 
                 if (user.Banned)
                 {
-                    context.Insert<AuthenticationLog>(new AuthenticationLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Banned User", UserName = user.Name, UUIDType = "AuthenticationLog", Vector = "UserManager.AuthenticateUser" });
+                    context.Insert<AccessLog>(new AccessLog() { Authenticated = false, AuthenticationDate = DateTime.UtcNow, IPAddress = ip, FailType = "Banned User", UserName = user.Name, UUIDType = "AccessLog", Vector = "UserManager.AuthenticateUser" });
                     return ServiceResponse.Error("User is banned.");
                 }
             }
@@ -578,6 +618,9 @@ namespace TreeMon.Managers.Membership
 
         public async Task<ServiceResult> SendEmailAsync(string ip, string toEmail,string fromEmail, string subject, string body, EmailSettings settings)
         {
+            if(string.IsNullOrWhiteSpace(toEmail))
+                return ServiceResponse.Error("The recipients email is not set.");
+
             if (string.IsNullOrWhiteSpace(settings.SiteDomain))
             {
                 _logger.InsertError("The  email setting site domain key is not set.", "UserManager", "SendEmail");
@@ -589,6 +632,33 @@ namespace TreeMon.Managers.Membership
                 _logger.InsertError("The email setting SiteEmail is not set.", "UserManager", "SendEmail");
                 return ServiceResponse.Error("An error occured when sending the message.");
             }
+
+            #region EmailLog
+            var app = new AppManager(this._connectionKey, "web", "");
+            string secret = app.GetSetting("AppKey")?.Value;
+           
+
+
+            EmailLog emailLog = new EmailLog();
+            emailLog.Message = body + "<br/><br/><br/>Message Key:" + emailLog.UUID;
+            emailLog.Subject = subject;
+            emailLog.EmailFrom = Cipher.Crypt(secret, fromEmail, true);
+            //     emailLog.UUIDType += "." + 
+            emailLog.EmailTo = Cipher.Crypt(secret, toEmail, true);
+
+            emailLog.DateCreated = DateTime.UtcNow;
+            emailLog.IpAddress = ip;
+            emailLog.Status = "not_sent";
+           emailLog.CreatedBy = Cipher.Crypt(secret, fromEmail, true);
+                //emailLog.AccountUUID = CurrentUser.AccountUUID;
+         
+
+            EmailLogManager emailLogManager = new EmailLogManager(this._connectionKey);
+            if (emailLogManager.Insert(emailLog).Code == 500)
+            {
+                return ServiceResponse.Error("Failed to save the email. Try again later.");
+            }
+            #endregion
 
             string siteEmail = settings.SiteEmail;
             MailAddress ma = new MailAddress(siteEmail, settings.SiteDomain);
@@ -602,6 +672,115 @@ namespace TreeMon.Managers.Membership
             SMTP mailServer = new SMTP(this._connectionKey, settings);
             return await mailServer.SendMailAsync(mail);
         }
+
+
+        public ServiceResult InsertProfile(Profile p)
+        {
+            if (p == null)
+                return ServiceResponse.Error("Invalid profile.");
+            
+            if(string.IsNullOrWhiteSpace(p.UUID))
+                p.UUID = Guid.NewGuid().ToString("N");
+
+            p.DateCreated = DateTime.UtcNow;
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                if (context.Insert<Profile>(p))
+                    return ServiceResponse.OK("",p);
+            }
+            return ServiceResponse.Error("Failed to add profile.");
+        }
+
+        public ServiceResult UpdateProfile(Profile p)
+        {
+            if (p == null)
+                return ServiceResponse.Error("Invalid profile.");
+
+            p.DateCreated = DateTime.UtcNow;
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                if (context.Update<Profile>(p) > 0)
+                    return ServiceResponse.OK();
+            }
+            return ServiceResponse.Error("Failed to save profile.");
+        }
+
+        public Profile GetProfile(string userUUID, string accountUUID)
+        {
+            if (string.IsNullOrWhiteSpace(userUUID))
+                return null;
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                return context.GetAll<Profile>()?.OrderByDescending(po => po.DateCreated)?.FirstOrDefault(pw => pw.UserUUID == userUUID && pw.AccountUUID == accountUUID);
+            }
+        }
+
+        public List<Profile> GetProfiles(string userUUID, string accountUUID)
+        {
+            if (string.IsNullOrWhiteSpace(userUUID))
+                return new List<Profile>();
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                return context.GetAll<Profile>()?.Where(pw => pw.UserUUID == userUUID && pw.AccountUUID == accountUUID)?.OrderByDescending(po => po.DateCreated).ToList();
+            }
+        }
+
+        public Profile SetActiveProfile(string profileUUID, string userUUID, string accountUUID)
+        {
+            Profile active = new Profile();
+            //todo set all other for user account to not active 
+            //then set this to active
+            if (string.IsNullOrWhiteSpace(profileUUID) || string.IsNullOrWhiteSpace(userUUID) || string.IsNullOrWhiteSpace(accountUUID))
+                return null;
+
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                var profiles = context.GetAll<Profile>()?.Where(w => w.UserUUID == userUUID && w.AccountUUID == accountUUID).ToList();
+                if (profiles.Count == 0)
+                    return null;
+
+                foreach (Profile p in profiles)
+                {
+                    if (p.UUID == profileUUID)
+                    {
+                        p.Active = true;
+                        context.Update(p);
+                        active = p;
+                        continue;
+                    }
+
+                    if (p.Active)
+                    {
+                        p.Active = false;
+                        context.Update(p);
+                    }
+                }
+            }
+            return active;
+        }
+
+        public Profile GetProfile(string profileUUID)
+        {
+            if (string.IsNullOrWhiteSpace(profileUUID))
+                return null;
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                return context.GetAll<Profile>()?.FirstOrDefault(pw => pw.UUID == profileUUID);
+            }
+        }
+
+        public void DeleteProfile(string profileUUID)
+        {
+            if (string.IsNullOrWhiteSpace(profileUUID))
+                return;
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                Profile p = context.GetAll<Profile>()?.FirstOrDefault(w => w.UUID == profileUUID);
+                context.Delete<Profile>(p);
+            }
+        }
+
+
 
 
         #region Registration Methods
@@ -636,137 +815,119 @@ namespace TreeMon.Managers.Membership
                 return ServiceResponse.Error("Invalid email name.");
             }
 
+            var app = new AppManager(this._connectionKey, "web", "");
+            string secret = app.GetSetting("AppKey")?.Value;
+            var encEmail = Cipher.Crypt(secret, ur.Email, true);
+
             User dbUser;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                dbUser = context.GetAll<User>().FirstOrDefault(uw => (uw.Email?.EqualsIgnoreCase(ur.Email)?? false) || (uw.Name?.EqualsIgnoreCase(ur.Name)??false));
+                dbUser = context.GetAll<User>()?.FirstOrDefault(uw => (uw.Email == encEmail) || (uw.Name?.EqualsIgnoreCase(ur.Name)??false));
             }
 
             if (dbUser != null && dbUser.Approved == false)
-                return ServiceResponse.Error("The email account you provided is already on registered, but has not been validated. <br />Please check your email account and follow the instructions on the message sent.<br/><br/>Thank you,<br/> ");
+                return ServiceResponse.Error("The email account you provided is already registered, but has not been validated.  Please check your email account and follow the instructions on the message sent. Thank you.");
          
          
             else if (dbUser != null)
                 return ServiceResponse.Error("Username or email already exists.");
 
-            if (string.IsNullOrWhiteSpace(ur.AccountUUID))
-                ur.AccountUUID = SystemFlag.Default.Account;
-
-            string tmpHashPassword = PasswordHash.CreateHash(ur.Password);
-            bool approved = true;// false;TODO make this false when the email url is fixed
-            //if mobile the email validation isn't going to be sent for them to validate=> approve. So auto approve.
-            if (ur.ClientType == "mobile.app")
-                approved = true; 
-
-            User u = new User()
+            var userUUID = Guid.NewGuid().ToString("N");
+            var accountGuid = Guid.NewGuid().ToString("N");
+            Account newAccount = null;
+            AccountMember accountMember = null;
+            ServiceResult res = null;
+           
+           // using (var scope = new TransactionScope())
+            using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                AccountUUID = ur.AccountUUID,
-                Name = ur.Name,                
-                Password = PasswordHash.ExtractHashPassword(tmpHashPassword),
-                PasswordAnswer = ur.SecurityAnswer,
-                PasswordQuestion = ur.SecurityQuestion,
-                Active = true,
-                DateCreated = DateTime.UtcNow,
-                Deleted = false,
-                PasswordSalt = PasswordHash.ExtractSalt(tmpHashPassword),
-                PasswordHashIterations = PasswordHash.ExtractIterations(tmpHashPassword),
-                Email = ur.Email,
-                SiteAdmin = false,
-                Approved = approved,
-                Anonymous = false,
-                Banned = false,
-                LockedOut = false,
-                Private = true, // Since its a site admin we'll make it private  appSettings.UserIsPrivate,
-                FailedPasswordAnswerAttemptWindowStart = 0,
-                FailedPasswordAttemptCount = 0,
-                FailedPasswordAnswerAttemptCount = 0,
-                ProviderUserKey = Cipher.RandomString(12),
-                ProviderName = UserFlags.ProviderName.ValidateEmail
-               
-        };        
+                context.Configuration.AutoDetectChangesEnabled = false;
 
-          ServiceResult res = await InsertUserAsync(u, ipAddress);
+                if (string.IsNullOrWhiteSpace(ur.AccountUUID))
+                {  //create an account. we don't want the user in the same
+                    // account as the default data account.
+                    var dbAccount = context.GetAll<Account>()?.FirstOrDefault(w => w.Name.EqualsIgnoreCase(ur.Name));
+                    if (dbAccount != null)
+                        return ServiceResponse.Error("Account already exists.");
 
-            if (res.Code != 200)
-                return res;
+                    newAccount = new Account()
+                    {
+                        Name = ur.Name,
+                        AccountUUID = accountGuid,
+                        UUID = accountGuid,
+                        AccountSource = ur.ClientType,
+                        DateCreated = DateTime.Now,
+                        CreatedBy = userUUID,
+                        Email = encEmail, //ur.Email,
+                        RoleOperation = "=",
+                        RoleWeight = 4,
+                        GUUID = accountGuid,
+                        Private = true
+                    };
 
-            res.Result =  u;
+                    if (context.Insert<Account>(newAccount))
+                    {
+                        accountMember = new AccountMember() { AccountUUID = accountGuid, MemberUUID = userUUID, MemberType = "User" };
+                        if (!context.Insert<AccountMember>(accountMember))
+                        {
+                            //todo rollback make sure account is rolled back
+                            return ServiceResponse.Error("Error adding user to account.");
+                        }
+                    }
+                    else
+                    {
+                        return ServiceResponse.Error("Error creating account." + context.Message);
+                    }
+
+                    ur.AccountUUID = accountGuid;
+                }
+
+                string tmpHashPassword = PasswordHash.CreateHash(ur.Password);
+             
+
+                User u = new User()
+                {
+                    UUID = userUUID,
+                    AccountUUID = ur.AccountUUID,
+                    Name = ur.Name,
+                    Password = PasswordHash.ExtractHashPassword(tmpHashPassword),
+                    PasswordAnswer = ur.SecurityAnswer,
+                    PasswordQuestion = ur.SecurityQuestion,
+                    Active = true,
+                    DateCreated = DateTime.UtcNow,
+                    Deleted = false,
+                    PasswordSalt = PasswordHash.ExtractSalt(tmpHashPassword),
+                    PasswordHashIterations = PasswordHash.ExtractIterations(tmpHashPassword),
+                    Email = encEmail, // ur.Email,
+                    SiteAdmin = false,
+                    Approved = Approved,
+                    Anonymous = false,
+                    Banned = false,
+                    LockedOut = false,
+                    Private = true, // Since its a site admin we'll make it private  appSettings.UserIsPrivate,
+                    FailedPasswordAnswerAttemptWindowStart = 0,
+                    FailedPasswordAttemptCount = 0,
+                    FailedPasswordAnswerAttemptCount = 0,
+                    ProviderUserKey = Cipher.RandomString(12),
+                    ProviderName = UserFlags.ProviderName.ValidateEmail
+                };
+
+                res = await InsertUserAsync(u, ipAddress);
+
+                if (res.Code != 200)
+                {
+                    //todo rollback make sure account && AccountMember is rolled back
+                    return res;
+                }
+                
+                context.SaveChanges();
+              //  scope.Complete();
+                context.Configuration.AutoDetectChangesEnabled = true;
+                res.Result = u;
+            }
             return res;
         }
 
-        public  ServiceResult RegisterUser(UserRegister ur, bool Approved, string ipAddress)
-        {
-            if (string.IsNullOrEmpty(ur.Name))
-                return ServiceResponse.Error("Invalid username.");
-
-            if (ur.Password != ur.ConfirmPassword)
-                return ServiceResponse.Error("Passwords must match.");
-
-            if (Validator.IsEmailInjectionAttempt(ur.Email))
-            {
-                _logger.InsertSecurity(ur.Email, "UserManager", "RegisterUser.IsEmailInjectionAttempt");
-                return ServiceResponse.Error("Dangerous email format.");
-            }
-
-            if (!Validator.IsValidEmailFormat(ur.Email))
-            {
-                return ServiceResponse.Error("Invalid email format.");
-            }
-
-            if (Validator.HasReservedLoginName(ur.Email))
-            {
-                _logger.InsertSecurity(ur.Email, "UserManager", "RegisterUser.HasReservedLoginName");
-                return ServiceResponse.Error("Invalid email name.");
-            }
-
-            User dbUser = new User();
-            using (var context = new TreeMonDbContext(this._connectionKey))
-            {
-                dbUser = context.GetAll<User>().FirstOrDefault(uw => (uw.Email?.EqualsIgnoreCase(ur.Email) ??false)|| (uw.Name?.EqualsIgnoreCase(ur.Name)??false));
-            }
-
-            if (dbUser != null && dbUser.Approved == false)
-                return ServiceResponse.Error("The email account you provided is already on registered, but has not been validated. <br />Please check your email account and follow the instructions on the message sent.<br/><br/>Thank you,<br/> ");
-
-
-            else if (dbUser != null)
-                return ServiceResponse.Error("Username or email already exists.");
-
-            string tmpHashPassword = PasswordHash.CreateHash(ur.Password);
-            bool approved = false;
-            //if mobile the email validation isn't going to be sent for them to validate=> approve. So auto approve.
-            if (ur.ClientType == "mobile.app")
-                approved = true;
-
-            User u = new User()
-            {
-                //AccountUUID 
-                Name = ur.Name,
-                Password = PasswordHash.ExtractHashPassword(tmpHashPassword),
-                PasswordAnswer = ur.SecurityAnswer,
-                PasswordQuestion = ur.SecurityQuestion,
-                Active = true,
-                DateCreated = DateTime.UtcNow,
-                Deleted = false,
-                PasswordSalt = PasswordHash.ExtractSalt(tmpHashPassword),
-                PasswordHashIterations = PasswordHash.ExtractIterations(tmpHashPassword),
-                Email = ur.Email,
-                SiteAdmin = false,
-                Approved = approved,
-                Anonymous = false,
-                Banned = false,
-                LockedOut = false,
-                Private = true, // Since its a site admin we'll make it private  appSettings.UserIsPrivate,
-                FailedPasswordAnswerAttemptWindowStart = 0,
-                FailedPasswordAttemptCount = 0,
-                FailedPasswordAnswerAttemptCount = 0,
-                ProviderUserKey = Cipher.RandomString(12),
-                ProviderName = UserFlags.ProviderName.ValidateEmail
-
-            };
-
-            return Insert(u, ipAddress,true);
-        }
 
         //Used to resend validation email
         public async Task<ServiceResult> SendUserEmailValidationAsync(User user, string validationCode, string ipAddress, EmailSettings settings)
@@ -779,10 +940,10 @@ namespace TreeMon.Managers.Membership
 
             #region build email from template
            
-            string validationUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mreg/code/" + validationCode;
-            string oopsUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + validationCode;
-           // string validationUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mreg&code=" + validationCode;
-          //  string oopsUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mdel&code=" + validationCode;
+           // string validationUrl = "https://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mreg/code/" + validationCode;
+           // string oopsUrl = "https://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + validationCode;
+             string validationUrl = "https://" + settings.SiteDomain + "?validate=membership&type=mbr&operation=mreg&code=" + validationCode;
+             string oopsUrl = "https://" + settings.SiteDomain + "?validate=membership&type=mbr&operation=mdel&code=" + validationCode;
 
             DocumentManager dm = new DocumentManager(this._connectionKey, SessionKey);
             ServiceResult docRes = dm.GetTemplate("EmailNewMember");
@@ -803,16 +964,22 @@ namespace TreeMon.Managers.Membership
 
             #endregion
 
-         
-            MailAddress ma = new MailAddress(settings.SiteEmail, settings.SiteDomain);
+            //                From domain must match authenticated domain
+            //HostUser = info@treemon.org
+            // EmailHostUser= info@treemon.org
+
+             // todo add email domain and make it what dev.treemon.org
+            MailAddress ma = new MailAddress(settings.SiteEmail, settings.SiteDomain); 
             MailMessage mail = new MailMessage();
             mail.From = ma;
             mail.ReplyToList.Add(ma);
-            mail.To.Add(user.Email?.Trim());
+           
+            mail.To.Add( user.Email);
             mail.Subject = settings.SiteDomain + " account registration.";
             mail.Body = template;
             mail.IsBodyHtml = true;
             SMTP mailServer = new SMTP(this._connectionKey, settings);
+            _logger.InsertInfo("978", "usermanager.cs", "senduseremailvalidationasync");
             return await mailServer.SendMailAsync(mail);
         }
 
@@ -825,10 +992,10 @@ namespace TreeMon.Managers.Membership
                 return ServiceResponse.Error("The applications site email key is not set.");
 
             #region build email from template 
-            string validationUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mreg/code/" + validationCode;
-            string oopsUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + validationCode;
-           // string validationUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mreg&code=" + validationCode;
-           // string oopsUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mdel&code=" + validationCode;
+            //string validationUrl = "https://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mreg/code/" + validationCode;
+            //string oopsUrl = "https://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + validationCode;
+            string validationUrl = "https://" + settings.SiteDomain + "?validate=membership&type=mbr&operation=mreg&code=" + validationCode;
+            string oopsUrl = "https://" + settings.SiteDomain + "?validate=membership&type=mbr&operation=mdel&code=" + validationCode;
 
             DocumentManager dm = new DocumentManager(this._connectionKey, SessionKey);
             ServiceResult docRes = dm.GetTemplate("EmailNewMember");
@@ -873,15 +1040,17 @@ namespace TreeMon.Managers.Membership
 
             #region build email from template backlog make function
 
-            string validationUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/pwdr/code/" + user.ProviderUserKey;
-            string oopsUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + user.ProviderUserKey;
+            //string validationUrl = "https://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/pwdr/code/" + user.ProviderUserKey;
+            //string oopsUrl = "https://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + user.ProviderUserKey;
+            string validationUrl = "https://" + settings.SiteDomain + "?validate=membership&type=mbr&operation=mreg&code=" + user.ProviderUserKey;
+            string oopsUrl = "https://" + settings.SiteDomain + "?validate=membership&type=mbr&operation=mdel&code=" + user.ProviderUserKey;
 
             DocumentManager dm = new DocumentManager(this._connectionKey,SessionKey);
             ServiceResult docRes = dm.GetTemplate("PasswordResetEmail");
-            if (docRes.Status != "OK")
+            if (docRes.Status != "OK" || docRes.Result == null)
                 return docRes;
 
-            string template = docRes.Result?.ToString();
+            string template = docRes.Result.ToString();
 
             template = template.Replace("[DOMAIN]", settings.SiteDomain);
             template = template.Replace("[USERNAME]", user.Name);
@@ -914,17 +1083,18 @@ namespace TreeMon.Managers.Membership
 
             #region build email from template 
             //users/validate/type/:type/operation/:operation/code/:code
-            string validationUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/pwdr/code/" + user.ProviderUserKey;
-            string oopsUrl = "http://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + user.ProviderUserKey;
-           // string validationUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=pwdr&code=" + user.ProviderUserKey;
-            //string oopsUrl = "http://" + settings.SiteDomain + "/users/validate?type=mbr&operation=mdel&code=" + user.ProviderUserKey;
+            //string validationUrl = "https://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/pwdr/code/" + user.ProviderUserKey;
+            //string oopsUrl = "https://" + settings.SiteDomain + "/membership/validate/type/mbr/operation/mdel/code/" + user.ProviderUserKey;
+            string validationUrl = "https://" + settings.SiteDomain + "?validate=membership&type=mbr&operation=mreg&code=" + user.ProviderUserKey;
+            string oopsUrl = "https://" + settings.SiteDomain + "?validate=membership&type=mbr&operation=mdel&code=" + user.ProviderUserKey;
+
 
             DocumentManager dm = new DocumentManager(this._connectionKey, SessionKey);
             ServiceResult docRes = dm.GetTemplate("UserInfoEmail");
-            if (docRes.Status != "OK")
+            if (docRes.Status != "OK" || docRes.Result == null)
                 return docRes;
 
-            string template = docRes.Result?.ToString();
+            string template = docRes.Result.ToString();
 
             template = template.Replace("[DOMAIN]", settings.SiteDomain);
             template = template.Replace("[USERNAME]", user.Name);
@@ -933,13 +1103,14 @@ namespace TreeMon.Managers.Membership
 
             #endregion
 
-      
-            MailAddress ma = new MailAddress(settings.SiteEmail, settings.SiteDomain);
+            //  Your smtp login email MUST be same as your FROM address.
+
+            MailAddress ma = new MailAddress( settings.SiteEmail, settings.EmailDomain);
             MailMessage mail = new MailMessage();
             mail.From = ma;
             mail.ReplyToList.Add(ma);
             mail.To.Add(user.Email);
-            mail.Subject = settings.SiteDomain + "  Account Information";
+            mail.Subject = settings.SiteDomain + "  Account Information"; 
             mail.Body = template;
             mail.IsBodyHtml = true;
             SMTP mailServer = new SMTP(this._connectionKey, settings);
@@ -955,10 +1126,10 @@ namespace TreeMon.Managers.Membership
                 return ServiceResponse.Error("Error processing request, invalid url.");
             }
 
-            User user = new User();
+            User user;
             try
             {
-                user = this.GetUsers(false).FirstOrDefault(dd => dd.ProviderUserKey == validationCode &&
+                user = this.GetUsers(false)?.FirstOrDefault(dd => dd.ProviderUserKey == validationCode &&
                                                             (dd.ProviderName == UserFlags.ProviderName.ValidateEmail ||
                                                              dd.ProviderName == UserFlags.ProviderName.SendAccountInfo ||
                                                              dd.ProviderName == UserFlags.ProviderName.ForgotPassword));
@@ -991,29 +1162,29 @@ namespace TreeMon.Managers.Membership
                     user.ProviderUserKey = "";
                     //Add user to customer role by default.
                     //
-                    RoleManager rm = new RoleManager(this._connectionKey, user);
-                    Role customer = (Role)rm.GetRole("customer", user.AccountUUID);
+                    //RoleManager rm = new RoleManager(this._connectionKey, user);
+                    //Role customer = (Role)rm.GetRole("customer", user.AccountUUID);
                     
-                    if (customer == null)
-                    {
-                        _logger.InsertError("Failed to get role customer!", "UserManager", "ValidateAsync.mbr_mreg");
-                        return ServiceResponse.Error("Error saving role information. Try again later.");
-                    }
-                    else {
-                        rm.AddUserToRole(customer.UUID, user, requestingUser);  
-                    }
-                    return Update(user);
+                    //if (customer == null)
+                    //{
+                    //    _logger.InsertError("Failed to get role customer!", "UserManager", "ValidateAsync.mbr_mreg");
+                    //    return ServiceResponse.Error("Error saving role information. Try again later.");
+                    //}
+                    //else {
+                    //    rm.AddUserToRole(customer.UUID, user, requestingUser);  
+                    //}
+                    return UpdateUser(user,false);
 
                 case "mbr_mdel": //membership oops/remove
                     user.ProviderName = "";
                     user.ProviderUserKey = "";
                     user.Email = string.Empty;
-                    Update(user);
+                    UpdateUser(user, true);
                     //don't purge or it may break internal references.
                     return this.Delete(user, false);
 
                 case "mbr_pwdr"://password reset
-                    return Update(user);
+                    return UpdateUser(user, false);
                 default:
                     return ServiceResponse.Error("Invalid code.");
             }

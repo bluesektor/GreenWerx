@@ -1,6 +1,6 @@
 ﻿[
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Left",
     "UUParentIDType": "AnatomyTag",
@@ -12,7 +12,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Right",
     "UUParentIDType": "AnatomyTag",
@@ -24,7 +24,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Center",
     "UUParentIDType": "AnatomyTag",
@@ -36,7 +36,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Front",
     "UUParentIDType": "AnatomyTag",
@@ -48,7 +48,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Back",
     "UUParentIDType": "AnatomyTag",
@@ -60,7 +60,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Upper",
     "UUParentIDType": "AnatomyTag",
@@ -72,7 +72,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Lower",
     "UUParentIDType": "AnatomyTag",
@@ -84,7 +84,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Inner",
     "UUParentIDType": "AnatomyTag",
@@ -96,7 +96,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Top",
     "UUParentIDType": "AnatomyTag",
@@ -108,7 +108,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Bottom",
     "UUParentIDType": "AnatomyTag",
@@ -120,7 +120,7 @@
     "DateCreated": "2017-01-23 21:05:43.000"
   },
   {
-    "SyncType": "AnatomyTag",
+    "GuuidType": "AnatomyTag",
     "UUParentID": "0",
     "Name": "Outer",
     "UUParentIDType": "AnatomyTag",

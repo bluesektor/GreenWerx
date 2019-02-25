@@ -1,0 +1,18 @@
+page-event-edit{
+
+    .map-canvas {
+        position: absolute;
+    
+        height: 90%;
+        width: 90%;
+    
+        background-color: transparent;
+    
+        opacity: 0;
+        transition: opacity 150ms ease-in
+      }
+    
+      .show-map {
+        opacity: 1;
+      }
+}

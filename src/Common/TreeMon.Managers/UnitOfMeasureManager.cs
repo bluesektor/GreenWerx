@@ -45,7 +45,7 @@ namespace TreeMon.Managers
                 }
 
                 //get the UnitOfMeasure from the table with all the data so when its updated it still contains the same data.
-                s = (UnitOfMeasure)this.GetBy(s.UUID);
+                s = (UnitOfMeasure)this.Get(s.UUID);
                 if (s == null)
                     return ServiceResponse.Error("Measure not found.");
 
@@ -57,13 +57,14 @@ namespace TreeMon.Managers
             }
         }
 
-        public INode Get( string name)
+        public List<UnitOfMeasure> Search(string name)
                 {
                     if (string.IsNullOrWhiteSpace(name))
-                        return null;
+                        return new List<UnitOfMeasure> ();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<UnitOfMeasure>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<UnitOfMeasure>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
                 }
 
@@ -71,7 +72,7 @@ namespace TreeMon.Managers
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<UnitOfMeasure>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<UnitOfMeasure>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
@@ -79,17 +80,17 @@ namespace TreeMon.Managers
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<UnitOfMeasure>().Where(sw => (sw.AccountUUID == accountUUID) && (sw.Category?.EqualsIgnoreCase(category) ?? false) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<UnitOfMeasure>()?.Where(sw => (sw.AccountUUID == accountUUID) && (sw.Category?.EqualsIgnoreCase(category) ?? false) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
         
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<UnitOfMeasure>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<UnitOfMeasure>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -98,14 +99,12 @@ namespace TreeMon.Managers
             UnitOfMeasure res = null;
 
             if (string.IsNullOrWhiteSpace(uuid) && string.IsNullOrWhiteSpace(name) == false)
-                res = (UnitOfMeasure)this.Get(name);
-            else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
-                res = (UnitOfMeasure)this.GetBy(uuid);
+                res = this.Search(name)?.FirstOrDefault();
             else
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    res = context.GetAll<UnitOfMeasure>().FirstOrDefault(w => w.UUID == uuid || ( w.Name?.EqualsIgnoreCase(name)??false));
+                    res = context.GetAll<UnitOfMeasure>()?.FirstOrDefault(w => w.UUID == uuid || ( w.Name?.EqualsIgnoreCase(name)??false));
                 }
             }
             if (res == null)
@@ -120,7 +119,7 @@ namespace TreeMon.Managers
             return null;
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (n == null)
                 return ServiceResponse.Error("Value is empty.");
@@ -131,13 +130,12 @@ namespace TreeMon.Managers
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    UnitOfMeasure dbU = context.GetAll<UnitOfMeasure>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name)??false) && wu.AccountUUID == s.AccountUUID);
+             
+                    UnitOfMeasure dbU = context.GetAll<UnitOfMeasure>()?.FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name)??false) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("UnitOfMeasure already exists.");
-                }
+             
      
                 if (context.Insert<UnitOfMeasure>(s))
                     return ServiceResponse.OK("",s);

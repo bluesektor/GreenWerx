@@ -37,6 +37,10 @@ namespace TreeMon.Models.App
         public System.DateTime Issued { get; set; }
         public System.DateTime Expires { get;set; }
 
+        //this will be the default account they sign in under
+        [StringLength(32)]
+        public string AccountUUID { get; set; }
+
         public bool IsPersistent { get; set; }
         public string UserData { get; set; }
         [StringLength(32)]
@@ -47,6 +51,41 @@ namespace TreeMon.Models.App
 
         public string Captcha { get; set; }
 
+        public string CartTrackingId { get; set; }
+
+        public string ShoppingCartUUID { get; set; }
+
+        // todo implement this as a security measure to
+        // prevent token jacking. The this uuid is generated
+        // on the client and sent during login and stored in session table.
+        // Use browser info?
+        #region javascript example
+        /**.
+         * NOTE: must be able to replicate this on client and server side.
+         * test: have angular client login and to create a session. copy the
+         * auth token and use postman to send a request. it should get rejected.
+         * try doing this only for phone app clients at first.
+* @function _guid
+* @description Creates GUID for user based on several different browser variables
+* It will never be RFC4122 compliant but it is robust
+* @returns {Number}
+* @private
+*/
+//        var guid = function() {
+
+//    var nav = window.navigator;
+//        var screen = window.screen;
+//        var guid = nav.mimeTypes.length;
+//        guid += nav.userAgent.replace(/\D+/g, '');
+//    guid += nav.plugins.length;
+//    guid += screen.height || '';
+//    guid += screen.width || '';
+//    guid += screen.pixelDepth || '';
+
+//    return guid;
+//};
+    #endregion
+        // public string ClientUUID { get; set; }
         /// <summary>
         /// In minutes
         /// </summary>

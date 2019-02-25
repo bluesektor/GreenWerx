@@ -3,9 +3,19 @@
 
 export class Screen {
 
+    Caption: string;
+
     Command: string;
 
     Field: string;
 
     Value: string;
+
+    Type: string;
+
+    Operator: string;
+
+    Junction: string;
+
+    Order: number;
 }

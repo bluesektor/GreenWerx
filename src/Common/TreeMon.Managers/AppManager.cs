@@ -15,10 +15,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using TreeMon.Data;
+using TreeMon.Data.Helpers;
 using TreeMon.Data.Logging;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers.Finance;
 using TreeMon.Managers.General;
+using TreeMon.Managers.Geo;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Plant;
 using TreeMon.Managers.Store;
@@ -41,8 +43,8 @@ namespace TreeMon.Managers
 {
     public class AppManager : BaseManager
     {
-        private readonly string _sessionKey;
-
+       
+       
         readonly SystemLogger _logger;
 
         //todo check file instead of setting this in appscontroller
@@ -52,13 +54,13 @@ namespace TreeMon.Managers
         /// AppTypes are web, forms, mobil(for mobile phone app, not mobile theme).
         /// </summary>
         /// <param name="appType"></param>
-        public AppManager(string connectionKey, string appType, string sessionKey) : base(connectionKey, sessionKey)
+        public AppManager(string connectionKey, string appType, string sessionKey) //: base(connectionKey, sessionKey)
         {
             this.Installing = false;
             AppType = appType;
             this._connectionKey = connectionKey;
 
-            _sessionKey = sessionKey;
+            this.SessionKey = sessionKey;
             _logger = new SystemLogger(connectionKey);
         }
 
@@ -81,7 +83,6 @@ namespace TreeMon.Managers
             return ServiceResponse.OK("", duplicates);
         }
 
-
         public ServiceResult SearchTables(string[] values)
         {
             if (values == null)
@@ -97,7 +98,6 @@ namespace TreeMon.Managers
 
         private List<Node> SearchTables(string value)
         {
-
             List<Node> res = new List<Node>();
             string pathToSql = Path.Combine(EnvironmentEx.AppDataFolder, "SQLScripts\\SearchAllTables.sql");
             string sql = File.ReadAllText(pathToSql);
@@ -116,10 +116,10 @@ namespace TreeMon.Managers
                     if (reader.FieldCount < 3)
                         fields = reader.FieldCount;
 
-                    string foundRow = "";
+                    StringBuilder foundRow = new StringBuilder();
                     for (int i = 0; i < fields; i++)
                     {
-                        foundRow += reader[i]?.ToString();
+                        foundRow.Append(reader[i]?.ToString());
                     }
 
                     res.Add(new Node()
@@ -127,7 +127,7 @@ namespace TreeMon.Managers
                         UUID = reader["UUID"]?.ToString(),
                         Name = reader["Name"]?.ToString(),
                         AccountUUID = reader["AccountUUID"]?.ToString(),
-                        SafeName = foundRow
+                        SafeName = foundRow.ToString()
                     });
                 }
             }
@@ -178,7 +178,7 @@ namespace TreeMon.Managers
                 }
                 finally
                 {
-                    if (reader != null) { reader.Close(); }
+                    reader.Close(); 
                 }
             }
             return tableData;
@@ -191,7 +191,7 @@ namespace TreeMon.Managers
             //C.delete product
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                List<dynamic> products = context.GetAll<Product>().Where(w => w.CategoryUUID == "PRODUCT.BOOTH")
+                List<dynamic> products = context.GetAll<Product>()?.Where(w => w.CategoryUUID == "PRODUCT.BOOTH")
                     .Select(s => new {
                         Name = s.Name,
                         UUID = s.UUID,
@@ -201,7 +201,7 @@ namespace TreeMon.Managers
 
                 foreach (dynamic p in products)
                 {
-                    dynamic account = context.GetAll<Account>().Where(w => w.Name.ToSafeString(true)?.ToUpper() == p.SafeName).FirstOrDefault();
+                    dynamic account = context.GetAll<Account>()?.FirstOrDefault(w => w.Name.ToSafeString(true)?.ToUpper() == p.SafeName);
 
                     if (account != null)
                     {
@@ -243,7 +243,7 @@ namespace TreeMon.Managers
 
         public ServiceResult DataTypes()
         {
-            User currentUser = this.GetUser(_sessionKey);
+            User currentUser = this.GetUser(this.SessionKey);
             if (currentUser == null || !currentUser.SiteAdmin)
                 return ServiceResponse.Error("Unauthorized access.");
 
@@ -251,17 +251,8 @@ namespace TreeMon.Managers
                 return ServiceResponse.Error("Unauthorized access.");
 
 
-            List<string> dataTypes;
-            using (var context = new TreeMonDbContext(this._connectionKey))
-            {
-                dataTypes = context.GetDataTypes();
-                if (dataTypes == null || dataTypes.Count == 0)
-                {
-                    context.LoadTableNames();
-                    dataTypes = context.GetDataTypes();
-                }
-            }
-
+            List<string> dataTypes = DatabaseEx.GetDataTypes();
+             
             if (dataTypes == null)
                 return ServiceResponse.Error("Unable to load table names. Check the log for details.");
 
@@ -276,12 +267,11 @@ namespace TreeMon.Managers
             return appData.CreateDatabase(appSettings, connectionString);
 
         }
+
         public ServiceResult CreateAccounts(AppInfo appSettings)
         {
             if (string.IsNullOrWhiteSpace(this._connectionKey))
                 return ServiceResponse.Error("Connection key is not set.");
-
-            // this._connectionKey = appSettings.ActiveDbConnectionKey;
 
             string accountUUID = Guid.NewGuid().ToString("N");
 
@@ -303,7 +293,7 @@ namespace TreeMon.Managers
             };
 
             using (var context = new TreeMonDbContext(this._connectionKey))
-            {      // appSettings.ActiveDatabase, "");
+            {      
 
                 if (!context.Insert<Account>(ua))
                     return ServiceResponse.Error("Error inserting account.");
@@ -341,16 +331,16 @@ namespace TreeMon.Managers
                 if (!context.Insert<AppInfo>(appSettings))
                     return ServiceResponse.Error("Error inserting appSettings.");
 
-                //if (!string.IsNullOrWhiteSpace(appSettings.ActiveDatabase))
-                //    appSettings.ActiveDbPassword = Cipher.Crypt(appSettings.AppKey, appSettings.ActiveDbPassword, true);
+                ////if (!string.IsNullOrWhiteSpace(appSettings.ActiveDatabase))
+                ////    appSettings.ActiveDbPassword = Cipher.Crypt(appSettings.AppKey, appSettings.ActiveDbPassword, true);
 
-                // appSettings.RunInstaller = false;//if you don't set this the client will keep redirecting to install page.
+                //// appSettings.RunInstaller = false;//if you don't set this the client will keep redirecting to install page.
 
-                //if (!appData.Insert<AppInfo>(appSettings))
-                //    return ServiceResponse.Error("Error inserting application info.");
+                ////if (!appData.Insert<AppInfo>(appSettings))
+                ////    return ServiceResponse.Error("Error inserting application info.");
 
-                //if (PasswordHash.CheckStrength(appSettings.UserPassword) < PasswordHash.PasswordScore.Strong)
-                //    return ServiceResponse.Error("Your password is weak. Try again.");
+                ////if (PasswordHash.CheckStrength(appSettings.UserPassword) < PasswordHash.PasswordScore.Strong)
+                ////    return ServiceResponse.Error("Your password is weak. Try again.");
 
                 string tmpHashPassword = PasswordHash.CreateHash(appSettings.UserPassword);
                 //create user
@@ -469,7 +459,7 @@ namespace TreeMon.Managers
             //I.When installing website add location(so we can add items to inventory).the location will be the created account
             //a.name = domain user typed.  type = domain, default = true
             //b.to add current web site.name is domain name, custom type = domain, check box Set as default for current site.
-            LocationManager lm = new LocationManager(this._connectionKey, "");// appSettings.ActiveDatabase, "");
+            LocationManager lm = new LocationManager(this._connectionKey, ""); 
             lm.Insert(new Models.Geo.Location()
             {
                 AccountUUID = ua.AccountUUID,
@@ -563,7 +553,6 @@ namespace TreeMon.Managers
             string pathToCommands = Path.Combine(directory, "Install\\install.json");
             if (File.Exists(pathToCommands))
             {
-                // File.Move(pathToCommands, pathToCommands + ".bak");
                 File.Delete(pathToCommands);
             }
             //We need to make sure the file is gone before moving on because
@@ -591,7 +580,7 @@ namespace TreeMon.Managers
 
         public ServiceResult TableNames()
         {
-            User currentUser = this.GetUser(_sessionKey);
+            User currentUser = this.GetUser(SessionKey);
             if (currentUser == null || !currentUser.SiteAdmin)
                 return ServiceResponse.Error("Unauthorized access.");
 
@@ -599,11 +588,7 @@ namespace TreeMon.Managers
                 return ServiceResponse.Error("Unauthorized access.");
 
 
-            List<string> tables;
-            using (var context = new TreeMonDbContext(this._connectionKey))
-            {
-                tables = context.GetTableNames();
-            }
+            List<string> tables = DatabaseEx.GetTableNames();
             return ServiceResponse.OK("", tables);
         }
         public string AppType { get; set; }
@@ -645,90 +630,72 @@ namespace TreeMon.Managers
         {
             ServiceResult res = new ServiceResult();
             res.Code = 200;
-            List<string> tables = new List<string>();
-            using (var context = new TreeMonDbContext(this._connectionKey))
-            {
-                //get table names from context
-                //loop through table names add .json and try to parse the objects
-                context.LoadTableNames();
-                tables = context.GetTableNames();
-            }
-
+            List<string> tables = DatabaseEx.GetTableNames();
+            
+            //loop through table names add .json and try to parse the objects
             foreach (string table in tables)
             {
-
-
-                // bool useDefaultAccount = false;
-
-
-                //if (table.Contains("Currency"))
-                //    useDefaultAccount = true; 
-
                 string pathToFile = Path.Combine(pathToFolder, table + ".json");
                 if (!File.Exists(pathToFile))
                     continue;
 
-                string type;
-                using (var context = new TreeMonDbContext(this._connectionKey))
-                {
-                    type = context.GetTableType(table);
+                string type = DatabaseEx.GetTableType(table);
 
-                }
                 if (string.IsNullOrWhiteSpace(type))
                     continue;
 
                 this.ImportFile(type, pathToFile, Path.GetFileName(pathToFile), "install.seed");
 
-                //object tableObject = context.GetTableObject(table);
+                ////object tableObject = context.GetTableObject(table);
 
-                //if (tableObject == null)
-                //    continue;
-                //string sqlSelect = "";
-                //string sqlInsert = "";
-                //string seedData = "";
-                //int index = 0;
-                //try
-                //{
-                //    seedData = File.ReadAllText(pathToFile);
+                ////if (tableObject == null)
+                ////    continue;
+                ////string sqlSelect = "";
+                ////string sqlInsert = "";
+                ////string seedData = "";
+                ////int index = 0;
+                ////try
+                ////{
+                ////    seedData = File.ReadAllText(pathToFile);
 
-                //    List<dynamic> dataItems = JsonConvert.DeserializeObject<List<dynamic>>(seedData);
+                ////    List<dynamic> dataItems = JsonConvert.DeserializeObject<List<dynamic>>(seedData);
 
-                //    foreach (dynamic dataItem in dataItems)
-                //    {
-                //        index++;
+                ////    foreach (dynamic dataItem in dataItems)
+                ////    {
+                ////        index++;
 
-                //        if (useDefaultAccount)
-                //            dataItem.AccountUUID = SystemFlag.Default.Account;
-                //        else
-                //            dataItem.AccountUUID = accountUUID;
+                ////        if (useDefaultAccount)
+                ////            dataItem.AccountUUID = SystemFlag.Default.Account;
+                ////        else
+                ////            dataItem.AccountUUID = accountUUID;
 
-                //        dataItem.DateCreated = DateTime.UtcNow;
-                //        //When importing the uuid/id can change per account, user etc., so we check the SyncKey since this should NOT change.
-                //        // depricated.. OR Name='" + dataItem.Name?.ToString()?.Replace("'", "''") 
-                //        //
-                //        sqlSelect = GenerateSqlStatement("select", dataItem, "WHERE SyncKey='" + dataItem.SyncKey + "' AND AccountUUID='" + dataItem.AccountUUID + "'");
-                //        sqlSelect = sqlSelect.Replace("SELECT *", "SELECT COUNT(*)");
+                ////        dataItem.DateCreated = DateTime.UtcNow;
+                ////        //When importing the uuid/id can change per account, user etc., so we check the GUUID since this should NOT change.
+                ////        // depricated.. OR Name='" + dataItem.Name?.ToString()?.Replace("'", "''") 
+                ////        //
+                ////        sqlSelect = GenerateSqlStatement("select", dataItem, "WHERE GUUID='" + dataItem.GUUID + "' AND AccountUUID='" + dataItem.AccountUUID + "'");
+                ////        sqlSelect = sqlSelect.Replace("SELECT *", "SELECT COUNT(*)");
 
-                //        object count = context.ExecuteScalar(sqlSelect, null);
-                //        if (count != null && ((int)count) > 0)
-                //            continue;//do not insert if the id is already there.
+                ////        object count = context.ExecuteScalar(sqlSelect, null);
+                ////        if (count != null && ((int)count) > 0)
+                ////            continue;//do not insert if the id is already there.
 
-                //        dataItem.RoleWeight = 1;
-                //        dataItem.RoleOperation = ">=";
+                ////        dataItem.RoleWeight = 1;
+                ////        dataItem.RoleOperation = ">=";
 
-                //        sqlInsert = GenerateSqlStatement("insert", dataItem, "");
-                //        if (context.ExecuteNonQuery(sqlInsert, null) == 0)
-                //            res.Message += "insert failed for: " + dataItem.UUID + "<br/>";
+                ////        sqlInsert = GenerateSqlStatement("insert", dataItem, "");
+                ////        if (context.ExecuteNonQuery(sqlInsert, null) == 0)
+                ////            res.Message += "insert failed for: " + dataItem.UUID + "<br/>";
 
-                //    }
-                //}
-                //catch (Exception ex)
-                //{
-                //    _logger.InsertError(ex.Message, "AppManager", "SeedDatabase.tableObject:" + tableObject);
-                //    res.Code = 500;
-                //    res.Message += ex.Message + index.ToString() + "<br/>";
-                //    continue;
-                //}
+                ////    }
+                ////}
+                ////catch (Exception ex)
+                ////{
+                ////    _logger.InsertError(ex.Message, "AppManager", "SeedDatabase.tableObject:" + tableObject);
+                ////    res.Code = 500;
+                ////    res.Message += ex.Message + index.ToString() + "<br/>";
+                ////    continue;
+                ////}
             }
             return res;
         }
@@ -747,27 +714,27 @@ namespace TreeMon.Managers
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-               IEnumerable<Strain> strains =  context.GetAll<Strain>().Where(w => w.AccountUUID == SystemFlag.Default.Account);
+               IEnumerable<Strain> strains =  context.GetAll<Strain>()?.Where(w => w.AccountUUID == SystemFlag.Default.Account);
                 foreach (Strain s in strains)
                 {
                     s.AccountUUID = accountUUID;
                     context.Update<Strain>(s);
                 }
-                IEnumerable<Category> cats = context.GetAll<Category>().Where(w => w.AccountUUID == SystemFlag.Default.Account);
+                IEnumerable<Category> cats = context.GetAll<Category>()?.Where(w => w.AccountUUID == SystemFlag.Default.Account);
                 foreach (Category c in cats)
                 {
                     c.AccountUUID = accountUUID;
                     context.Update<Category>(c);
                 }
 
-                IEnumerable<Product> prods = context.GetAll<Product>().Where(w => w.AccountUUID == SystemFlag.Default.Account);
+                IEnumerable<Product> prods = context.GetAll<Product>()?.Where(w => w.AccountUUID == SystemFlag.Default.Account);
                 foreach (Product p in prods)
                 {
                     p.AccountUUID = accountUUID;
                     context.Update<Product>(p);
                 }
 
-                IEnumerable<UnitOfMeasure> uoms = context.GetAll<UnitOfMeasure>().Where(w => w.AccountUUID == SystemFlag.Default.Account);
+                IEnumerable<UnitOfMeasure> uoms = context.GetAll<UnitOfMeasure>()?.Where(w => w.AccountUUID == SystemFlag.Default.Account);
                 foreach (UnitOfMeasure u in uoms)
                 {
                    u.AccountUUID = accountUUID;
@@ -843,21 +810,16 @@ namespace TreeMon.Managers
                 accountUUID = currentUser.AccountUUID;
             }
 
-            string tableName;
-            object tableObject;
-            using (var tmpcontext = new TreeMonDbContext(this._connectionKey))
-            {
-                tableName = tmpcontext.GetTableName(type);
+            string tableName = DatabaseEx.GetTableName(type);
+            if (string.IsNullOrWhiteSpace(tableName))
+                return ServiceResponse.Error("Could not find the table name for the type:" + type);
 
-                if (string.IsNullOrWhiteSpace(tableName))
-                    return ServiceResponse.Error("Could not find the table name for the type:" + type);
-
-                 tableObject = tmpcontext.GetTableObject(tableName);
-            }
+            object tableObject = DatabaseEx.GetTableObject(tableName);
+            
             if (tableObject == null)
                 return ServiceResponse.Error("Could not find the table for the table name:" + tableName);
 
-            string msg = "";
+            StringBuilder msg = new StringBuilder();
 
             switch (tableObject.GetType().Name.ToUpper())
             {
@@ -870,14 +832,14 @@ namespace TreeMon.Managers
                         foreach (Account account in accounts)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<Account>().FirstOrDefault(x => x.UUID == account.SyncKey  ) == null 
-                                &&  string.IsNullOrWhiteSpace(account.SyncKey) == false)
-                                account.UUID = account.SyncKey;
+                            if (context.GetAll<Account>()?.FirstOrDefault(x => x.UUID == account.GUUID  ) == null 
+                                &&  string.IsNullOrWhiteSpace(account.GUUID) == false)
+                                account.UUID = account.GUUID;
 
                             //account is different because it's the tabe record that splits the rest of the records into accounts so it's all global in accounts.
-                            if (context.GetAll<Account>().FirstOrDefault(x =>  x.Name.EqualsIgnoreCase(account.Name)   ) != null  )
+                            if (context.GetAll<Account>()?.FirstOrDefault(x =>  x.Name.EqualsIgnoreCase(account.Name)   ) != null  )
                             {
-                                msg += "Account already exists:" + account.Name + Environment.NewLine;
+                                msg.AppendLine( "Account already exists:" + account.Name );
                                 continue;
                             }
                             account.CreatedBy = createdBy;
@@ -917,24 +879,24 @@ namespace TreeMon.Managers
                         foreach (Anatomy anatomy in anatomies)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<Anatomy>().FirstOrDefault(x => x.UUID == anatomy.SyncKey ) == null && string.IsNullOrWhiteSpace(anatomy.SyncKey) == false)
-                                anatomy.UUID = anatomy.SyncKey;
+                            if (context.GetAll<Anatomy>()?.FirstOrDefault(x => x.UUID == anatomy.GUUID ) == null && string.IsNullOrWhiteSpace(anatomy.GUUID) == false)
+                                anatomy.UUID = anatomy.GUUID;
 
                             if (validate)
                             {
-                                if (context.GetAll<Anatomy>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(anatomy.Name) && x.AccountUUID == accountUUID) != null)
+                                if (context.GetAll<Anatomy>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(anatomy.Name) && x.AccountUUID == accountUUID) != null)
                                 {
-                                    msg += "Anatomy already exists:" + anatomy.Name + Environment.NewLine;
+                                    msg.AppendLine( "Anatomy already exists:" + anatomy.Name );
                                     continue;
                                 }
                             }
-                            else if (validateGlobally)
+                            else if (validateGlobally &&
+                                    context.GetAll<Anatomy>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(anatomy.Name)) != null)
                             {
-                                if (context.GetAll<Anatomy>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(anatomy.Name)) != null)
-                                {
-                                    msg += "Anatomy already exists globally:" + anatomy.Name + Environment.NewLine;
+                              
+                                    msg.AppendLine( "Anatomy already exists globally:" + anatomy.Name );
                                     continue;
-                                }
+                              
                             }
                             anatomy.CreatedBy = createdBy;
                             if (string.IsNullOrWhiteSpace(anatomy.AccountUUID))
@@ -972,23 +934,23 @@ namespace TreeMon.Managers
                         foreach (AnatomyTag AnatomyTag in anatomyTags)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<AnatomyTag>().FirstOrDefault(x => x.UUID == AnatomyTag.SyncKey  ) == null
-                                 && string.IsNullOrWhiteSpace(AnatomyTag.SyncKey) == false)
-                                AnatomyTag.UUID = AnatomyTag.SyncKey;
+                            if (context.GetAll<AnatomyTag>()?.FirstOrDefault(x => x.UUID == AnatomyTag.GUUID  ) == null
+                                 && string.IsNullOrWhiteSpace(AnatomyTag.GUUID) == false)
+                                AnatomyTag.UUID = AnatomyTag.GUUID;
 
                             if (validate)
                             {
-                                if (context.GetAll<AnatomyTag>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(AnatomyTag.Name) && x.AccountUUID == accountUUID) != null)
+                                if (context.GetAll<AnatomyTag>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(AnatomyTag.Name) && x.AccountUUID == accountUUID) != null)
                                 {
-                                    msg += "AnatomyTag already exists:" + AnatomyTag.Name + Environment.NewLine;
+                                    msg.AppendLine( "AnatomyTag already exists:" + AnatomyTag.Name );
                                     continue;
                                 }
                             }
                             else if (validateGlobally)
                             {
-                                if (context.GetAll<AnatomyTag>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(AnatomyTag.Name)) != null)
+                                if (context.GetAll<AnatomyTag>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(AnatomyTag.Name)) != null)
                                 {
-                                    msg += "AnatomyTag already exists globally:" + AnatomyTag.Name + Environment.NewLine;
+                                    msg.AppendLine( "AnatomyTag already exists globally:" + AnatomyTag.Name );
                                     continue;
                                 }
                             }
@@ -1028,23 +990,23 @@ namespace TreeMon.Managers
                         foreach (Category category in categories)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<Category>().FirstOrDefault(x => x.UUID == category.SyncKey  ) == null
-                                 && string.IsNullOrWhiteSpace(category.SyncKey) == false)
-                                category.UUID = category.SyncKey;
+                            if (context.GetAll<Category>()?.FirstOrDefault(x => x.UUID == category.GUUID  ) == null
+                                 && string.IsNullOrWhiteSpace(category.GUUID) == false)
+                                category.UUID = category.GUUID;
 
                             if (validate)
                             {
-                                if (context.GetAll<Category>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(category.Name) && x.AccountUUID == accountUUID) != null)
+                                if (context.GetAll<Category>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(category.Name) && x.AccountUUID == accountUUID) != null)
                                 {
-                                    msg += "Category already exists:" + category.Name + Environment.NewLine;
+                                    msg.AppendLine( "Category already exists:" + category.Name );
                                     continue;
                                 }
                             }
                             else if (validateGlobally)
                             {
-                                if (context.GetAll<Category>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(category.Name)) != null)
+                                if (context.GetAll<Category>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(category.Name)) != null)
                                 {
-                                    msg += "Category already exists globally:" + category.Name + Environment.NewLine;
+                                    msg.AppendLine( "Category already exists globally:" + category.Name );
                                     continue;
                                 }
                             }
@@ -1083,26 +1045,22 @@ namespace TreeMon.Managers
                         foreach (Currency currency in currencies)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<Currency>().FirstOrDefault(x => x.UUID == currency.SyncKey ) == null
-                                   && string.IsNullOrWhiteSpace(currency.SyncKey) == false)
-                                currency.UUID = currency.SyncKey;
+                            if (context.GetAll<Currency>()?.FirstOrDefault(x => x.UUID == currency.GUUID ) == null
+                                   && string.IsNullOrWhiteSpace(currency.GUUID) == false)
+                                currency.UUID = currency.GUUID;
 
 
-                            if (validate)
+                            if ( validate &&
+                                 context.GetAll<Currency>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(currency.Name) && x.AccountUUID == accountUUID) != null)
                             {
-                                if (context.GetAll<Currency>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(currency.Name) && x.AccountUUID == accountUUID) != null)
-                                {
-                                    msg += "Currency already exists:" + currency.Name + Environment.NewLine;
+                                    msg.AppendLine( "Currency already exists:" + currency.Name );
                                     continue;
-                                }
                             }
-                            else if (validateGlobally)
+                            else if (validateGlobally && 
+                                    context.GetAll<Currency>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(currency.Name)) != null)
                             {
-                                if (context.GetAll<Currency>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(currency.Name)) != null)
-                                {
-                                    msg += "Currency already exists globally:" + currency.Name + Environment.NewLine;
-                                    continue;
-                                }
+                                msg.AppendLine( "Currency already exists globally:" + currency.Name );
+                                continue;
                             }
 
                          
@@ -1142,24 +1100,24 @@ namespace TreeMon.Managers
                         foreach (Location loc in locations)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<Location>().FirstOrDefault(x => x.UUID == loc.SyncKey  ) == null
-                                  && string.IsNullOrWhiteSpace(loc.SyncKey) == false)
-                                loc.UUID = loc.SyncKey;
+                            if (context.GetAll<Location>()?.FirstOrDefault(x => x.UUID == loc.GUUID  ) == null
+                                  && string.IsNullOrWhiteSpace(loc.GUUID) == false)
+                                loc.UUID = loc.GUUID;
 
 
                             if (validate)
                             {
-                                if (context.GetAll<Location>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(loc.Name) && x.AccountUUID == accountUUID) != null)
+                                if (context.GetAll<Location>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(loc.Name) && x.AccountUUID == accountUUID) != null)
                                 {
-                                    msg += "Location already exists:" + loc.Name + Environment.NewLine;
+                                    msg.AppendLine("Location already exists:" + loc.Name );
                                     continue;
                                 }
                             }
                             else if (validateGlobally)
                             {
-                                if (context.GetAll<Location>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(loc.Name)) != null)
+                                if (context.GetAll<Location>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(loc.Name)) != null)
                                 {
-                                    msg += "Location already exists globally:" + loc.Name + Environment.NewLine;
+                                    msg.AppendLine( "Location already exists globally:" + loc.Name );
                                     continue;
                                 }
                             }
@@ -1199,22 +1157,22 @@ namespace TreeMon.Managers
                         foreach (Product Product in products)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<Product>().FirstOrDefault(x => x.UUID == Product.SyncKey) == null
-                                  && string.IsNullOrWhiteSpace(Product.SyncKey) == false)
-                                Product.UUID = Product.SyncKey;
+                            if (context.GetAll<Product>()?.FirstOrDefault(x => x.UUID == Product.GUUID) == null
+                                  && string.IsNullOrWhiteSpace(Product.GUUID) == false)
+                                Product.UUID = Product.GUUID;
 
                             if (validate)
                             {
-                                if (context.GetAll<Product>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(Product.Name) && x.AccountUUID == accountUUID) != null)
+                                if (context.GetAll<Product>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(Product.Name) && x.AccountUUID == accountUUID) != null)
                                 {
-                                    msg += "Product already exists:" + Product.Name + Environment.NewLine;
+                                    msg.AppendLine( "Product already exists:" + Product.Name );
                                     continue;
                                 }
                             }
                             else if (validateGlobally &&
-                                    context.GetAll<Product>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(Product.Name)) != null)
+                                    context.GetAll<Product>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(Product.Name)) != null)
                             {
-                                msg += "Product already exists globally:" + Product.Name + Environment.NewLine;
+                                msg.AppendLine( "Product already exists globally:" + Product.Name );
                                 continue;
                             }
 
@@ -1256,23 +1214,23 @@ namespace TreeMon.Managers
                         foreach (Strain Strain in Strains)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<Strain>().FirstOrDefault(x => x.UUID == Strain.SyncKey ) == null
-                                  && string.IsNullOrWhiteSpace(Strain.SyncKey) == false)
-                                Strain.UUID = Strain.SyncKey;
+                            if (context.GetAll<Strain>()?.FirstOrDefault(x => x.UUID == Strain.GUUID ) == null
+                                  && string.IsNullOrWhiteSpace(Strain.GUUID) == false)
+                                Strain.UUID = Strain.GUUID;
 
                             if (validate)
                             {
-                                if (context.GetAll<Strain>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(Strain.Name) && x.AccountUUID == accountUUID) != null)
+                                if (context.GetAll<Strain>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(Strain.Name) && x.AccountUUID == accountUUID) != null)
                                 {
-                                    msg += "Strain already exists:" + Strain.Name + Environment.NewLine;
+                                    msg.AppendLine( "Strain already exists:" + Strain.Name );
                                     continue;
                                 }
                             }
                             else if (validateGlobally)
                             {
-                                if (context.GetAll<Strain>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(Strain.Name)) != null)
+                                if (context.GetAll<Strain>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(Strain.Name)) != null)
                                 {
-                                    msg += "Strain already exists globally:" + Strain.Name + Environment.NewLine;
+                                    msg.AppendLine( "Strain already exists globally:" + Strain.Name );
                                     continue;
                                 }
                             }
@@ -1314,23 +1272,23 @@ namespace TreeMon.Managers
                         foreach (UnitOfMeasure uom in unitsOfMeasure)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<UnitOfMeasure>().FirstOrDefault(x => x.UUID == uom.SyncKey ) == null
-                                  && string.IsNullOrWhiteSpace(uom.SyncKey) == false)
-                                uom.UUID = uom.SyncKey;
+                            if (context.GetAll<UnitOfMeasure>()?.FirstOrDefault(x => x.UUID == uom.GUUID ) == null
+                                  && string.IsNullOrWhiteSpace(uom.GUUID) == false)
+                                uom.UUID = uom.GUUID;
 
                             if (validate)
                             {
-                                if (context.GetAll<UnitOfMeasure>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(uom.Name) && x.AccountUUID == accountUUID) != null)
+                                if (context.GetAll<UnitOfMeasure>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(uom.Name) && x.AccountUUID == accountUUID) != null)
                                 {
-                                    msg += "Unit of measure already exists:" + uom.Name + Environment.NewLine;
+                                    msg.AppendLine( "Unit of measure already exists:" + uom.Name );
                                     continue;
                                 }
                             }
                             else if (validateGlobally)
                             {
-                                if (context.GetAll<UnitOfMeasure>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(uom.Name)) != null)
+                                if (context.GetAll<UnitOfMeasure>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(uom.Name)) != null)
                                 {
-                                    msg += "Unit of measure already exists globally:" + uom.Name + Environment.NewLine;
+                                    msg.AppendLine( "Unit of measure already exists globally:" + uom.Name );
                                     continue;
                                 }
                             }
@@ -1369,21 +1327,21 @@ namespace TreeMon.Managers
                         foreach (Vendor Vendor in Vendors)
                         {
                             //If the sync key doesn't exist as uuid then it hasn't been imported during the install.
-                            if (context.GetAll<Vendor>().FirstOrDefault(x => x.UUID == Vendor.SyncKey ) == null
-                                  && string.IsNullOrWhiteSpace(Vendor.SyncKey) == false)
-                                Vendor.UUID = Vendor.SyncKey;
+                            if (context.GetAll<Vendor>()?.FirstOrDefault(x => x.UUID == Vendor.GUUID ) == null
+                                  && string.IsNullOrWhiteSpace(Vendor.GUUID) == false)
+                                Vendor.UUID = Vendor.GUUID;
 
                             if (validate)
                             {
-                                if (context.GetAll<Vendor>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(Vendor.Name) && x.AccountUUID == accountUUID) != null)
+                                if (context.GetAll<Vendor>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(Vendor.Name) && x.AccountUUID == accountUUID) != null)
                                 {
-                                   msg += "Vendor already exists:" + Vendor.Name + Environment.NewLine;
+                                   msg.AppendLine( "Vendor already exists:" + Vendor.Name );
                                     continue;
                                 }
                             }
-                            else if (validateGlobally && context.GetAll<Vendor>().FirstOrDefault(x => x.Name.EqualsIgnoreCase(Vendor.Name)) != null)
+                            else if (validateGlobally && context.GetAll<Vendor>()?.FirstOrDefault(x => x.Name.EqualsIgnoreCase(Vendor.Name)) != null)
                             {
-                                msg += "Vendor already exists globally:" + Vendor.Name + Environment.NewLine;
+                                msg.AppendLine( "Vendor already exists globally:" + Vendor.Name );
                                     continue;
                             }
                             
@@ -1415,7 +1373,7 @@ namespace TreeMon.Managers
                 default:
                     return ServiceResponse.Error("Import for type:" + type + " not supported yet.");
             }
-            return ServiceResponse.OK(msg);
+            return ServiceResponse.OK(msg.ToString());
         }
 
 
@@ -1424,7 +1382,7 @@ namespace TreeMon.Managers
 
             string fileName = type + ".json";
            
-            object tableObject = new TreeMonDbContext(this._connectionKey).GetTableObject(type);
+            object tableObject = DatabaseEx.GetTableObject(type);
 
             if (tableObject == null)
                 return ServiceResponse.Error("Table lookup for file wasn't found.");
@@ -1457,7 +1415,7 @@ namespace TreeMon.Managers
                 {
                     case "ACCOUNT":
                         AccountManager accountManager = new AccountManager(this._connectionKey, SessionKey);
-                        Account a = (Account)accountManager.GetBy(n.UUID);
+                        Account a = (Account)accountManager.Get(n.UUID);
                         if (a == null)
                             return ServiceResponse.Error("Account was not found.");
 
@@ -1465,13 +1423,13 @@ namespace TreeMon.Managers
                         a.CreatedBy = SystemFlag.Default.Account;
                         a.DateCreated = DateTime.UtcNow;
                         a.AccountUUID = user.AccountUUID;
-                        res = accountManager.Insert(a, false);
+                        res = accountManager.Insert(a);
 
                     break;
 
                     case "ANATOMY":
                         AnatomyManager AnatomyManager = new AnatomyManager(this._connectionKey, SessionKey);
-                        Anatomy anatomy = (Anatomy) AnatomyManager.GetBy(n.UUID);
+                        Anatomy anatomy = (Anatomy) AnatomyManager.Get(n.UUID);
                         if (anatomy == null)
                             return ServiceResponse.Error("Anatomy was not found.");
 
@@ -1479,7 +1437,7 @@ namespace TreeMon.Managers
                         anatomy.CreatedBy = SystemFlag.Default.Account;
                         anatomy.DateCreated = DateTime.UtcNow;
                         anatomy.AccountUUID = user.AccountUUID;
-                        res = AnatomyManager.Insert(anatomy, false);
+                        res = AnatomyManager.Insert(anatomy);
                         break;
 
                     case "AnatomyTag":
@@ -1491,22 +1449,22 @@ namespace TreeMon.Managers
                         AnatomyTag.CreatedBy = SystemFlag.Default.Account;
                         AnatomyTag.DateCreated = DateTime.UtcNow;
                         AnatomyTag.AccountUUID = user.AccountUUID;
-                        res = AnatomyTagManager.Insert(AnatomyTag, false);
+                        res = AnatomyTagManager.Insert(AnatomyTag);
                         break;
                     case "CATEGORY":
                         CategoryManager categoryManager = new CategoryManager(this._connectionKey, SessionKey);
-                        Category category = (Category)categoryManager.GetBy(n.UUID);
+                        Category category = (Category)categoryManager.Get(n.UUID);
                         if (category == null)
                             return ServiceResponse.Error("Category was not found.");
                         category.UUID = Guid.NewGuid().ToString("N");
                         category.CreatedBy = SystemFlag.Default.Account;
                         category.DateCreated = DateTime.UtcNow;
                         category.AccountUUID = user.AccountUUID;
-                        res = categoryManager.Insert(category, false);
+                        res = categoryManager.Insert(category);
                         break;
                     case "CURRENCY":
                         CurrencyManager financeManager = new CurrencyManager(this._connectionKey, SessionKey);
-                        Currency currency = (Currency)financeManager.GetBy(n.UUID);
+                        Currency currency = (Currency)financeManager.Get(n.UUID);
                         if (currency == null)
                             return ServiceResponse.Error("Currency was not found.");
 
@@ -1514,22 +1472,22 @@ namespace TreeMon.Managers
                         currency.CreatedBy = SystemFlag.Default.Account;
                         currency.DateCreated = DateTime.UtcNow;
                         currency.AccountUUID = user.AccountUUID;
-                        res = financeManager.Insert(currency, false);
+                        res = financeManager.Insert(currency);
                         break;
                     case "PRODUCT":
                         ProductManager productManager = new ProductManager(this._connectionKey, SessionKey);
-                        Product product = (Product)productManager.GetBy(n.UUID);
+                        Product product = (Product)productManager.Get(n.UUID);
                         if (product == null)
                             return ServiceResponse.Error("Product was not found.");
                         product.UUID = Guid.NewGuid().ToString("N");
                         product.CreatedBy = SystemFlag.Default.Account;
                         product.DateCreated = DateTime.UtcNow;
                         product.AccountUUID = user.AccountUUID;
-                        res = productManager.Insert(product, false);
+                        res = productManager.Insert(product);
                         break;
                     case "STRAIN":
                         StrainManager strainManager = new StrainManager(this._connectionKey, SessionKey);
-                        Strain strain = (Strain)strainManager.GetBy(n.UUID);
+                        Strain strain = (Strain)strainManager.Get(n.UUID);
                         if (strain == null)
                             return ServiceResponse.Error("Product was not found.");
 
@@ -1537,18 +1495,18 @@ namespace TreeMon.Managers
                         strain.CreatedBy = SystemFlag.Default.Account;
                         strain.DateCreated = DateTime.UtcNow;
                         strain.AccountUUID = user.AccountUUID;
-                        res = strainManager.Insert(strain, false);
+                        res = strainManager.Insert(strain);
                         break;
                     case "VENDOR":
                         VendorManager VendorManager = new VendorManager(this._connectionKey, SessionKey);
-                        Vendor Vendor = (Vendor)VendorManager.GetBy(n.UUID);
+                        Vendor Vendor = (Vendor)VendorManager.Get(n.UUID);
                         if (Vendor == null)
                             return ServiceResponse.Error("Product was not found.");
                         Vendor.UUID = Guid.NewGuid().ToString("N");
                         Vendor.CreatedBy = SystemFlag.Default.Account;
                         Vendor.DateCreated = DateTime.UtcNow;
                         Vendor.AccountUUID = user.AccountUUID;
-                        res = VendorManager.Insert(Vendor,false);
+                        res = VendorManager.Insert(Vendor);
                         break;
                     default:
                         return ServiceResponse.Error("Invalid type.");
@@ -1597,7 +1555,7 @@ namespace TreeMon.Managers
             if (string.IsNullOrWhiteSpace(command))
                 return command;
 
-            string tableName = new TreeMonDbContext(this._connectionKey).GetTableName((string)dataObject.UUIDType);
+            string tableName = DatabaseEx.GetTableName((string)dataObject.UUIDType);
 
             string sqlCommand = command;
             switch (command.ToUpper())
@@ -1710,7 +1668,7 @@ namespace TreeMon.Managers
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                app = context.GetAll<AppInfo>().FirstOrDefault(aw => aw.UUParentID == accountUUID && aw.UUParentIDType == "account");
+                app = context.GetAll<AppInfo>()?.FirstOrDefault(aw => aw.UUParentID == accountUUID && aw.UUParentIDType == "account");
 
                 if (app == null)
                     return null;
@@ -1719,7 +1677,7 @@ namespace TreeMon.Managers
                     return null;
 
 
-                app.Settings = context.GetAll<Setting>().Where(sw =>sw.AccountUUID == accountUUID && ( sw.AppType?.EqualsIgnoreCase(AppType) ??false ) ).ToList();
+                app.Settings = context.GetAll<Setting>()?.Where(sw =>sw.AccountUUID == accountUUID && ( sw.AppType?.EqualsIgnoreCase(AppType) ??false ) ).ToList();
             }
             return app;
         }
@@ -1732,12 +1690,13 @@ namespace TreeMon.Managers
         /// <returns></returns>
         public List<Node> GetDefaultData(string type)
         {
-
             List<Node> res = new List<Node>();
+
+            string tableName = DatabaseEx.GetTableName(type);
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-               string tableName =  context.GetTableName(type);
+              
 
                 if (string.IsNullOrWhiteSpace(tableName))
                     return res;
@@ -1787,7 +1746,7 @@ namespace TreeMon.Managers
                 }
                 finally
                 {
-                    if (reader != null) { reader.Close(); }
+                    reader.Close();  
                 }
                 return res;
             }
@@ -1798,6 +1757,14 @@ namespace TreeMon.Managers
         {
             if (n == null ||   string.IsNullOrWhiteSpace(n.Name))
                 return ServiceResponse.Error("Setting is empty or invalid.");
+
+            if (_requestingUser == null)
+            {
+                _requestingUser = GetUser(this.SessionKey);
+
+                if (_requestingUser == null)
+                    return ServiceResponse.Error("You must be logged in for this functionality.");
+            }
 
             n.Initialize(this._requestingUser.UUID, this._requestingUser.AccountUUID, this._requestingUser.RoleWeight);
 
@@ -1823,6 +1790,7 @@ namespace TreeMon.Managers
 
                 setting.Value = Cipher.Crypt(encryptionKey, setting.Value, true);
             }
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (context.Insert<Setting>(setting))
@@ -1836,7 +1804,7 @@ namespace TreeMon.Managers
             Setting s;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                s = context.GetAll<Setting>().FirstOrDefault(sw => sw.UUID == uuid);
+                s = context.GetAll<Setting>()?.FirstOrDefault(sw => sw.UUID == uuid);
 
 
                 if (s == null)
@@ -1857,7 +1825,7 @@ namespace TreeMon.Managers
             Setting s;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                s = context.GetAll<Setting>().FirstOrDefault(sw => sw.UUID == n.UUID);
+                s = context.GetAll<Setting>()?.FirstOrDefault(sw => sw.UUID == n.UUID);
 
 
                 if (s == null)
@@ -1874,13 +1842,13 @@ namespace TreeMon.Managers
         }
 
      
-        public bool SettingExists(string name, string value)
+        public bool SettingExistsInDatabase(string name, string value)
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(value))
                 return false;
 
-            //  if (!this.DataAccessAuthorized(s,  "GET", false))
-            //     return null;
+            ////  if (!this.DataAccessAuthorized(s,  "GET", false))
+            ////     return null;
 
             try
             {
@@ -1902,15 +1870,15 @@ namespace TreeMon.Managers
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
-            //  if (!this.DataAccessAuthorized(s,  "GET", false))
-            //     return null;
+            ////  if (!this.DataAccessAuthorized(s,  "GET", false))
+            ////     return null;
             try
             {
                 if (useDatabase)
                 {
                     using (var context = new TreeMonDbContext(this._connectionKey))
                     {
-                        Setting s = context.GetAll<Setting>().FirstOrDefault(sw => (sw.Name?.EqualsIgnoreCase(name) ?? false));
+                        Setting s = context.GetAll<Setting>()?.FirstOrDefault(sw => (sw.Name?.EqualsIgnoreCase(name) ?? false));
 
                         if (s == null)
                         {//this is a fallback because it's defaulted to true
@@ -1959,14 +1927,14 @@ namespace TreeMon.Managers
             if (string.IsNullOrWhiteSpace(name))
                 return new List<Setting>();
 
-            //  if (!this.DataAccessAuthorized(s,  "GET", false))
-            //     return null;
+            ////  if (!this.DataAccessAuthorized(s,  "GET", false))
+            ////     return null;
 
             try
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    return context.GetAll<Setting>().Where(sw => (sw.Name?.EqualsIgnoreCase(name) ?? false)).ToList();
+                    return context.GetAll<Setting>()?.Where(sw => (sw.Name?.EqualsIgnoreCase(name) ?? false)).ToList();
                 }
             }
             catch (Exception ex)
@@ -1976,11 +1944,11 @@ namespace TreeMon.Managers
             }
         }
 
-        public Setting GetBy(string UUID)
+        public Setting Get(string UUID)
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                Setting s = context.GetAll<Setting>().FirstOrDefault(sw => sw.UUID == UUID);
+                Setting s = context.GetAll<Setting>()?.FirstOrDefault(sw => sw.UUID == UUID);
                 if (!this.DataAccessAuthorized(s,  "GET", false))
                     return null;
 
@@ -1997,9 +1965,9 @@ namespace TreeMon.Managers
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if(currentUser.SiteAdmin)
-                    return context.GetAll<Setting>().Where(sw => sw.Deleted == false && (sw.AppType?.EqualsIgnoreCase(appType)??false) ).ToList();
+                    return context.GetAll<Setting>()?.Where(sw => sw.Deleted == false && (sw.AppType?.EqualsIgnoreCase(appType)??false) ).ToList();
 
-                return context.GetAll<Setting>().Where(sw => sw.AccountUUID == currentUser.AccountUUID &&  sw.Deleted == false && (sw.AppType?.EqualsIgnoreCase(appType)??false) ).ToList();
+                return context.GetAll<Setting>()?.Where(sw => sw.AccountUUID == currentUser.AccountUUID &&  sw.Deleted == false && (sw.AppType?.EqualsIgnoreCase(appType)??false) ).ToList();
 
             }
         }
@@ -2009,7 +1977,7 @@ namespace TreeMon.Managers
           
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Setting>().Where(sw => sw.Private == false && sw.AccountUUID == accountUUID && sw.Deleted == false && (sw.AppType?.EqualsIgnoreCase(appType) ??false)).ToList();
+                return context.GetAll<Setting>()?.Where(sw => sw.Private == false && sw.AccountUUID == accountUUID && sw.Deleted == false && (sw.AppType?.EqualsIgnoreCase(appType) ??false)).ToList();
 
             }
         }
@@ -2032,7 +2000,7 @@ namespace TreeMon.Managers
             if ( this.Installing == false && !this.DataAccessAuthorized(n,  "",false))
                     return ServiceResponse.Error("Unauthorized access.");
 
-            Setting dbs = GetBy(n.UUID);
+            Setting dbs = Get(n.UUID);
             if (dbs == null)
                 return ServiceResponse.Error("Update setting couldn't find:" + n.Name );
 
@@ -2101,29 +2069,18 @@ namespace TreeMon.Managers
             switch (appSettings.ActiveDbProvider?.ToUpper())
             {
                 case "MSSQL":
-                    //connectionString = string.Format("<add name=\"{0}\" connectionString=\"Data Source={1};Initial Catalog={2};"+
-                    //                                  "User Id={ 3}; Password={ 4}; MultipleActiveResultSets=true;\" providerName=\"{5}\" />" 
-                    //                                  , appSettings.ActiveDbProvider, "localhost",
-                    //                                    appSettings.ActiveDatabase, appSettings.ActiveDbUser,
-                    //                                    appSettings.ActiveDbPassword, "System.Data.SqlClient");
                     connectionString = string.Format("Data Source={0};Initial Catalog={1};" +
                                              "User Id={2}; Password={3}; MultipleActiveResultSets=true;"
                                              ,  appSettings.DatabaseServer,appSettings.ActiveDatabase, appSettings.ActiveDbUser,appSettings.ActiveDbPassword);
                     break;
                 case "MYSSQL":
-                    //connectionString = string.Format("<add name=\"{0}\" connectionString=\"Server={1};Port=3306;Database={2};" +
-                    //                 "uid={ 3}; pwd={4}; Convert Zero Datetime=True;\" providerName=\"{5}\" />"
-                    //                 , appSettings.ActiveDbProvider, "localhost",
-                    //                   appSettings.ActiveDatabase, appSettings.ActiveDbUser,
-                    //                   appSettings.ActiveDbPassword, "System.Data.MySqlClient");
                     connectionString = string.Format("Server={0};Port=3306;Database={1};" +
                       "uid={2}; pwd={3}; Convert Zero Datetime=True;"
                       , appSettings.DatabaseServer, appSettings.ActiveDatabase, appSettings.ActiveDbUser,appSettings.ActiveDbPassword );
                     break;
                 case "SQLITE":
                     string pathToDb = Path.Combine(EnvironmentEx.AppDataFolder, "TreeMon.sqlite");
-                    //connectionString = string.Format("<add name=\"{0}\" connectionString=\"data source={1};\" providerName=\"{2}\" />",
-                    //                                    appSettings.ActiveDbProvider, pathToDb , "System.Data.SQLite");
+    
                     connectionString = string.Format("data source={0};", pathToDb );
                     break;
             }
@@ -2197,7 +2154,7 @@ namespace TreeMon.Managers
         public async Task<ServiceResult> RestoreDatabase(string fileName, string encryptionKey)
         {
             string pathToDecryptedFile = "";
-            string pathToFile = GetDatabaseBackupFiles(false).FirstOrDefault(w => w.Contains( fileName) );
+            string pathToFile = GetDatabaseBackupFiles(false)?.FirstOrDefault(w => w.Contains( fileName) );
 
             if(string.IsNullOrWhiteSpace(pathToFile))
                 return ServiceResponse.Error("Could not find backup file.");
@@ -2296,23 +2253,23 @@ namespace TreeMon.Managers
 
       
 
-        //backlog v2 for future use.
-        //public void DatabaseStatus()
-        //{
-        //    //stats
-        //    //SELECT command, percent_complete, start_time FROM sys.dm_exec_requests where command = 'RESTORE DATABASE' 
-        //    //SELECT command, percent_complete, start_time FROM sys.dm_exec_requests where command = 'BACKUP DATABASE' 
-        //    //============================================
-        //    //                SELECT r.session_id,r.command,CONVERT(NUMERIC(6, 2), r.percent_complete)
-        //    //AS[Percent Complete],CONVERT(VARCHAR(20), DATEADD(ms, r.estimated_completion_time, GetDate()), 20) AS[ETA Completion Time],
-        //    //CONVERT(NUMERIC(10, 2), r.total_elapsed_time / 1000.0 / 60.0) AS[Elapsed Min],
-        //    //CONVERT(NUMERIC(10, 2), r.estimated_completion_time / 1000.0 / 60.0) AS[ETA Min],
-        //    //CONVERT(NUMERIC(10, 2), r.estimated_completion_time / 1000.0 / 60.0 / 60.0) AS[ETA Hours],
-        //    //CONVERT(VARCHAR(1000), (SELECT SUBSTRING(text, r.statement_start_offset / 2,
-        //    //CASE WHEN r.statement_end_offset = -1 THEN 1000 ELSE(r.statement_end_offset - r.statement_start_offset) / 2 END)
-        //    //FROM sys.dm_exec_sql_text(sql_handle)))
-        //    //FROM sys.dm_exec_requests r WHERE command IN('RESTORE DATABASE', 'BACKUP DATABASE')
-        //}
+        ////backlog v2 for future use.
+        ////public void DatabaseStatus()
+        ////{
+        ////    //stats
+        ////    //SELECT command, percent_complete, start_time FROM sys.dm_exec_requests where command = 'RESTORE DATABASE' 
+        ////    //SELECT command, percent_complete, start_time FROM sys.dm_exec_requests where command = 'BACKUP DATABASE' 
+        ////    //============================================
+        ////    //                SELECT r.session_id,r.command,CONVERT(NUMERIC(6, 2), r.percent_complete)
+        ////    //AS[Percent Complete],CONVERT(VARCHAR(20), DATEADD(ms, r.estimated_completion_time, GetDate()), 20) AS[ETA Completion Time],
+        ////    //CONVERT(NUMERIC(10, 2), r.total_elapsed_time / 1000.0 / 60.0) AS[Elapsed Min],
+        ////    //CONVERT(NUMERIC(10, 2), r.estimated_completion_time / 1000.0 / 60.0) AS[ETA Min],
+        ////    //CONVERT(NUMERIC(10, 2), r.estimated_completion_time / 1000.0 / 60.0 / 60.0) AS[ETA Hours],
+        ////    //CONVERT(VARCHAR(1000), (SELECT SUBSTRING(text, r.statement_start_offset / 2,
+        ////    //CASE WHEN r.statement_end_offset = -1 THEN 1000 ELSE(r.statement_end_offset - r.statement_start_offset) / 2 END)
+        ////    //FROM sys.dm_exec_sql_text(sql_handle)))
+        ////    //FROM sys.dm_exec_requests r WHERE command IN('RESTORE DATABASE', 'BACKUP DATABASE')
+        ////}
         #endregion
 
     }

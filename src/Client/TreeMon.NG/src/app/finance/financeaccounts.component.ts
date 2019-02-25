@@ -139,7 +139,7 @@ export class FinanceAccountsComponent implements OnInit {
 
     cloneItem(c: FinanceAccount): FinanceAccount {
         const item = new FinanceAccount();
-        for (const prop in c) {
+        for (const prop of Object.keys(c)){
             item[prop] = c[prop];
         }
         return item;
@@ -330,6 +330,7 @@ export class FinanceAccountsComponent implements OnInit {
         const screen = new Screen();
         screen.Command = 'SearchBy';
         screen.Field = 'Name';
+        screen.Operator = 'CONTAINS';
         screen.Value = event.query.toLowerCase();
         filter.Screens.push(screen);
         this._financeService.getCurrencies(filter).subscribe(response => {

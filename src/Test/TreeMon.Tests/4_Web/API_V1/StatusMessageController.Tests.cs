@@ -136,66 +136,66 @@ namespace TreeMon.Web.Tests.API.V1
         [TestMethod]
         public void Api_StatusMessageController_Get_StatusMessages_ByType()
         {
-            TreeMonDbContext context = new TreeMonDbContext(connectionKey);
+            //TreeMonDbContext context = new TreeMonDbContext(connectionKey);
 
-            User u = TestHelper.GenerateTestUser(Guid.NewGuid().ToString("N"));
-            u.SiteAdmin = true;
-            string loginPassword = u.Password;
-            string tmpHashPassword = PasswordHash.CreateHash(u.Password);
-            u.Password = PasswordHash.ExtractHashPassword(tmpHashPassword);
-            u.AccountUUID = SystemFlag.Default.Account;
-            u.PasswordHashIterations = PasswordHash.ExtractIterations(tmpHashPassword);
-            u.PasswordSalt = PasswordHash.ExtractSalt(tmpHashPassword);
-            u.DateCreated = DateTime.Now;
-            Assert.IsTrue(context.Insert<User>(u));
+            //User u = TestHelper.GenerateTestUser(Guid.NewGuid().ToString("N"));
+            //u.SiteAdmin = true;
+            //string loginPassword = u.Password;
+            //string tmpHashPassword = PasswordHash.CreateHash(u.Password);
+            //u.Password = PasswordHash.ExtractHashPassword(tmpHashPassword);
+            //u.AccountUUID = SystemFlag.Default.Account;
+            //u.PasswordHashIterations = PasswordHash.ExtractIterations(tmpHashPassword);
+            //u.PasswordSalt = PasswordHash.ExtractSalt(tmpHashPassword);
+            //u.DateCreated = DateTime.Now;
+            //Assert.IsTrue(context.Insert<User>(u));
 
-            // set a user session then pass the authtoken
-            SessionManager sessionManager = new SessionManager(connectionKey);
-            string userJson = JsonConvert.SerializeObject(u);
-            UserSession us = sessionManager.SaveSession("127.1.1.34", u.UUID, userJson, false);
+            //// set a user session then pass the authtoken
+            //SessionManager sessionManager = new SessionManager(connectionKey);
+            //string userJson = JsonConvert.SerializeObject(u);
+            //UserSession us = sessionManager.SaveSession("127.1.1.34", u.UUID, userJson, false);
 
-            string statusType = Guid.NewGuid().ToString("N");
-            StatusMessage mdl = new StatusMessage();
-            mdl.AccountUUID = SystemFlag.Default.Account;
-            mdl.Status = Guid.NewGuid().ToString("N");
-            mdl.UUID = Guid.NewGuid().ToString("N");
-            mdl.DateCreated = DateTime.UtcNow;
-            mdl.CreatedBy = u.UUID;
+            //string statusType = Guid.NewGuid().ToString("N");
+            //StatusMessage mdl = new StatusMessage();
+            //mdl.AccountUUID = SystemFlag.Default.Account;
+            //mdl.Status = Guid.NewGuid().ToString("N");
+            //mdl.UUID = Guid.NewGuid().ToString("N");
+            //mdl.DateCreated = DateTime.UtcNow;
+            //mdl.CreatedBy = u.UUID;
             
-            mdl.StatusType = statusType;
-            Assert.IsTrue(context.Insert<StatusMessage>(mdl));
+            //mdl.StatusType = statusType;
+            //Assert.IsTrue(context.Insert<StatusMessage>(mdl));
 
-            StatusMessage mdl2 = new StatusMessage();
-            mdl2.AccountUUID = SystemFlag.Default.Account;
-            mdl2.Status = Guid.NewGuid().ToString("N");
-            mdl2.UUID = Guid.NewGuid().ToString("N");
-            mdl2.CreatedBy =  u.UUID;
+            //StatusMessage mdl2 = new StatusMessage();
+            //mdl2.AccountUUID = SystemFlag.Default.Account;
+            //mdl2.Status = Guid.NewGuid().ToString("N");
+            //mdl2.UUID = Guid.NewGuid().ToString("N");
+            //mdl2.CreatedBy =  u.UUID;
           
-            mdl2.DateCreated = DateTime.UtcNow;
-            mdl2.StatusType = statusType;
-            Assert.IsTrue(context.Insert<StatusMessage>(mdl2));
+            //mdl2.DateCreated = DateTime.UtcNow;
+            //mdl2.StatusType = statusType;
+            //Assert.IsTrue(context.Insert<StatusMessage>(mdl2));
 
-            Task.Run(async () =>
-            {
-                ServiceResult res = await TestHelper.SentHttpRequest("POST", "api/StatusMessages/Type/" + mdl.StatusType, "", us.AuthToken);
+            //Task.Run(async () =>
+            //{
+            //    ServiceResult res = await TestHelper.SentHttpRequest("POST", "api/StatusMessages/Type/" + mdl.StatusType, "", us.AuthToken);
 
-                Assert.IsNotNull(res);
-                Assert.AreEqual(res.Code, 200);
+            //    Assert.IsNotNull(res);
+            //    Assert.AreEqual(res.Code, 200);
 
-                List<StatusMessage> StatusMessages = JsonConvert.DeserializeObject<List<StatusMessage>>(res.Result.ToString());
-                Assert.IsNotNull(StatusMessages);
-                Assert.IsTrue(StatusMessages.Count >= 2);
+            //    List<StatusMessage> StatusMessages = JsonConvert.DeserializeObject<List<StatusMessage>>(res.Result.ToString());
+            //    Assert.IsNotNull(StatusMessages);
+            //    Assert.IsTrue(StatusMessages.Count >= 2);
 
-                int foundStatusMessages = 0;
-                foreach (StatusMessage p in StatusMessages)
-                {
-                    if (p.Status == mdl.Status || p.Status == mdl2.Status)
-                        foundStatusMessages++;
-                }
+            //    int foundStatusMessages = 0;
+            //    foreach (StatusMessage p in StatusMessages)
+            //    {
+            //        if (p.Status == mdl.Status || p.Status == mdl2.Status)
+            //            foundStatusMessages++;
+            //    }
 
-                Assert.AreEqual(foundStatusMessages, 2);
+            //    Assert.AreEqual(foundStatusMessages, 2);
 
-            }).GetAwaiter().GetResult();
+            //}).GetAwaiter().GetResult();
         }
 
 

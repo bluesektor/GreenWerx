@@ -11,11 +11,14 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 using TreeMon.Data.Logging;
+using TreeMon.Managers.Events;
+using TreeMon.Managers.Geo;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Store;
-
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
+using TreeMon.Models.Events;
 using TreeMon.Models.Flags;
 using TreeMon.Models.Membership;
 using TreeMon.Models.Services;
@@ -25,14 +28,18 @@ using TreeMon.Utilites.Security;
 using TreeMon.Web.api.Helpers;
 using TreeMon.Web.Filters;
 using TreeMon.Web.Models;
+using WebApi.OutputCache.V2;
 using WebApiThrottle;
 
 namespace TreeMon.Web.api.v1
 {
+    
     public class AccountsController : ApiBaseController
     {
+        readonly SystemLogger _logger = null;
         public AccountsController()
         {
+            _logger = new SystemLogger(Globals.DBConnectionKey);
         }
 
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
@@ -129,19 +136,20 @@ namespace TreeMon.Web.api.v1
         public ServiceResult Get(string name)
         {
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Account a = (Account)accountManager.Get(name);
-            if (a == null)
+            List<Account> a = accountManager.Search(name);
+            if (a == null || a.Count == 0)
                 return ServiceResponse.Error("Invalid name.");
 
             return ServiceResponse.OK("", a);
         }
 
-        [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
+        [EnableThrottling(PerSecond = 1, PerMinute = 20, PerHour = 200, PerDay = 1500, PerWeek = 3000)]
+        [AllowAnonymous]
         [Route("api/AccountsBy/{uuid}")]
         public ServiceResult GetBy(string uuid)
         {
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Account a = (Account) accountManager.GetBy(uuid);
+            Account a = (Account) accountManager.Get(uuid);
             if (a == null)
                 return ServiceResponse.Error("Invalid id.");
 
@@ -154,7 +162,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Accounts/{accountUUID}/Permissions")]
-        public ServiceResult GetAccountPermissons(string accountUUID = "", string filter = "")
+        public ServiceResult GetAccountPermissons(string accountUUID = "")
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -167,8 +175,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> permissions =rm.GetAccountPermissions(accountUUID).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                permissions = FilterEx.FilterInput(permissions, tmpFilter, out count);
+            DataFilter tmpFilter = this.GetFilter(Request);
+            permissions = permissions.Filter(tmpFilter, out count);
           
             return ServiceResponse.OK("",permissions, count);
         }
@@ -181,8 +189,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Accounts/")]
-        public ServiceResult GetAccounts(string filter = "")
+        [Route("api/Accounts")]
+        public ServiceResult GetAccounts()
         {
             GetUser(Request.Headers?.Authorization?.Parameter);
             if (CurrentUser == null)
@@ -191,33 +199,104 @@ namespace TreeMon.Web.api.v1
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
             List<dynamic> accounts =accountManager.GetAccounts(CurrentUser.UUID).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
+            DataFilter tmpFilter = this.GetFilter(Request);
 
-            accounts = FilterEx.FilterInput(accounts, tmpFilter, out count);
+            accounts = accounts.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("",accounts, count);
         }
 
-        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
+        [EnableThrottling(PerSecond = 1, PerMinute = 20, PerHour = 200, PerDay = 1500, PerWeek = 3000)]
+        [AllowAnonymous]
         [HttpPost]
         [HttpGet]
-        [Route("api/AllAccounts/")]
-        public ServiceResult GetAllAccounts(string filter = "")
+        [Route("api/AllAccounts")]
+        public ServiceResult GetAllAccounts()
         {
              AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
             var accounts = accountManager.GetAllAccounts().Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            accounts = FilterEx.FilterInput(accounts, tmpFilter, out count);
+            DataFilter tmpFilter = this.GetFilter(Request);
+            
+            accounts = accounts.Filter( tmpFilter, out count);
 
             accounts = accounts.Select(s => new
             {
-                Name = s.Name,
+                Name = s.Name.Replace("�", "'"),
                 UUID = s.UUID,
-                SyncKey = s.SyncKey
+                UUIDType = s.UUIDType,
+                GUUID = s.GUUID,
+                Image = s.Image,
+                Phone = s.Phone,
+                Email = s.Email,
+                OwnerUUID = s.OwnerUUID,
+                CreatedBy = s.CreatedBy,
+                WebSite = s.WebSite
             }).Cast<dynamic>().ToList();
 
+            return ServiceResponse.OK("", accounts, count);
+        }
+
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 0)]
+        [HttpPost]
+        [Route("api/Accounts/{accountUUID}/Favorite")]
+        public ServiceResult AddAccountToFavorites(string accountUUID)
+        {
+            if (string.IsNullOrWhiteSpace(accountUUID))
+                return ServiceResponse.Error("No event id sent.");
+
+            if (CurrentUser == null)
+                return ServiceResponse.Error("You must be logged in to access this function.");
+
+            AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+            var temp = accountManager.Get(accountUUID);
+            if (temp == null)
+                return ServiceResponse.Error("Account does not exist for " + accountUUID);
+
+            var e = (Account)temp;
+
+            Reminder r = new Reminder()
+            {
+                Favorite = true,
+                RoleOperation = e.RoleOperation,
+                RoleWeight = e.RoleWeight,
+                Private = true,
+                Name = e.Name,
+                UUIDType = e.UUIDType,
+                EventUUID = e.UUID,
+                AccountUUID = CurrentUser.AccountUUID,
+                CreatedBy = CurrentUser.UUID,
+                DateCreated = DateTime.UtcNow,
+                RepeatCount = 0,
+                RepeatForever = false,
+                Active = true,
+                Deleted = false,
+                ReminderCount = 0, //its new, now reminders/notifications have taken place
+               
+            };
+
+            ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+            return reminderManager.Insert(r);
+        }
+
+        [EnableThrottling(PerSecond = 3)]
+        [HttpPost]
+        [HttpGet]
+        [Route("api/Accounts/Favorites")]
+        public ServiceResult GetFavoriteAccounts()
+        {
+            DataFilter tmpFilter = this.GetFilter(Request);
+
+            if (CurrentUser == null)
+                return ServiceResponse.Error("You must be logged in to view favorites.");
+
+            int count;
+            AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+
+            List<dynamic> accounts = accountManager.GetFavoriteAccounts(CurrentUser.UUID, CurrentUser.AccountUUID);
+            accounts = accounts.Filter(tmpFilter, out count);
             return ServiceResponse.OK("", accounts, count);
         }
 
@@ -225,7 +304,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Accounts/{accountUUID}/Members")]
-        public ServiceResult GetMembers(string accountUUID = "", string filter = "")
+        public ServiceResult GetMembers(string accountUUID = "")
         {
             if (string.IsNullOrWhiteSpace(accountUUID))
                 return ServiceResponse.Error("You must provide an account id to view it's members.");
@@ -233,8 +312,8 @@ namespace TreeMon.Web.api.v1
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
             List<dynamic> accountMembers =accountManager.GetAccountMembers(accountUUID).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            accountMembers = FilterEx.FilterInput(accountMembers, tmpFilter, out count);
+            DataFilter tmpFilter = this.GetFilter(Request);
+            accountMembers = accountMembers.Filter( tmpFilter, out count);
             return ServiceResponse.OK("",accountMembers, count);
         }
 
@@ -242,7 +321,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Accounts/{accountUUID}/NonMembers")]
-        public ServiceResult GetNonMembers(string accountUUID = "", string filter = "")
+        public ServiceResult GetNonMembers(string accountUUID = "")
         {
             if (string.IsNullOrWhiteSpace(accountUUID))
                 return ServiceResponse.Error("You must provide an account id to complete this action.");
@@ -250,15 +329,10 @@ namespace TreeMon.Web.api.v1
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
             List<dynamic> accountMembers = accountManager.GetAccountNonMembers(accountUUID).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            accountMembers = FilterEx.FilterInput(accountMembers, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            accountMembers = accountMembers.Filter( tmpFilter, out count);
             return ServiceResponse.OK("",accountMembers, count);
         }
-
-
-
-        //and then...
-        
 
         [AllowAnonymous]
         [HttpPost]
@@ -275,7 +349,7 @@ namespace TreeMon.Web.api.v1
             if (string.IsNullOrWhiteSpace(credentials.Password))
                 return ServiceResponse.Error("Invalid password.");
 
-
+    
             if (string.IsNullOrEmpty(credentials.ReturnUrl))
                 credentials.ReturnUrl = "";
 
@@ -291,15 +365,14 @@ namespace TreeMon.Web.api.v1
             User user = null;
             #region
 
-            //User user = null;
             if (userName.Contains("/"))
             {
                 accountName = userName.Split('/')[0];
                 userName = userName.Split('/')[1];
-                user = (User)userManager.Get(userName, false);
+                user = userManager.Search(userName, false)?.FirstOrDefault();
                 if (user == null)
                     return ServiceResponse.Error("Invalid username or password.");
-                string accountUUID = accountManager.Get(accountName)?.UUID;
+                string accountUUID = accountManager.Search(accountName)?.FirstOrDefault()?.UUID;
 
                 if(string.IsNullOrWhiteSpace(accountUUID))
                     return ServiceResponse.Error("Invalid account name " + accountName );
@@ -314,7 +387,7 @@ namespace TreeMon.Web.api.v1
             }
             else
             {
-                user = (User)userManager.Get(userName,false);
+                user =  userManager.Search(userName,false)?.FirstOrDefault();
                 if (user == null)
                     return ServiceResponse.Error("Invalid username or password.");
             }
@@ -329,9 +402,9 @@ namespace TreeMon.Web.api.v1
 
             UserSession us = null;
             if (credentials.ClientType == "mobile.app")//if mobile make the session persist.
-               us = SessionManager.SaveSession(ipAddress, user.UUID, userJson, true);
+               us = SessionManager.SaveSession(ipAddress, user.UUID,user.AccountUUID, userJson, true);
             else
-               us = SessionManager.SaveSession(ipAddress, user.UUID, userJson, false);
+               us = SessionManager.SaveSession(ipAddress, user.UUID,user.AccountUUID, userJson, false);
 
             if (us == null)
                 return ServiceResponse.Error("Failed to save your session.");
@@ -345,11 +418,27 @@ namespace TreeMon.Web.api.v1
             dashBoard.UserUUID = user.UUID;
             dashBoard.AccountUUID = user.AccountUUID;
             dashBoard.ReturnUrl = credentials.ReturnUrl;
-            dashBoard.DefaultLocationUUID = lm.GetLocations(user.AccountUUID)?.FirstOrDefault(w => w.isDefault == true)?.UUID;
+            var location = lm.GetLocations(user.AccountUUID)?.FirstOrDefault(w => w.isDefault == true);
+            dashBoard.Location =location?.UUID;
+            dashBoard.LocationType = location?.LocationType;
             dashBoard.IsAdmin =  user.SiteAdmin == true ? true : roleManager.IsUserRequestAuthorized(dashBoard.UserUUID, dashBoard.AccountUUID, "/Admin");
-
+            dashBoard.Profile = userManager.GetProfile(user.UUID, user.AccountUUID);
+            dashBoard.UserRoles = roleManager.GetRolesForUser(dashBoard.UserUUID, dashBoard.AccountUUID);
             return ServiceResponse.OK("",dashBoard);
         }
+
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
+        [AllowAnonymous]
+        [EnableThrottling(PerSecond = 3)]
+        [HttpGet]
+        [Route("api/Accounts/Categories")]
+        public ServiceResult GetEventCategories()
+        {
+            AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+            List<string> categories = accountManager.GetAccountCategories();
+            return ServiceResponse.OK("", categories, categories?.Count ?? 0);
+        }
+
 
         [AllowAnonymous]
         [HttpPost]
@@ -379,6 +468,7 @@ namespace TreeMon.Web.api.v1
 
             string userName = credentials.UserName;
             string accountName = "";
+            List<User> users;
             User user = null;
 
             if (userName.Contains("/"))
@@ -386,14 +476,17 @@ namespace TreeMon.Web.api.v1
                 accountName = userName.Split('/')[0];
                 userName = userName.Split('/')[1];
 
-                user = (User)userManager.Get(userName,false);
-                if (user == null)
+                users = userManager.Search(userName,false);
+                if (users == null || users.Count == 0)
                     return ServiceResponse.Error("Invalid username or password.");
 
-                string accountUUID = accountManager.Get(accountName)?.UUID;
+                user = users.FirstOrDefault();
+
+                string accountUUID = accountManager.Search(accountName)?.FirstOrDefault()?.UUID;
 
                 if (!accountManager.IsUserInAccount(accountUUID, user.UUID))
                     return ServiceResponse.Error("You are not a member of the account.");
+
 
                 if(user.AccountUUID != accountUUID)
                 {
@@ -403,7 +496,7 @@ namespace TreeMon.Web.api.v1
             }
             else
             {
-                user = (User)userManager.Get(userName);
+                user =  userManager.Search(userName)?.FirstOrDefault();
                 if (user == null)
                     return ServiceResponse.Error("Invalid username or password.");
             }
@@ -418,27 +511,27 @@ namespace TreeMon.Web.api.v1
 
             UserSession us = null;
             if (credentials.ClientType == "mobile.app")//if mobile make the session persist.
-                 us = SessionManager.SaveSession(ipAddress, user.UUID, userJson,true);
+                 us = SessionManager.SaveSession(ipAddress, user.UUID, user.AccountUUID, userJson,true);
             else
-                us = SessionManager.SaveSession(ipAddress, user.UUID, userJson, false);
+                us = SessionManager.SaveSession(ipAddress, user.UUID,user.AccountUUID, userJson, false);
 
             if (us == null)
                 return ServiceResponse.Error("Server was unable to create a session, try again later.");
       
             Dashboard dashBoard = new Dashboard();
-
             dashBoard.Authorization = us.AuthToken;
             dashBoard.UserUUID = user.UUID;
             dashBoard.AccountUUID = user.AccountUUID;
             dashBoard.ReturnUrl = credentials.ReturnUrl;
             dashBoard.IsAdmin = roleManager.IsUserRequestAuthorized(dashBoard.UserUUID, dashBoard.AccountUUID, "/Admin");
+            dashBoard.Profile = userManager.GetProfile(user.UUID, user.AccountUUID);
             return ServiceResponse.OK("",dashBoard);
         }
 
 
         [AllowAnonymous]
         [HttpPost]
-        [EnableThrottling( PerSecond =1, PerHour = 10, PerDay = 100)]
+        [EnableThrottling(  PerHour = 3, PerDay = 3)]
         [Route("api/Accounts/WpLogin")]
         public async Task<string> WPLogin(LoginModel credentials)
         {
@@ -472,7 +565,7 @@ namespace TreeMon.Web.api.v1
 
             //IMPORTANT!!! when you know an update is going to be used on the user internally, 
             //DO NOT CLEAR THE SENSITIVE DATA! It will make the password blank! 
-            User u = (User)userManager.GetBy(us.UserUUID, false);
+            User u = (User)userManager.GetUser(us.UserUUID, false);
 
             if (u == null)
                 return ServiceResponse.OK();
@@ -503,52 +596,58 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("Invalid form data.");
             }
 
+            var sendValidationEmail = true; //if mobile app don't send the validation email.
+            var approved = false;
+            // false;TODO make this false when the email url is fixed
+            //if mobile the email validation isn't going to be sent for them to validate=> approve. So auto approve.
+            if (ur.ClientType == "mobile.app")
+            {
+                approved = true;
+                sendValidationEmail = false;
+            }
             UserManager   userManager = new UserManager(Globals.DBConnectionKey, Request?.Headers?.Authorization?.Parameter);
 
-            //if (ur.ClientType != "mobile.app")
-            //{ //if not the mobile app then validate the captcha
-            //    UserSession us = SessionManager.GetSessionByUser(ur.Captcha?.ToUpper());
-            //    if (us == null)
-            //    {
-            //        us = SessionManager.GetSessionByUser(ip);//in the sitecontroller the captcha doesn't know whoe the user is when registering, so we used the ip addres as the name
-            //        if (us == null)
-            //            return ServiceResponse.Error("Invalid session.");
-            //    }
-            //    if (ur.Captcha?.ToUpper() != us.Captcha?.ToUpper())
-            //        return ServiceResponse.Error("Code doesn't match.");
-            //}
+            ////if (ur.ClientType != "mobile.app")
+            ////{ //if not the mobile app then validate the captcha
+            ////    UserSession us = SessionManager.GetSessionByUser(ur.Captcha?.ToUpper());
+            ////    if (us == null)
+            ////    {
+            ////        us = SessionManager.GetSessionByUser(ip);//in the sitecontroller the captcha doesn't know whoe the user is when registering, so we used the ip addres as the name
+            ////        if (us == null)
+            ////            return ServiceResponse.Error("Invalid session.");
+            ////    }
+            ////    if (ur.Captcha?.ToUpper() != us.Captcha?.ToUpper())
+            ////        return ServiceResponse.Error("Code doesn't match.");
+            ////}
 
-            //if (ur.ClientType == "mobile.app")
-            //    sendValidationEmail = false; //if mobile app don't send the validation email.
-            ServiceResult res = await userManager.RegisterUserAsync(ur, false, ip);
-            return res;
-            //TODO reimplement this. Change the url sent to be encrypted.
-            //if (res.Code != 200  )
-            //    return res;
+             
+            ServiceResult res = await userManager.RegisterUserAsync(ur, approved, ip);
+            if(res.Code != 200 || sendValidationEmail == false)
+                return res;
 
-            //User newUser = (User)res.Result;
+            User newUser = (User)res.Result;
 
-            //EmailSettings settings = new EmailSettings();
+            EmailSettings settings = new EmailSettings();
 
-            //string appKey = Globals.Application.AppSetting("AppKey");
-            //string emailPassword = Globals.Application.AppSetting("EmailHostPassword");
-            //// var testHostPassword = Cipher.Crypt(appKey,emailPassword, false);
-            //settings.HostPassword =  Globals.Application.AppSetting("EmailHostPassword");
-            //settings.EncryptionKey = Globals.Application.AppSetting("AppKey");
-            //settings.HostUser= Globals.Application.AppSetting("EmailHostUser");
-            //settings.MailHost= Globals.Application.AppSetting("MailHost");
-            //settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
-            //settings.SiteDomain= Globals.Application.AppSetting("SiteDomain");
-            //settings.SiteEmail= Globals.Application.AppSetting("SiteEmail");
-            //settings.UseSSL= StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
-            
-            //ServiceResult emailRes = await userManager.SendUserEmailValidationAsync(newUser, newUser.ProviderUserKey, ip, settings);
+            settings.HostPassword = Globals.Application.AppSetting("EmailHostPassword");
+            settings.EncryptionKey = Globals.Application.AppSetting("AppKey");
+            settings.HostUser = Globals.Application.AppSetting("EmailHostUser");
+            settings.MailHost = Globals.Application.AppSetting("MailHost");
+            settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
+            settings.SiteDomain = Globals.Application.AppSetting("SiteDomain");
+            settings.EmailDomain = Globals.Application.AppSetting("EmailDomain");
+            settings.SiteEmail = Globals.Application.AppSetting("SiteEmail");
+            settings.UseSSL = StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
 
-            //if (emailRes.Code != 200)
-            //{
-            //    return ServiceResponse.OK("Registration email failed to send. Check later for email confirmation.");
-            //}
-            //return emailRes;
+            newUser.Email = ur.Email;//because it gets encrypted when saving 
+            _logger.InsertInfo("604", "accountcontroller.cs.cs", "registerasync");
+            ServiceResult emailRes =  await userManager.SendUserEmailValidationAsync(newUser, newUser.ProviderUserKey, ip, settings);
+
+            if (emailRes.Code != 200)
+            {
+                return ServiceResponse.OK("Registration email failed to send. Check later for email confirmation.");
+            }
+            return emailRes;
         }
 
 
@@ -603,31 +702,36 @@ namespace TreeMon.Web.api.v1
             return res;
         }
 
-        
+        [EnableThrottling(PerHour = 1, PerDay = 3)]
         [HttpPost]
         [Route("api/Accounts/SendInfo/")]
-        public async Task<ServiceResult> SendAccountValidationEmailAsync(SendAccountInfoForm frm)
+        public async Task<ServiceResult> SendAccountValidationEmailAsync(SendAccountInfoForm form)
         {
-            if (frm == null)
+            if (form == null)
                 return ServiceResponse.Error("Invalid form sent to server.");
 
-            if (string.IsNullOrWhiteSpace(frm.Email)) 
-                return ServiceResponse.Error("All fields must be filled out!");
+            if (string.IsNullOrWhiteSpace(form.Email)) 
+                return ServiceResponse.Error("You must provide an email!");
 
             NetworkHelper network = new NetworkHelper();
             UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            User u = userManager.GetUserByEmail(frm.Email,false);
+            string encEmail = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), form.Email, true);
+            User u = userManager.GetUserByEmail(encEmail, false);
 
             if (u == null)
-                return ServiceResponse.OK("Email sent.");//return ok so the client can't fish for members.
+            {
+                u = userManager.Search(encEmail)?.FirstOrDefault();
+                if(u == null)
+                    return ServiceResponse.OK("Invalid username/email.");//return ok so the client can't fish for members.
+            }
 
             u.ProviderUserKey = Cipher.RandomString(12);
 
             if (userManager.SetUserFlag(u.UUID, "PROVIDERUSERKEY", u.ProviderUserKey, false).Code != 200)
                 return ServiceResponse.Error("Unable to send email.");
 
-            if (frm.ForgotPassword)
+            if (form.ForgotPassword)
             {
                 u.ProviderName = UserFlags.ProviderName.ForgotPassword;
             }
@@ -647,13 +751,14 @@ namespace TreeMon.Web.api.v1
             settings.MailHost = Globals.Application.AppSetting("MailHost");
             settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
             settings.SiteDomain = Globals.Application.AppSetting("SiteDomain");
+            settings.EmailDomain = Globals.Application.AppSetting("EmailDomain");
             settings.SiteEmail = Globals.Application.AppSetting("SiteEmail");
             settings.UseSSL = StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
             string ipAddress = network.GetClientIpAddress(this.Request);
-            if (frm.ForgotPassword)
-            {
+
+            if (form.ForgotPassword)
                 return await userManager.SendPasswordResetEmailAsync(u, ipAddress, settings);
-            }
+
             return await userManager.SendUserInfoAsync(u,  network.GetClientIpAddress(this.Request), settings);
         }
 
@@ -666,19 +771,28 @@ namespace TreeMon.Web.api.v1
             if (string.IsNullOrWhiteSpace(accountUUID))
                 return ServiceResponse.Error("You must pass a valid account UUID to mark as default.");
 
-            UserSession us =  SessionManager.GetSession(Request.Headers?.Authorization?.Parameter, false);
+            UserSession us =  SessionManager.GetSession(Request.Headers?.Authorization?.Parameter);
             if (us == null)
                 return ServiceResponse.Error("You must log in to access this functionality.");
             
+
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+
+            //this will set the accountUUID field in the users table
             ServiceResult res =accountManager.SetActiveAccount(accountUUID, CurrentUser.UUID, CurrentUser);
 
             if (res.Code != 200)
                 return res;
 
-            CurrentUser.AccountUUID = accountUUID;
-            us.UserData = JsonConvert.SerializeObject(CurrentUser);
-            SessionManager.Update(us);
+            // SessionManager.DeleteByUserId(CurrentUser.UUID, CurrentUser.AccountUUID, false);
+
+            UserSession setSession = SessionManager.GetSessionByUser(CurrentUser.UUID, accountUUID);
+
+           // if (setSession == null || string.IsNullOrWhiteSpace(setSession.UserData))
+              //  return  ServiceResponse.Unauthorized("Session not found, login to establish a session.");
+            
+          //  CurrentUser  =  JsonConvert.DeserializeObject<User>(setSession.UserData);
+
             return res;
         }
 
@@ -692,16 +806,24 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("No record sent.");
 
             AccountManager accountManager = new AccountManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            var dbAcct = (Account)accountManager.GetBy(account.UUID);
+            var dbAcct = (Account)accountManager.Get(account.UUID);
 
             if (dbAcct == null)
                 return ServiceResponse.Error("Invalid account id.");
 
-            dbAcct.Email = account.Email;
+            dbAcct.Email = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), account.Email, true);
             dbAcct.Name = account.Name;
             dbAcct.Active = account.Active;
             dbAcct.Private = account.Private;
             dbAcct.SortOrder = account.SortOrder;
+            dbAcct.BillingPostalCode = account.BillingPostalCode;
+            dbAcct.BillingAddress = account.BillingAddress;
+            dbAcct.BillingCity = account.BillingCity;
+            dbAcct.BillingCountry = account.BillingCountry;
+            dbAcct.BillingState = account.BillingState;
+            dbAcct.Description = account.Description;
+            dbAcct.LocationType = account.LocationType;
+            dbAcct.LocationUUID = account.LocationUUID;
 
             return accountManager.Update(dbAcct);
         }
@@ -737,7 +859,8 @@ namespace TreeMon.Web.api.v1
                 if (string.IsNullOrWhiteSpace(frm.ConfirmationCode))
                     return ServiceResponse.Error("Invalid confirmation code. You must use the link provided in the email in order to reset your password.");
 
-                u = userManager.GetUsers(false).FirstOrDefault(dw => (dw.ProviderUserKey == frm.ConfirmationCode && dw.Email.EqualsIgnoreCase(frm.Email)));
+                string encEmail = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), frm.Email, true);
+                u = userManager.GetUsers(false)?.FirstOrDefault(dw => (dw.ProviderUserKey == frm.ConfirmationCode && dw.Email == encEmail));
 
                 if (u == null)
                     return ServiceResponse.Error("Invalid confirmation code.");
@@ -749,7 +872,7 @@ namespace TreeMon.Web.api.v1
 
                 sessionToken = Request.Headers?.Authorization?.Parameter;
                 u = GetUser(sessionToken);//since the user session doesn't contain the password, wi have to pull it.
-                u = (User)userManager.GetBy(u.UUID, false);
+                u = (User)userManager.GetUser(u.UUID, false);
             }
 
             if (u == null)
@@ -769,7 +892,8 @@ namespace TreeMon.Web.api.v1
 
             if (frm.ResetPassword)
             {
-                if (u.ProviderName != UserFlags.ProviderName.ForgotPassword  || u.ProviderUserKey != frm.ConfirmationCode || u.Email.EqualsIgnoreCase( frm.Email) == false )
+                string encEmail = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), frm.Email, true);
+                if (u.ProviderName != UserFlags.ProviderName.ForgotPassword  || u.ProviderUserKey != frm.ConfirmationCode || u.Email != encEmail )
                 {//
                     string msg ="Invalid informaition posted to server";
                     SystemLogger  logger = new SystemLogger(Globals.DBConnectionKey);
@@ -798,7 +922,7 @@ namespace TreeMon.Web.api.v1
             u.ProviderUserKey = "";
             u.LastPasswordChangedDate = DateTime.UtcNow;
 
-            ServiceResult updateResult = userManager.Update(u, false);
+            ServiceResult updateResult = userManager.UpdateUser(u, false);
             if (updateResult.Code != 200)
                 return ServiceResponse.Error("Error updating password. Try again later.");
 
@@ -814,7 +938,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("Invalid user id.");
 
             UserManager userManager = new UserManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            User user =   (User)userManager.GetBy(userUUID);
+            User user =   (User)userManager.Get(userUUID);
 
             if (user == null)
                 return ServiceResponse.Error("User not found!");
@@ -828,6 +952,7 @@ namespace TreeMon.Web.api.v1
             settings.MailHost = Globals.Application.AppSetting("MailHost");
             settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
             settings.SiteDomain = Globals.Application.AppSetting("SiteDomain");
+            settings.EmailDomain = Globals.Application.AppSetting("EmailDomain");
             settings.SiteEmail = Globals.Application.AppSetting("SiteEmail");
             settings.UseSSL = StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
 

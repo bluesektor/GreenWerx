@@ -32,8 +32,6 @@ namespace TreeMon.Managers
 
             var s = (EmailLog)n;
 
-            List<EmailLog> pms = new List<EmailLog>();
-
             if (purge)
             {
                 using (var context = new TreeMonDbContext(_dbConnectionKey))
@@ -44,7 +42,7 @@ namespace TreeMon.Managers
             }
 
             //get the EmailLog from the table with all the data so when its updated it still contains the same data.
-            s = (EmailLog)this.GetBy(s.UUID);
+            s = (EmailLog)this.Get(s.UUID);
             if (s == null)
                     return ServiceResponse.Error("Email log not found");
 
@@ -62,28 +60,29 @@ namespace TreeMon.Managers
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
 
-                return context.GetAll<EmailLog>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.DateSent).ToList();
+                return context.GetAll<EmailLog>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.DateSent).ToList();
             }
         }
 
-        public INode Get(string name)
+        public List<EmailLog> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<EmailLog>();
+
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<EmailLog>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<EmailLog>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                return context.GetAll<EmailLog>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<EmailLog>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -93,7 +92,7 @@ namespace TreeMon.Managers
         /// <param name="n"></param>
         /// <param name="validateFirst"></param>
         /// <returns></returns>
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
     {
             if (n == null)
                 return ServiceResponse.Error("No record sent.");
@@ -104,13 +103,6 @@ namespace TreeMon.Managers
          
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                //if (validateFirst)
-                //{
-                //    EmailLog dbU = context.GetAll<EmailLog>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name) ?? false) && wu.AccountUUID == s.AccountUUID);
-                //    if (dbU != null)
-                //        return ServiceResponse.Error("Email log already exists.");
-                //}
-
                 if (context.Insert<EmailLog>(s))
                     return ServiceResponse.OK("",s);
             }

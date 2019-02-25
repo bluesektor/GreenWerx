@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using TreeMon.Data;
 using TreeMon.Data.Logging;
 using TreeMon.Models;
@@ -59,11 +60,11 @@ namespace TreeMon.Managers.Store
                             return ServiceResponse.Error(p.Name + " failed to delete. ");
                     }
                 }
-                //SQLITE
-                //this was the only way I could get it to delete a RolePermission without some stupid EF error.
-                //object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
-                //context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
-                //  context.Delete<RolePermission>(rp);
+                ////SQLITE
+                ////this was the only way I could get it to delete a RolePermission without some stupid EF error.
+                ////object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
+                ////context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
+                ////  context.Delete<RolePermission>(rp);
             }
             catch (Exception ex)
             {
@@ -77,28 +78,28 @@ namespace TreeMon.Managers.Store
 
         public List<Product> GetAll(string category = "")
         {
-            //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (string.IsNullOrWhiteSpace(category)) {
                     return context.GetAll<Product>()
                         .OrderBy(o => o.Name).ToList();
                 }
-                return context.GetAll<Product>().Where(pw => pw.CategoryUUID == category)
+                return context.GetAll<Product>()?.Where(pw => pw.CategoryUUID == category)
                                                  .OrderBy(po => po.Name).ToList();
             }
         }
 
         public List<Product> GetAccountProducts(string accountUUID)
         {
-            //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Product>().ToList();
 
-                return context.GetAll<Product>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<Product>()?.Where(pw => pw.AccountUUID == accountUUID).ToList();
             }
         }
 
@@ -109,13 +110,13 @@ namespace TreeMon.Managers.Store
         /// <returns></returns>
         public List<Product> GetCombinedProducts( string userUUID, string accountUUID, string category = "")
         {
-            //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-            List<Product> products = new List<Product>();
+            ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            List<Product> products;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 products = context.GetAll<Product>()
-                    .Where(pw => ((pw.CreatedBy == userUUID && pw.AccountUUID == accountUUID) ) && pw.Deleted == false)
-                    .DistinctBy(pd => pd.CategoryUUID).ToList();//.GroupBy( pg => pg.Category ).Select(ps => ps.First()).ToList();
+                    .Where(pw => (pw.CreatedBy == userUUID && pw.AccountUUID == accountUUID)  && pw.Deleted == false)
+                    .DistinctBy(pd => pd.CategoryUUID).ToList(); 
             }
             return products;
         }
@@ -124,34 +125,34 @@ namespace TreeMon.Managers.Store
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<Product>().ToList();
 
-                return context.GetAll<Product>().Where(pw => pw.AccountUUID == accountUUID && pw.CreatedBy == userUUID).ToList();
+                return context.GetAll<Product>()?.Where(pw => pw.AccountUUID == accountUUID && pw.CreatedBy == userUUID).ToList();
             }
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return new Product();
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Product>().FirstOrDefault(sw => sw.UUID == uuid);
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                return context.GetAll<Product>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
-        public INode Get( string name)
+        public List<Product> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Product>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Product>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                return context.GetAll<Product>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -159,8 +160,8 @@ namespace TreeMon.Managers.Store
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<Product>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                return context.GetAll<Product>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
@@ -173,6 +174,7 @@ namespace TreeMon.Managers.Store
         public ServiceResult Update(List<Product> products)
         {
             ServiceResult res = ServiceResponse.OK("Products moved to new categories.");
+            StringBuilder msg = new StringBuilder();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 foreach (Product p in products)
@@ -181,13 +183,13 @@ namespace TreeMon.Managers.Store
                     //Get the product from the database because when we update the framework will update all fields, and the products
                     //passed in may not be complete.
                     //
-                    var dbP = context.GetAll<Product>().FirstOrDefault(pw => pw.UUID == p.UUID);
+                    var dbP = context.GetAll<Product>()?.FirstOrDefault(pw => pw.UUID == p.UUID);
                     if (dbP == null)
                     {
                         if (res.Code == 200)
                             res = ServiceResponse.Error(p.UUID + " product not found.<br/>");
                         else
-                            res.Message += p.UUID + " product not found.<br/>";
+                            msg.AppendLine(p.UUID + " product not found.");
 
                         continue;
                     }
@@ -201,11 +203,11 @@ namespace TreeMon.Managers.Store
                         if (res.Code == 200)
                             res = ServiceResponse.Error(dbP.Name + " failed to update. " + dbP.UUID + "<br/>");
                         else
-                            res.Message += dbP.Name + " failed to update. " + dbP.UUID + "<br/>";
+                            msg.AppendLine(dbP.Name + " failed to update. " + dbP.UUID );
                     }
                 }
             }
-
+            res.Message = msg.ToString();
             return res;
         }
    
@@ -237,7 +239,7 @@ namespace TreeMon.Managers.Store
         /// <param name="p"></param>
         /// <param name="checkName">This will check the products by name to see if they exist already. If it does an error message will be returned.</param>
         /// <returns></returns>
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (n == null)
                 return ServiceResponse.Error("No product to insert.");
@@ -248,11 +250,10 @@ namespace TreeMon.Managers.Store
 
             var p = (Product)n;
 
-            if (validateFirst)
-            {
-                Product dbU = (Product)Get(p.Name);
+           
+                List<Product> dbU = Search(p.Name);
 
-                if (dbU != null)
+                if (dbU != null && dbU.Count > 0 )
                     return ServiceResponse.Error("Product already exists.");
 
                 if(string.IsNullOrWhiteSpace(p.CreatedBy))
@@ -260,7 +261,7 @@ namespace TreeMon.Managers.Store
 
                 if (string.IsNullOrWhiteSpace(p.AccountUUID))
                     return ServiceResponse.Error("The account id is empty.");
-            }
+            
      
             p.Expires = null;  
  

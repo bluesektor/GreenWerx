@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using TreeMon.Data;
 using TreeMon.Data.Logging;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Models;
 using TreeMon.Models.App;
+using TreeMon.Models.Events;
 using TreeMon.Models.Membership;
 using TreeMon.Models.Plant;
 using TreeMon.Models.Store;
@@ -32,14 +34,14 @@ namespace TreeMon.Managers.Membership
 
         public ServiceResult AddUsersToAccount(string accountUUID, List<AccountMember> users, User requestingUser )
         {
-            //if (!this.DataAccessAuthorized(a, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(a, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
             foreach (AccountMember am in users)
             {
                 ServiceResult res = AddUserToAccount(accountUUID, am.MemberUUID, requestingUser);
                 if (res.Code == 500)
                     return res;
             }
-            return ServiceResponse.OK(string.Format("{0} users added to account.", users.Count()));
+            return ServiceResponse.OK(string.Format("{0} users added to account.", users.Count));
         }
 
         public ServiceResult AddUserToAccount(string accountUUID, string userUUID, User requestingUser)
@@ -51,15 +53,15 @@ namespace TreeMon.Managers.Membership
                 return ServiceResponse.Error("Invalid user id");
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                Account a = context.GetAll<Account>().FirstOrDefault(w => w.UUID == accountUUID);
+                Account a = context.GetAll<Account>()?.FirstOrDefault(w => w.UUID == accountUUID);
                 if (a == null)
                     return ServiceResponse.Error("Account not found.");
 
-                if (!this.DataAccessAuthorized(a, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
-                // if (!_roleManager.DataAccessAuthorized(a, requestingUser, "post", false))
-                //   return ServiceResponse.Error("Access denied for account " + a.Name );
+                if (!this.DataAccessAuthorized(a, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
+                //// if (!_roleManager.DataAccessAuthorized(a, requestingUser, "post", false))
+                ////   return ServiceResponse.Error("Access denied for account " + a.Name );
 
-                User u = context.GetAll<User>().FirstOrDefault(w => w.UUID == userUUID) ;
+                User u = context.GetAll<User>()?.FirstOrDefault(w => w.UUID == userUUID) ;
                 if (u == null)
                     return ServiceResponse.Error("User not found.");
 
@@ -80,9 +82,9 @@ namespace TreeMon.Managers.Membership
         {
             if (s == null)
                 return null;
-            //if (!this.DataAccessAuthorized(v, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(v, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-            Account v = (Account)GetBy(s.BreederUUID);
+            Account v = (Account)Get(s.BreederUUID);
 
             if (v != null)
                 return v;
@@ -123,14 +125,14 @@ namespace TreeMon.Managers.Membership
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                Account a = context.GetAll<Account>().FirstOrDefault(w => w.UUID == accountUUID) ;
+                Account a = context.GetAll<Account>()?.FirstOrDefault(w => w.UUID == accountUUID) ;
                 if (a == null)
                     return ServiceResponse.Error("Account not found.");
 
                 if (!this.DataAccessAuthorized(a, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-                //if (!_roleManager.DataAccessAuthorized(a, requestingUser,"delete", false))
-                  //  return ServiceResponse.Error("You are not authorized access to this account.");
+                ////if (!_roleManager.DataAccessAuthorized(a, requestingUser,"delete", false))
+                ////  return ServiceResponse.Error("You are not authorized access to this account.");
 
                 if (accountUUID == _requestingUser.AccountUUID)//todo check if any user has this as default account
                     return ServiceResponse.Error("Cannot delete a default account. You must select another account as default before deleting this one.");
@@ -171,13 +173,13 @@ namespace TreeMon.Managers.Membership
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                Account a = context.GetAll<Account>().FirstOrDefault(w => w.UUID == account.UUID);
+                Account a = context.GetAll<Account>()?.FirstOrDefault(w => w.UUID == account.UUID);
 
                 if (!this.DataAccessAuthorized(a, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
 
                 if (!purge)
                 {
-                    Account dbAcct = context.GetAll<Account>().FirstOrDefault(w => w.UUID == a.UUID) ;
+                    Account dbAcct = context.GetAll<Account>()?.FirstOrDefault(w => w.UUID == a.UUID) ;
 
                     if (dbAcct == null)
                         return ServiceResponse.Error("Account not found.");
@@ -204,73 +206,74 @@ namespace TreeMon.Managers.Membership
            
         }
 
-        private Account FindAccount(string uuid, string name, string AccountUUID, bool includeDefaultAccount = true)
+        private List<Account> FindAccount(string uuid, string name, string AccountUUID, bool includeDefaultAccount = true)
         {
-            Account res = null;
+            List<Account> res = null;
 
             if (string.IsNullOrWhiteSpace(uuid) && string.IsNullOrWhiteSpace(name) == false)
-                res = (Account)this.Get(name);
-            else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
-                res = (Account)GetBy(uuid);
+                res = this.Search(name);
+          
             else
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    res = context.GetAll<Account>().FirstOrDefault(w => w.UUID == uuid ||( w.Name?.EqualsIgnoreCase(name)??false));
+                    res = context.GetAll<Account>()?.Where(w => w.UUID == uuid ||( w.Name?.EqualsIgnoreCase(name)??false)).ToList();
                 }
             }
             if (res == null)
                 return res;
 
-        //    if (!this.DataAccessAuthorized(res, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+        ////    if (!this.DataAccessAuthorized(res, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-            if (includeDefaultAccount && ( res.AccountUUID == AccountUUID))
+            if (includeDefaultAccount && ( res.FirstOrDefault().AccountUUID == AccountUUID))
                 return res;
 
-            if (res.AccountUUID == AccountUUID)
+            if (res.FirstOrDefault().AccountUUID == AccountUUID)
                 return res;
 
-            return null;
+            return new List<Account>();
         }
 
-        public INode Get(string name)
+        public List<Account> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Account>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Account>().FirstOrDefault(aw => aw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<Account>()?.Where(aw => aw.Name.EqualsIgnoreCase(name)).ToList();
             }
-            //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Account>().FirstOrDefault(aw => aw.UUID == uuid);
+                return context.GetAll<Account>()?.FirstOrDefault(aw => aw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        //public INode GetBySyncKey(string syncKey)
+        //public List<Account> ClearSensitiveData(List<Account> accounts)
         //{
-        //    if (string.IsNullOrWhiteSpace(syncKey))
-        //        return null;
-        //    using (var context = new TreeMonDbContext(this._connectionKey))
+        //    if (accounts == null)
+        //        return accounts;
+
+        //    accounts.ForEach(am =>
         //    {
-        //        //try to get the record by account.
-        //        INode a = context.GetAll<Account>().FirstOrDefault(aw => aw.SyncKey == syncKey && aw.AccountUUID == _requestingUser.AccountUUID);
+        //        am.Email = "";
+        //    });
+        //    return accounts;
+        //}
+        //public Account ClearSensitiveData(Account account)
+        //{
+        //    if (account == null)
+        //        return account;
 
-        //        //if not get the record matching the default account
-        //        if(a == null)
-        //            a = context.GetAll<Account>().FirstOrDefault(aw => aw.SyncKey == syncKey &&  aw.AccountUUID == SystemFlag.Default.Account );
-
-        //        return a;
-        //    }
-        //    //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+        //    account.Email = "";
+        //    return account;
         //}
 
         /// <summary>
@@ -285,11 +288,11 @@ namespace TreeMon.Managers.Membership
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 IEnumerable<Account> userAccounts =
-              from am in context.GetAll<AccountMember>().Where(amw => amw.MemberUUID == userUUID)/// && rrw.UUParentIDType == "User")// && rrw.AccountUUID == accountUUID)
-              join accounts in context.GetAll<Account>().Where(uw => uw.Deleted == false) on am.AccountUUID equals accounts.UUID
+              from am in context.GetAll<AccountMember>()?.Where(amw => amw.MemberUUID == userUUID)/// && rrw.UUParentIDType == "User")// && rrw.AccountUUID == accountUUID)
+              join accounts in context.GetAll<Account>()?.Where(uw => uw.Deleted == false) on am.AccountUUID equals accounts.UUID
               select accounts;
 
-                //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return userAccounts.ToList();
             }
         }
@@ -325,7 +328,7 @@ namespace TreeMon.Managers.Membership
                 {
                     userAccounts = context.Select<Account>(sql, p).ToList();
                 }
-            //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             return userAccounts;
         }
 
@@ -334,7 +337,7 @@ namespace TreeMon.Managers.Membership
             List<User> accountMembers;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                accountMembers = context.GetAll<AccountMember>().Where(w => w.AccountUUID == accountUUID)
+                accountMembers = context.GetAll<AccountMember>()?.Where(w => w.AccountUUID == accountUUID)
                                         .Join(
                                             context.GetAll<User>()
                                                 .Where(w => w.Deleted == false),
@@ -351,7 +354,7 @@ namespace TreeMon.Managers.Membership
             if (clearSensitiveData)
                 accountMembers = new UserManager(this._connectionKey, SessionKey).ClearSensitiveData(accountMembers);
 
-            //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             return accountMembers;
         }
 
@@ -367,9 +370,9 @@ namespace TreeMon.Managers.Membership
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 //this query is from a bug, just kludge it in for now. backlog fix this damn mess.
-                 nonMembers = context.GetAll<User>().Where(w => w.Deleted == false && string.IsNullOrWhiteSpace(w.AccountUUID) == true).ToList();
+                 nonMembers = context.GetAll<User>()?.Where(w => w.Deleted == false && string.IsNullOrWhiteSpace(w.AccountUUID) == true).ToList();
 
-                nonMembers.AddRange(context.GetAll<AccountMember>().Where(w => w.AccountUUID != accountUUID)
+                nonMembers.AddRange(context.GetAll<AccountMember>()?.Where(w => w.AccountUUID != accountUUID)
                                            .Join(
                                                context.GetAll<User>()
                                                      .Where(w => w.Deleted == false),
@@ -385,7 +388,7 @@ namespace TreeMon.Managers.Membership
             if (members != null)
                 nonMembers = nonMembers.Except(members).ToList();
 
-            //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             return nonMembers;
         }
 
@@ -394,15 +397,15 @@ namespace TreeMon.Managers.Membership
             List<Account> acts;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-               acts =  context.GetAll<AccountMember>().Where(w => w.MemberUUID == userUUID)
-                        .Join(context.GetAll<Account>().Where(w => w.Deleted == false),
+               acts =  context.GetAll<AccountMember>()?.Where(w => w.MemberUUID == userUUID)
+                        .Join(context.GetAll<Account>()?.Where(w => w.Deleted == false),
                             am => am.AccountUUID,
                             act => act.UUID,
                             (am, acct) => new { am, acct }
                         )
                         .Select(s => s.acct).ToList();
             }
-            //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             return acts;
         }
 
@@ -411,13 +414,13 @@ namespace TreeMon.Managers.Membership
             List<Account> acts;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-               acts = context.GetAll<Account>().Where(w => w.Deleted == false).ToList();
+               acts = context.GetAll<Account>()?.Where(w => w.Deleted == false && w.Private == false).OrderBy(o => o.Name).ToList();
             }
-            //if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(u, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             return acts;
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (n == null)
                 return ServiceResponse.Error("Invalid account data.");
@@ -430,13 +433,10 @@ namespace TreeMon.Managers.Membership
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    Account dbU = context.GetAll<Account>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(a.Name)??false) && wu.AccountUUID == a.AccountUUID);
+                Account dbU = context.GetAll<Account>()?.FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(a.Name)??false) && wu.AccountUUID == a.AccountUUID);
 
-                    if (dbU != null)
+                if (dbU != null)
                         return ServiceResponse.Error("Account already exists.");
-                }
 
                 if (context.Insert<Account>(a))
                     return ServiceResponse.OK("",a);
@@ -456,8 +456,66 @@ namespace TreeMon.Managers.Membership
             }
             return false;
         }
-     
-        
+
+        public List<string> GetAccountCategories(bool deleted = false)
+        {
+            try
+            {
+                using (var context = new TreeMonDbContext(this._connectionKey))
+                {
+                    return context.GetAll<Account>()?.Where(sw =>
+                            sw.Private == false &&
+                            sw?.Deleted == deleted)
+                        ?.OrderBy(o => o.Category)
+                        ?.Select(s => s.Category)
+                        ?.Distinct()
+                        ?.ToList();
+                }
+                //////if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.Message);
+            }
+            return new List<string>();
+        }
+
+        public List<dynamic> GetFavoriteAccounts(string userUUID, string accountUUID)
+        {
+
+            try
+            {
+                using (var context = new TreeMonDbContext(this._connectionKey))
+                {
+                    if (context.GetAll<Reminder>()?.FirstOrDefault() == null)
+                        return new List<dynamic>();
+
+                    var accounts = context.GetAll<Reminder>()?.Where(w => w?.CreatedBy == userUUID && w?.AccountUUID == accountUUID
+                        && w.UUIDType.EqualsIgnoreCase("account"))
+                        ?.Join(context.GetAll<Account>(),
+                         rem => rem.EventUUID,
+                         act => act.UUID,
+                        (rem, act) => new { rem, act })
+                        ?.Select(s => new Reminder()
+                        {
+                            Account = s.act,
+                            UUID = s.rem.UUID,
+                            UUIDType = s.rem.UUIDType,
+                            CreatedBy = s.rem.CreatedBy,
+                            AccountUUID = s.rem.AccountUUID
+                        });
+
+                    return accounts.Cast<dynamic>().ToList();
+                }
+                //////if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.Message);
+            }
+            return new List<dynamic>();
+        }
+
         ///This removes the user from all accounts
         public ServiceResult RemoveUserFromAllAccounts(string userUUID)
         {
@@ -469,7 +527,7 @@ namespace TreeMon.Managers.Membership
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
                     //Make sure correct userid is passed in.
-                    u = context.GetAll<User>().FirstOrDefault(w => w.UUID == userUUID);
+                    u = context.GetAll<User>()?.FirstOrDefault(w => w.UUID == userUUID);
 
                     if (u == null)
                         return ServiceResponse.Error("Invalid user id.");
@@ -480,10 +538,10 @@ namespace TreeMon.Managers.Membership
                     parameters.Add("@MEMBERID", userUUID);
                     context.Delete<AccountMember>("WHERE MemberUUID=@MEMBERID", parameters);
 
-                    //SQLITE
-                    //Remove the reference in the xref table
-                    //object[] parameters = new object[] { userUUID };
-                    //context.Delete<AccountMember>("WHERE MemberUUID=?", parameters);
+                    ////SQLITE
+                    ////Remove the reference in the xref table
+                    ////object[] parameters = new object[] { userUUID };
+                    ////context.Delete<AccountMember>("WHERE MemberUUID=?", parameters);
 
                     //now make sure the primary account in the user table is emptied.
                     u.AccountUUID = "";
@@ -503,16 +561,17 @@ namespace TreeMon.Managers.Membership
        public ServiceResult RemoveUsersFromAccount(string accountUUID, List<AccountMember> users, User requestingUser)
         {
             ServiceResult res = ServiceResponse.OK();
-
+            StringBuilder msg = new StringBuilder();
             foreach (AccountMember am in users)
             {
                 ServiceResult removeRes = RemoveUserFromAccount(accountUUID, am.MemberUUID);
                 if (res.Code != 200)
                 {
-                    res.Message += removeRes.Message + Environment.NewLine;
+                    msg.AppendLine( removeRes.Message );
                     res.Status = "ERROR";
                 }
             }
+            res.Message = msg.ToString();
             return res;
         }
 
@@ -535,14 +594,14 @@ namespace TreeMon.Managers.Membership
             if (!IsUserInAccount(accountUUID, userUUID))
                 return ServiceResponse.OK();
 
-            //if (!this.DataAccessAuthorized(a, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(a, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             User u = null;
             try
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    u = context.GetAll<User>().FirstOrDefault(w => w.UUID == userUUID);
+                    u = context.GetAll<User>()?.FirstOrDefault(w => w.UUID == userUUID);
                     if (u == null)
                         return ServiceResponse.Error("Invalid user id");
 
@@ -550,11 +609,11 @@ namespace TreeMon.Managers.Membership
                     parameters.Add("@AccountUUID", accountUUID);
                     parameters.Add("@MEMBERID", userUUID);
 
-                    int res = context.Delete<AccountMember>("WHERE AccountUUID=@AccountUUID AND  MemberUUID=@MEMBERID", parameters);
-                    //Remove the reference in the xref table
-                    //SQLITE SYNTAX
-                    //    object[] parameters = new object[] { accountUUID, userUUID };
-                    // int res =  context.Delete<AccountMember>("WHERE AccountUUID=? AND  MemberUUID=?", parameters);
+                    context.Delete<AccountMember>("WHERE AccountUUID=@AccountUUID AND  MemberUUID=@MEMBERID", parameters);
+                    ////Remove the reference in the xref table
+                    ////SQLITE SYNTAX
+                    ////    object[] parameters = new object[] { accountUUID, userUUID };
+                    //// int res =  context.Delete<AccountMember>("WHERE AccountUUID=? AND  MemberUUID=?", parameters);
 
                     if (u.AccountUUID == accountUUID)
                     {
@@ -590,7 +649,7 @@ namespace TreeMon.Managers.Membership
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                User u = context.GetAll<User>().FirstOrDefault(w => w.UUID == userUUID);
+                User u = context.GetAll<User>()?.FirstOrDefault(w => w.UUID == userUUID);
                 if (u == null)
                     return ServiceResponse.Error("Invalid user id.");
 
@@ -625,7 +684,7 @@ namespace TreeMon.Managers.Membership
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (context.Update<Account>(a) > 0)
-                    return ServiceResponse.OK();
+                    return ServiceResponse.OK("",a);
             }
             return ServiceResponse.Error("System error, account was not updated.");
         }

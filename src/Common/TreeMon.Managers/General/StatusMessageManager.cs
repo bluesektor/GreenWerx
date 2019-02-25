@@ -49,13 +49,13 @@ namespace TreeMon.Managers.General
             return ServiceResponse.OK();
         }
 
-        public INode Get(string status)
+        public List<StatusMessage> Search(string status)
         {
             if (string.IsNullOrWhiteSpace(status))
-                return null;
+                return new List<StatusMessage>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<StatusMessage>().FirstOrDefault(sw => sw.Status.EqualsIgnoreCase(status));
+                return context.GetAll<StatusMessage>()?.Where(sw => sw.Status.EqualsIgnoreCase(status)).ToList();
             }
         }
 
@@ -64,9 +64,9 @@ namespace TreeMon.Managers.General
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
 
-                return context.GetAll<StatusMessage>().Where(sw => (sw.AccountUUID == accountUUID)).OrderBy(ob => ob.Status).ToList();
+                return context.GetAll<StatusMessage>()?.Where(sw => (sw.AccountUUID == accountUUID)).OrderBy(ob => ob.Status).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
 
@@ -75,25 +75,25 @@ namespace TreeMon.Managers.General
             List<StatusMessage> status;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                status = context.GetAll<StatusMessage>().Where(sw => (sw.StatusType?.EqualsIgnoreCase(statusType)??false) &&
+                status = context.GetAll<StatusMessage>()?.Where(sw => (sw.StatusType?.EqualsIgnoreCase(statusType)??false) &&
                 sw.CreatedBy == userUUID && sw.AccountUUID == accountUUID).OrderBy(ob => ob.Status).DistinctBy(sd => sd.Status)?.ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             return status;
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<StatusMessage>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<StatusMessage>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (n == null)
                 return ServiceResponse.Error("Invalid StatusMessage data.");
@@ -105,13 +105,12 @@ namespace TreeMon.Managers.General
             var s = (StatusMessage)n;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    StatusMessage dbU = context.GetAll<StatusMessage>().FirstOrDefault(wu => wu.Status.EqualsIgnoreCase(s.Status) && wu.AccountUUID == s.AccountUUID);
+             
+                    StatusMessage dbU = context.GetAll<StatusMessage>()?.FirstOrDefault(wu => wu.Status.EqualsIgnoreCase(s.Status) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("StatusMessage already exists.");
-                }
+                 
    
                 if (!this.DataAccessAuthorized(s, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 

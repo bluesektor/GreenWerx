@@ -271,10 +271,10 @@ export class AccountsComponent implements OnInit {
                 this.msgBox.ShowMessage('info', 'Account added.', 10);
                 this.accountDetail.UUID = response.Result.UUID;
                 this._accountService.addUserToAccount(this.accountDetail.UUID,
-                    this._sessionService.CurrentSession.userUUID).subscribe(response => {
+                    this._sessionService.CurrentSession.userUUID).subscribe( sessionResponse => {
 
-                        if (response.Code !== 200) {
-                            this.msgBox.ShowMessage(response.Status, response.Message, 10);
+                        if (sessionResponse.Code !== 200) {
+                            this.msgBox.ShowMessage(sessionResponse.Status, sessionResponse.Message, 10);
                             return false;
                         }
                         this.newAccount = false;

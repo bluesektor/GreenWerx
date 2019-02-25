@@ -19,16 +19,21 @@ namespace TreeMon.Models.App
             return new ServiceResult() { Code = 500, Status = "ERROR", Message = message, Result = result };
         }
 
-        #region To use jquery jtable on the client you'll have to uncomment these and return them in the controller
-        //public static ServiceResult OK( object records = null, int allRecordsCount = 0, string message = "", string result = "")
-        //{
-        //    return new ServiceResult() { Code = 200, Status = "OK", Records = records, TotalRecordCount = allRecordsCount, Message = message, Result = result };
-        //}
+        public static ServiceResult Unauthorized(string message = "", object result = null)
+        {
+            return new ServiceResult() { Code = 401, Status = "UNAUTHORIZED", Message = message, Result = result };
+        }
 
-        //public static ServiceResult OK("",object record = null, string message = "", string result = "")
-        //{
-        //    return new ServiceResult() { Code = 200, Status = "OK", Record = record, Message = message, Result = result };
-        //}
+        #region To use jquery jtable on the client you'll have to uncomment these and return them in the controller
+        ////public static ServiceResult OK( object records = null, int allRecordsCount = 0, string message = "", string result = "")
+        ////{
+        ////    return new ServiceResult() { Code = 200, Status = "OK", Records = records, TotalRecordCount = allRecordsCount, Message = message, Result = result };
+        ////}
+
+        ////public static ServiceResult OK("",object record = null, string message = "", string result = "")
+        ////{
+        ////    return new ServiceResult() { Code = 200, Status = "OK", Record = record, Message = message, Result = result };
+        ////}
         #endregion
 
     }

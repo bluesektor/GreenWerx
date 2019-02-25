@@ -1,0 +1,334 @@
+
+ .green-black-theme{
+ 
+    // --ion-color-success: ${success};
+    // --ion-color-success-rgb: 16,220,96;
+    // --ion-color-success-contrast: ${contrast(success)};
+    // --ion-color-success-contrast-rgb: 255,255,255;
+    // --ion-color-success-shade: ${Color(success).darken(shadeRatio)};
+    // --ion-color-success-tint: ${Color(success).lighten(tintRatio)};
+    // --ion-color-warning: ${warning};
+    // --ion-color-warning-rgb: 255,206,0;
+    // --ion-color-warning-contrast: ${contrast(warning)};
+    // --ion-color-warning-contrast-rgb: 255,255,255;
+    // --ion-color-warning-shade: ${Color(warning).darken(shadeRatio)};
+    // --ion-color-warning-tint: ${Color(warning).lighten(tintRatio)};
+ 
+$colors: (
+  primary:    (base: #6ea94c, contrast:#000),
+  secondary:  (base: #007ACC, contrast: #000),
+  danger:     #f43e00,
+  light:      (base:#bdc3c7, contrast:#000),
+  dark:       (base:#d35400, contrast:#000),
+  alert:      #F39C12,
+  
+) !default;
+--class-color-primary: #6ea94c; //: var(--class-color-primary);
+// outer-content
+--ion-color-primary: #6ea94c; 
+--ion-color-primary-rgb: 110, 169, 76; //110, 169, 76
+--ion-color-primary-contrast: #000000;
+--ion-color-primary-contrast-rgb: 0,0,0;
+// --ion-color-primary-shade:  ${Color(primary).darken(shadeRatio)};
+// --ion-color-primary-tint:  ${Color(primary).lighten(tintRatio)};
+
+--ion-color-secondary:#007ACC;
+--ion-color-secondary-rgb: 0, 122, 204;
+--ion-color-secondary-contrast: #000000;
+--ion-color-secondary-contrast-rgb: 0,0,0;
+// --ion-color-secondary-shade:  ${Color(secondary).darken(shadeRatio)};
+// --ion-color-secondary-tint: ${Color(secondary).lighten(tintRatio)};
+
+--ion-color-dark: #d35400;
+--ion-color-dark-rgb: 211, 84, 0;
+--ion-color-dark-contrast:  #000000;
+--ion-color-dark-contrast-rgb: 0,0,0;
+// --ion-color-dark-shade: ${Color(dark).darken(shadeRatio)};
+// --ion-color-dark-tint: ${Color(dark).lighten(tintRatio)};
+
+--ion-color-light: #bdc3c7;
+--ion-color-light-rgb: 189, 195, 199;
+--ion-color-light-contrast:#000000;
+--ion-color-light-contrast-rgb: 0,0,0;
+   // --ion-color-light-shade: ${Color(light).darken(shadeRatio)};
+  //  --ion-color-light-tint: ${Color(light).lighten(tintRatio)};
+
+  --ion-color-danger: #f43e00;
+  --ion-color-danger-rgb: 244, 62, 0;
+  --ion-color-danger-contrast: #000000;
+  --ion-color-danger-contrast-rgb: 0,0,0;
+ // --ion-color-danger-shade: ${Color(danger).darken(shadeRatio)};
+ // --ion-color-danger-tint: ${Color(danger).lighten(tintRatio)};
+
+
+$--ion-color-base:  #d35400;
+--ion-color-contrast: #000;
+
+$background-color:           #363232 !default;
+--ion-background-color:     #363232;
+
+$text-color:              #DADFE1 !default;
+--ion-text-color:         #DADFE1;
+
+$link-color:                color($colors, primary) !default;
+--ion-link-color:         #6ea94c;
+
+$subdued-text-color:      #666 !default;
+--ion-subdued-text-color: #666;
+
+ 
+$font-family-base:            "Helvetica Neue", "Roboto", sans-serif !default;
+$font-size-base:             1.4rem !default; // 1.4rem == 14px
+
+$content-padding:            16px !default;
+$content-margin:             16px !default;
+
+$content-outer-background: #000;
+--ion-content-outer-background: #000;
+
+
+
+$toolbar-background:         #434343 !default;
+--ion-toolbar-background-color:#434343;
+
+$toolbar-border-color:       #434343 !default;
+--ion-toolbar-border-color:       #434343;
+
+$toolbar-active-color:       $link-color !default;
+--ion-toolbar-active-color:       #6ea94c;
+$toolbar-inactive-color:     #8c8c8c !default;
+--ion-toolbar-inactive-color:     #8c8c8c;
+
+//--ion-toolbar-text-color: ${contrast(dark, 0.1)};
+
+$tabs-background:            $toolbar-background !default;
+$tabs-border-color:          $toolbar-border-color !default;
+$tabs-tab-color-inactive:    #8c8c8c !default;
+$tabs-tab-color-active:      $link-color !default;
+
+$list-text-color:            $text-color !default;
+$list-background-color:      #242424 !default;
+$list-border-color:          #4C4C4C !default;
+$list-header-color:          $text-color !default;
+$list-activated-background-color: #656565 !default;
+
+$card-text-color:           $text-color !default;
+
+$item-divider-color: $text-color !default;
+$item-divider-background: #515151 !default;
+//--ion-item-background-color: ${contrast(light, 0.3)};
+//--ion-item-text-color: ${contrast(dark, 0.3)};
+
+$toast-background: #019875 !default;
+
+$tabs-tab-color-inactive: #808080 !default;
+
+$searchbar-input-text-color: #bdc3c7;
+$searchbar-input-placeholder-color: #A3A8AC;
+$searchbar-input-background-color: #313131;
+--ion-placeholder-color:#A3A8AC;
+
+$searchbar-md-input-search-icon-color: red;
+// searchbar-input.sc-ion-searchbar-md
+
+
+$toggle-background-color-off:#696969 !default;
+$toggle-background-color-on:#6ea94c !default;
+
+
+$alert-background: $toolbar-background !default;
+$alert-button-background-color-activated: lighten($alert-background,30%) !default;
+$alert-message-text-color: $text-color !default;
+$alert-input-background-color: #bdc3c7 !default;
+$alert-input-text-color: #242424 !default;
+
+
+::-webkit-scrollbar {
+  background-color: $toolbar-background;
+  }
+
+::-webkit-scrollbar-thumb {
+  background-color:#696969;
+  }
+
+.alert-input {
+  color: $alert-input-text-color;
+  background-color: $alert-input-background-color;
+}
+
+body {
+  //background-color: $background-color;
+  color: $text-color;
+  }
+
+
+//---=== platform specific color mappings ===---
+// kept the same because this is a non standard theme
+
+$loading-background: $toolbar-background !default;
+$loading-text-color: $text-color !default; 
+
+
+$alert-ios-background: $alert-background !default;
+$alert-md-background-color: $alert-background !default;
+$alert-wp-background-color: $alert-background !default;
+
+$alert-ios-message-text-color: $alert-message-text-color !default;
+$alert-md-message-text-color: $alert-message-text-color !default;
+$alert-wp-message-text-color: $alert-message-text-color !default;
+
+$alert-ios-button-background-color-activated: $alert-button-background-color-activated !default;
+$alert-md-button-background-color-activated: $alert-button-background-color-activated !default;
+$alert-wp-button-background-color-activated: $alert-button-background-color-activated !default;
+
+$content-ios-outer-background:$content-outer-background !default;
+$content-md-outer-background:$content-outer-background !default;
+$content-wp-outer-background:$content-outer-background !default;
+
+$list-ios-header-color:  $list-header-color !default;
+$list-md-header-color:  $list-header-color !default;
+$list-wp-header-color:  $list-header-color !default;
+
+$list-ios-border-color: $list-border-color !default;
+$list-md-border-color: $list-border-color !default;
+$list-wp-border-color: $list-border-color !default;
+$list-ios-activated-background-color: $list-activated-background-color !default;
+$list-md-activated-background-color: $list-activated-background-color !default;
+$list-wp-activated-background-color: $list-activated-background-color !default;
+
+$alert-ios-input-background-color: $alert-input-background-color !default;
+$alert-md-input-background-color: $alert-input-background-color !default;
+$alert-wp-input-background-color: $alert-input-background-color !default;
+
+$alert-ios-input-text-color:$alert-input-text-color !default;
+$alert-md-input-text-color:$text-color !default;
+$alert-wp-input-text-color:$alert-input-text-color !default;
+
+
+$loading-ios-background: $loading-background !default;
+$loading-md-background: $loading-background !default;
+$loading-wp-background: $loading-background !default;
+
+$loading-ios-text-color: $loading-text-color !default;
+$loading-md-text-color: $loading-text-color !default;
+$loading-wp-text-color: $loading-text-color !default;
+
+$item-ios-divider-color: $item-divider-color !default;
+$item-md-divider-color: $item-divider-color !default;
+$item-wp-divider-color: $item-divider-color !default;
+
+
+$card-ios-text-color: $card-text-color !default;
+$card-md-text-color: $card-text-color !default;
+$card-wp-text-color: $card-text-color !default;
+
+
+$item-ios-divider-background: $item-divider-background !default;
+$item-md-divider-background: $item-divider-background !default;
+$item-wp-divider-background: $item-divider-background !default;
+
+$tabs-ios-tab-color-inactive: $tabs-tab-color-inactive !default;
+$tabs-md-tab-color-inactive: $tabs-tab-color-inactive !default;
+$tabs-wp-tab-color-inactive: $tabs-tab-color-inactive !default;
+
+
+$searchbar-ios-input-text-color: $searchbar-input-text-color !default;
+$searchbar-md-input-text-color: $searchbar-input-text-color !default;
+$searchbar-wp-input-text-color: $searchbar-input-text-color !default;
+$searchbar-ios-input-background-color: $searchbar-input-background-color !default;
+$searchbar-md-input-background-color: $searchbar-input-background-color !default;
+$searchbar-wp-input-background-color: $searchbar-input-background-color !default;
+$searchbar-ios-input-placeholder-color:   $searchbar-input-placeholder-color !default;
+$searchbar-md-input-placeholder-color:  $searchbar-input-placeholder-color !default;
+$searchbar-wp-input-placeholder-color:  $searchbar-input-placeholder-color !default;
+
+$toast-ios-background: $toast-background !default;
+$toast-md-background: $toast-background !default;
+$toast-wp-background: $toast-background !default;
+
+$toggle-ios-background-color-off: $toggle-background-color-off !default;
+$toggle-md-background-color-off: $toggle-background-color-off !default;
+$toggle-wp-background-color-off: $toggle-background-color-off !default;
+$toggle-ios-background-color-on: $toggle-background-color-on !default;
+$toggle-md-background-color-on: $toggle-background-color-on !default;
+$toggle-wp-background-color-on: $toggle-background-color-on !default;
+
+$background-ios-color: #363232 !default;
+$background-md-color: #363232 !default;
+
+}
+
+  // changes search bar icon
+ // .searchbar-search-icon { background-image: url("../assets/img/appicon.svg")!important;}
+
+ ion-icon[name='menu']:before {
+  content: url('../assets/img/appicon.svg')!important;
+}
+
+//ionic search; couldn't get the search text and placeholder to change so I added this which works.
+.searchbar-input-container{
+  .searchbar-input{
+    &::-webkit-input-placeholder { // Chrome/Opera/Safari 
+      color: #A3A8AC;
+    }
+    &::-moz-placeholder { // Firefox 19+
+      color: #A3A8AC;
+    }
+    &:-ms-input-placeholder { // IE 10+ 
+      color: #A3A8AC;
+    }
+    &:-moz-placeholder { // Firefox 18- 
+      color: #A3A8AC;
+    }
+  }
+  .searchbar-input{
+    color: #A3A8AC; //text color when typing
+  }
+  .searchbar-clear-icon{
+    filter: invert(100);
+  }
+}
+
+//input search; created this because couldn't resolve the svg 404 issue.
+.search-input{
+  
+
+    &::-webkit-input-placeholder { // Chrome/Opera/Safari 
+      color: #A3A8AC;
+    }
+    &::-moz-placeholder { // Firefox 19+
+      color: #A3A8AC;
+    }
+    &:-ms-input-placeholder { // IE 10+ 
+      color: #A3A8AC;
+    }
+    &:-moz-placeholder { // Firefox 18- 
+      color: #A3A8AC;
+    }
+    background-color: #313131;
+    color: #bdc3c7;
+    padding: 6px;//6px 55px;
+    border-radius: 2px;
+    background-position: left 8px center;
+    height: auto;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 30px;
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    border: 0;
+    outline: none;
+    background: var(--background);
+    font-family: inherit;
+    -webkit-appearance: none;
+    letter-spacing: inherit;
+    text-decoration: inherit;
+    text-overflow: inherit;
+    text-transform: inherit;
+    text-align: inherit;
+    white-space: inherit;
+}
+
+
+ 

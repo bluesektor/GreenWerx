@@ -9,6 +9,7 @@ using TreeMon.Data.Logging.Models;
 using TreeMon.Managers;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Plant;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Membership;
@@ -17,10 +18,12 @@ using TreeMon.Utilites.Extensions;
 using TreeMon.Web.Filters;
 using TreeMon.Web.Models;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 using WebApiThrottle;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class StrainsController : ApiBaseController
     {
 
@@ -89,7 +92,7 @@ namespace TreeMon.Web.api.v1
 
             StrainManager strainManager = new StrainManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return strainManager.Insert(dest, true);
+            return strainManager.Insert(dest);
         }
 
         [EnableThrottling(PerSecond = 1, PerMinute = 20, PerHour = 200, PerDay = 1500, PerWeek = 3000)]
@@ -104,9 +107,9 @@ namespace TreeMon.Web.api.v1
 
             StrainManager strainManager = new StrainManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            Strain s = (Strain)strainManager.Get(name);
+            List<Strain> s = strainManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Strain could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -124,7 +127,7 @@ namespace TreeMon.Web.api.v1
 
             StrainManager strainManager = new StrainManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Strain s = (Strain)strainManager.GetBy(uuid);
+            Strain s = (Strain)strainManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("Strain could not be located for the name " + uuid);
@@ -132,15 +135,18 @@ namespace TreeMon.Web.api.v1
             return ServiceResponse.OK("", s);
         }
 
-     
 
+        //todo bookmark latest. none of the paging is working
+        //assets/strains
+     //   assets/products
+     //    not paging, maybe check the filter in the angular page
 
-        [EnableThrottling(PerSecond = 1, PerMinute= 20, PerHour= 200, PerDay= 1500, PerWeek= 3000)]
+                [EnableThrottling(PerSecond = 1, PerMinute= 20, PerHour= 200, PerDay= 1500, PerWeek= 3000)]
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Strains/")]
-        public ServiceResult GetStrains(string filter = "")
+        [Route("api/Strains")]
+        public ServiceResult GetStrains()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -150,9 +156,9 @@ namespace TreeMon.Web.api.v1
             List<dynamic>   Strains = (List <dynamic>) strainManager.GetStrains(CurrentUser.AccountUUID, false, true).Cast<dynamic>().ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
+             DataFilter tmpFilter = this.GetFilter(Request);
             
-            Strains = FilterEx.FilterInput(Strains, tmpFilter, out count);
+            Strains = Strains.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Strains, count);
             
         }
@@ -183,7 +189,7 @@ namespace TreeMon.Web.api.v1
 
             StrainManager strainManager = new StrainManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Strain fa = (Strain)strainManager.GetBy(uuid);
+            Strain fa = (Strain)strainManager.Get(uuid);
             if (fa == null)
                 return ServiceResponse.Error("Could not find strain.");
 
@@ -217,7 +223,7 @@ namespace TreeMon.Web.api.v1
 
             StrainManager strainManager = new StrainManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (Strain)strainManager.GetBy(form.UUID);
+            var dbS = (Strain)strainManager.Get(form.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Strain was not found.");

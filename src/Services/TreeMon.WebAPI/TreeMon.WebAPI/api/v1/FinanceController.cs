@@ -8,6 +8,7 @@ using System.Threading;
 using System.Web.Mvc;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers.Finance;
+using TreeMon.Managers.Geo;
 using TreeMon.Managers.Store;
 using TreeMon.Models;
 using TreeMon.Models.App;
@@ -54,7 +55,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return FinanceAccountManager.Insert(n, true);
+            return FinanceAccountManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -68,9 +69,9 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccount s = (FinanceAccount)FinanceAccountManager.Get(name);
+            List<FinanceAccount> s = FinanceAccountManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("FinanceAccount could not be located for the name " + name);
 
             return ServiceResponse.OK("", s);
@@ -88,7 +89,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccount s = (FinanceAccount)FinanceAccountManager.GetBy(uuid);
+            FinanceAccount s = (FinanceAccount)FinanceAccountManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("FinanceAccount could not be located for the uuid " + uuid);
@@ -101,8 +102,8 @@ namespace TreeMon.WebAPI.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
-        [System.Web.Http.Route("api/Finance/Accounts/")]
-        public ServiceResult GetFinanceAccounts(string filter = "")
+        [System.Web.Http.Route("api/Finance/Accounts")]
+        public ServiceResult GetFinanceAccounts()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -113,8 +114,8 @@ namespace TreeMon.WebAPI.api.v1
             List<dynamic> FinanceAccounts = financeAccountManager.GetFinanceAccounts(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            FinanceAccounts = FilterEx.FilterInput(FinanceAccounts, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            FinanceAccounts = FinanceAccounts.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", FinanceAccounts, count);
         }
@@ -150,7 +151,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccount fa = (FinanceAccount)FinanceAccountManager.GetBy(uuid);
+            FinanceAccount fa = (FinanceAccount)FinanceAccountManager.Get(uuid);
             if (fa == null)
                 return ServiceResponse.Error("Could not find finance account.");
 
@@ -168,7 +169,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccount fa = (FinanceAccount)FinanceAccountManager.GetBy(n.UUID);
+            FinanceAccount fa = (FinanceAccount)FinanceAccountManager.Get(n.UUID);
             if (fa == null)
                 return ServiceResponse.Error("Could not find finance account.");
 
@@ -198,7 +199,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountManager FinanceAccountManager = new FinanceAccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (FinanceAccount)FinanceAccountManager.GetBy(s.UUID);
+            var dbS = (FinanceAccount)FinanceAccountManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("FinanceAccount was not found.");
@@ -277,7 +278,7 @@ namespace TreeMon.WebAPI.api.v1
 
             PriceManager financeManager = new PriceManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return financeManager.Insert(PriceRule, false);
+            return financeManager.Insert(PriceRule);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -286,7 +287,7 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult GetPriceRule(string PriceRuleCode)
         {
             if (string.IsNullOrWhiteSpace(PriceRuleCode))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide a code for the rule.");
 
             PriceManager financeManager = new PriceManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
@@ -301,8 +302,8 @@ namespace TreeMon.WebAPI.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
-        [System.Web.Http.Route("api/Finance/PriceRules/")]
-        public ServiceResult GetPriceRules(string filter = "")
+        [System.Web.Http.Route("api/Finance/PriceRules")]
+        public ServiceResult GetPriceRules()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -311,8 +312,8 @@ namespace TreeMon.WebAPI.api.v1
 
             List<dynamic> PriceRule = (List<dynamic>)financeManager.GetPriceRules(CurrentUser.AccountUUID, false).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            PriceRule = FilterEx.FilterInput(PriceRule, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            PriceRule = PriceRule.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", PriceRule, count);
         }
 
@@ -341,7 +342,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("Invalid id.");
 
             PriceManager fm = new PriceManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            PriceRule c = (PriceRule ) fm.GetBy(uuid);
+            PriceRule c = (PriceRule ) fm.Get(uuid);
             if (c == null)
                 return ServiceResponse.Error("Invalid uuid");
 
@@ -371,7 +372,7 @@ namespace TreeMon.WebAPI.api.v1
 
             PriceManager financeManager = new PriceManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (PriceRule)financeManager.GetBy(fat.UUID);
+            var dbS = (PriceRule)financeManager.Get(fat.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("PriceRule was not found.");
@@ -437,7 +438,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountTransactionsManager financeManager = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return financeManager.Insert(s, false);
+            return financeManager.Insert(s);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -447,13 +448,13 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult GetFinanceAccountTransactionByName(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide a name for the transaction.");
 
             FinanceAccountTransactionsManager financeManager = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            FinanceAccountTransaction s = (FinanceAccountTransaction)financeManager.Get(name);
+            List<FinanceAccountTransaction> s = financeManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("FinanceAccountTransaction could not be located for the name " + name);
 
             return ServiceResponse.OK("", s);
@@ -462,24 +463,19 @@ namespace TreeMon.WebAPI.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
-        [System.Web.Http.Route("api/Finance/Accounts/Transactions/")]
-        public ServiceResult GetAccountTransactions(string filter = "")
+        [System.Web.Http.Route("api/Finance/Accounts/Transactions")]
+        public ServiceResult GetAccountTransactions()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
-           
-
             FinanceAccountTransactionsManager financeManager = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            List<FinanceAccountTransaction> cs = financeManager.GetAll();
 
             List<dynamic> FinanceAccountTransaction = (List<dynamic>)financeManager.GetFinanceAccountTransactions(CurrentUser.AccountUUID, false).Cast<dynamic>().ToList();
 
           int count;
-
-
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                FinanceAccountTransaction = FilterEx.FilterInput(FinanceAccountTransaction, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                FinanceAccountTransaction = FinanceAccountTransaction.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", FinanceAccountTransaction, count);
         }
@@ -509,7 +505,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("Invalid id.");
 
             FinanceAccountTransactionsManager fm = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            FinanceAccountTransaction c = (FinanceAccountTransaction)fm.GetBy(uuid);
+            FinanceAccountTransaction c = (FinanceAccountTransaction)fm.Get(uuid);
             if (c == null)
                 return ServiceResponse.Error("Invalid uuid");
 
@@ -539,7 +535,7 @@ namespace TreeMon.WebAPI.api.v1
 
             FinanceAccountTransactionsManager financeManager = new FinanceAccountTransactionsManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (FinanceAccountTransaction)financeManager.GetBy(fat.UUID);
+            var dbS = (FinanceAccountTransaction)financeManager.Get(fat.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("FinanceAccountTransaction was not found.");
@@ -614,7 +610,7 @@ namespace TreeMon.WebAPI.api.v1
 
             CurrencyManager financeManager = new CurrencyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return financeManager.Insert(s, false);
+            return financeManager.Insert(s);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -624,13 +620,13 @@ namespace TreeMon.WebAPI.api.v1
         public ServiceResult GetCurrencyByName(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide a name for the currency.");
 
             CurrencyManager financeManager = new CurrencyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Currency s = (Currency)financeManager.Get(name);
+            List<Currency> s = financeManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Currency could not be located for the name " + name);
 
             return ServiceResponse.OK("", s);
@@ -640,7 +636,7 @@ namespace TreeMon.WebAPI.api.v1
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
         [System.Web.Http.Route("api/Finance/Currency")]
-        public ServiceResult GetCurrency(string filter = "")
+        public ServiceResult GetCurrency()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -651,8 +647,8 @@ namespace TreeMon.WebAPI.api.v1
 
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            currency = FilterEx.FilterInput(currency, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            currency = currency.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", currency, count);
         }
 
@@ -662,7 +658,7 @@ namespace TreeMon.WebAPI.api.v1
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
         [System.Web.Http.Route("api/Finance/Currency/Symbols")]
-        public ServiceResult GetCurrencySymbols(string filter = "")
+        public ServiceResult GetCurrencySymbols()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -683,7 +679,7 @@ namespace TreeMon.WebAPI.api.v1
         [System.Web.Http.HttpPost]
         [System.Web.Http.HttpGet]
         [System.Web.Http.Route("api/Finance/AssetClasses")]
-        public ServiceResult GetAssetClasses(string filter = "")
+        public ServiceResult GetAssetClasses()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -726,7 +722,7 @@ namespace TreeMon.WebAPI.api.v1
                 return ServiceResponse.Error("Invalid id.");
 
             CurrencyManager fm = new CurrencyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Currency c = (Currency)fm.GetBy(currencyUUID);
+            Currency c = (Currency)fm.Get(currencyUUID);
             if (c == null)
                 return ServiceResponse.Error("Invalid uuid");
 
@@ -756,7 +752,7 @@ namespace TreeMon.WebAPI.api.v1
 
             CurrencyManager financeManager = new CurrencyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (Currency)financeManager.GetBy(form.UUID);
+            var dbS = (Currency)financeManager.Get(form.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Currency was not found.");
@@ -766,7 +762,7 @@ namespace TreeMon.WebAPI.api.v1
 
             dbS.Name = form.Name;
             dbS.AssetClass = form.AssetClass;
-            // dbS.Country = form.Country;
+            //// dbS.Country = form.Country;
             dbS.Symbol = form.Symbol;
             dbS.Test = form.Test;
             dbS.Image = form.Image;
@@ -788,8 +784,7 @@ namespace TreeMon.WebAPI.api.v1
             NetworkHelper network = new NetworkHelper();
             string ip = network.GetClientIpAddress(this.Request);
 
-            byte[] paramArray = await Request.Content.ReadAsByteArrayAsync();
-            var content = System.Text.Encoding.ASCII.GetString(paramArray);
+          
 
 
 #if DEBUG
@@ -799,17 +794,18 @@ namespace TreeMon.WebAPI.api.v1
                                         notify_version = 2.6 & custom = d5422cf40f364cd99cac5fb3df7c12f6 &payer_status = verified & address_country = United + States & address_city = San + Jose & quantity = 1 & 
                                         verify_sign = AtkOfCXbDm2hu0ZELryHFjY - Vb7PAUvS6nMXgysbElEn9v - 1XcmSoGtf & payer_email = gpmac_1231902590_per % 40paypal.com & txn_id = 61E67681CH3238416 & payment_type = instant & last_name = User & address_state = CA & receiver_email = gpmac_1231902686_biz % 40paypal.com & 
                                         payment_fee = 0.88 & receiver_id = S8XGHLYDW9T3S & txn_type = express_checkout & item_name = &mc_currency = USD & item_number = &residence_country = US & test_ipn = 1 & handling_amount = 0.00 & transaction_subject = &payment_gross = 19.95 & shipping = 0.00";
-            content = ipnSample;
 
-            _gatewayManager.ProcessIpn(content, ip);
+            _gatewayManager.ProcessIpn(ipnSample, ip);
 
 #else
+              byte[] paramArray = await Request.Content.ReadAsByteArrayAsync();
+            var content = System.Text.Encoding.ASCII.GetString(paramArray);
            //Fire and forget verification task
             Thread t = new Thread(() => _gatewayManager.ProcessIpn(content, ip));
             t.Start();
 #endif
 
-             return new HttpStatusCodeResult(HttpStatusCode.OK);
+            return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
 
     }

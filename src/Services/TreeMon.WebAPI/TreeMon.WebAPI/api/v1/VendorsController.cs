@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using TreeMon.Managers.Store;
- 
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Store;
@@ -41,7 +41,7 @@ namespace TreeMon.Web.api.v1
 
             VendorManager vendorManager = new VendorManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return vendorManager.Insert(n, true);
+            return vendorManager.Insert(n);
 
         }
 
@@ -56,9 +56,9 @@ namespace TreeMon.Web.api.v1
 
             VendorManager vendorManager = new VendorManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Vendor s =(Vendor) vendorManager.Get(name);
+            List<Vendor> s = vendorManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Vendor could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -75,7 +75,7 @@ namespace TreeMon.Web.api.v1
 
             VendorManager vendorManager = new VendorManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Vendor s = (Vendor)vendorManager.GetBy(uuid);
+            Vendor s = (Vendor)vendorManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("Vendor could not be located for the name " + uuid);
@@ -86,8 +86,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Vendors/")]
-        public ServiceResult GetVendors(string filter = "")
+        [Route("api/Vendors")]
+        public ServiceResult GetVendors()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -96,8 +96,8 @@ namespace TreeMon.Web.api.v1
 
             List<dynamic> Vendors = vendorManager.GetVendors(CurrentUser.AccountUUID, false, true).Cast<dynamic>().ToList();
             int count;
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                Vendors = FilterEx.FilterInput(Vendors, tmpFilter, out count);
+            DataFilter tmpFilter = this.GetFilter(Request);
+            Vendors = Vendors.Filter(tmpFilter, out count);
             return ServiceResponse.OK("", Vendors, count);
         }
 
@@ -132,7 +132,7 @@ namespace TreeMon.Web.api.v1
 
             VendorManager vendorManager = new VendorManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Vendor v = (Vendor)vendorManager.GetBy(vendorUUID);
+            Vendor v = (Vendor)vendorManager.Get(vendorUUID);
 
             return this.Delete(v);
         }
@@ -163,7 +163,7 @@ namespace TreeMon.Web.api.v1
 
             VendorManager vendorManager = new VendorManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbv =(Vendor) vendorManager.GetBy(v.UUID);
+            var dbv =(Vendor) vendorManager.Get(v.UUID);
 
             if (dbv == null)
                 return ServiceResponse.Error("Vendor was not found.");

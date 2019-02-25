@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using TreeMon.Managers.Membership;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Membership;
@@ -16,9 +17,11 @@ using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Helpers;
 using TreeMon.Web.Filters;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class RolesController : ApiBaseController
     {
         public RolesController()
@@ -36,9 +39,6 @@ namespace TreeMon.Web.api.v1
         [Route("api/Roles/{roleUUID}/Permissions/Add")]
         public ServiceResult AddPermissionsToRole(string roleUUID )
         {
-            string root = EnvironmentEx.AppDataFolder;
-            var provider = new MultipartFormDataStreamProvider(root);
-
             try
             {
                 Task<string> content = ActionContext.Request.Content.ReadAsStringAsync();
@@ -94,7 +94,6 @@ namespace TreeMon.Web.api.v1
         public ServiceResult AddUsersToRole(string roleUUID)
         {
             ServiceResult res;
-            string root = EnvironmentEx.AppDataFolder;
 
             try
             {
@@ -163,7 +162,7 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
 
-            Role dbRole = (Role) roleManager.GetBy(n.UUID);
+            Role dbRole = (Role) roleManager.Get(n.UUID);
 
             if (dbRole == null)
                 return ServiceResponse.Error("Invalid role.");
@@ -185,7 +184,7 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
 
-            Role dbRole = (Role)roleManager.GetBy(uuid);
+            Role dbRole = (Role)roleManager.Get(uuid);
 
             if (dbRole == null)
                 return ServiceResponse.Error("Invalid role.");
@@ -241,15 +240,15 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Roles/{roleUUID}/Permissions/Unassigned/")]
-        public ServiceResult GetUnassignedPermissionsForRole(string roleUUID, string filter = "")
+        [Route("api/Roles/{roleUUID}/Permissions/Unassigned")]
+        public ServiceResult GetUnassignedPermissionsForRole(string roleUUID)
         {
             RoleManager rm = new RoleManager(Globals.DBConnectionKey, this.GetUser(Request.Headers?.Authorization?.Parameter));
             List<dynamic> availablePerms =rm.GetAvailablePermissions(roleUUID, CurrentUser.AccountUUID).OrderBy(ob => ob.Name).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                availablePerms = FilterEx.FilterInput(availablePerms, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                availablePerms = availablePerms.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", availablePerms, count);
 
@@ -258,8 +257,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Roles/{roleUUID}/Permissions/")]
-        public ServiceResult GetPermissionsForRole(string roleUUID, string filter = "")
+        [Route("api/Roles/{roleUUID}/Permissions")]
+        public ServiceResult GetPermissionsForRole(string roleUUID)
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -268,8 +267,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> permissions = rm.GetPermissionsForRole(roleUUID, CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                permissions = FilterEx.FilterInput(permissions, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                permissions = permissions.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", permissions, count);
         }
@@ -279,7 +278,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Roles/{name}")]
-        public ServiceResult Get(string name )
+        public ServiceResult Search(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
                 return ServiceResponse.Error("You must provide a name for the role.");
@@ -291,9 +290,9 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, this.GetUser(Request.Headers?.Authorization?.Parameter));
 
-            Role s = (Role)roleManager.Get(name);
+            List<Role> s = roleManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Role could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -313,8 +312,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Roles/")]
-        public ServiceResult GetRoles(string filter = "")
+        [Route("api/Roles")]
+        public ServiceResult GetRoles()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -323,11 +322,23 @@ namespace TreeMon.Web.api.v1
 
             List<dynamic> roles = roleManager.GetRoles(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            roles = FilterEx.FilterInput(roles, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            roles = roles.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", roles, count);
         }
+
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
+        [HttpPost]
+        [HttpGet]
+        [Route("api/Roles/IsMember/{roleName}")]
+        public ServiceResult IsUserInRole( string roleName)
+        {
+            RoleManager rm = new RoleManager(Globals.DBConnectionKey, this.GetUser(Request.Headers?.Authorization?.Parameter));
+            bool isMember = rm.IsUserInRole(CurrentUser.UUID, roleName, CurrentUser.AccountUUID);
+            return ServiceResponse.OK("", isMember);
+        }
+
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpPost]
@@ -340,9 +351,24 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
 
-            Role  role= (Role)roleManager.GetBy(uuid);
+            Role  role= (Role)roleManager.Get(uuid);
          
             return ServiceResponse.OK("", role);
+        }
+
+        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
+        [HttpGet]
+        [Route("api/Roles/User")]
+        public ServiceResult GetUserRoles()
+        {
+            if (CurrentUser == null)
+                return ServiceResponse.Error("You must be logged in to access this function.");
+
+            RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, CurrentUser);
+
+            List<Role> userRoles = roleManager.GetRolesForUser(CurrentUser.UUID, CurrentUser.AccountUUID);
+
+            return ServiceResponse.OK("", userRoles);
         }
 
 
@@ -357,7 +383,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Roles/{roleUUID}/Users")]
-        public ServiceResult GetUsersInRole(string roleUUID,  string filter = "")
+        public ServiceResult GetUsersInRole(string roleUUID )
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -368,8 +394,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> usersInRole =rm.GetUsersInRole(roleUUID, CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            usersInRole = FilterEx.FilterInput(usersInRole, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            usersInRole = usersInRole.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", usersInRole, count);
         }
@@ -378,18 +404,18 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Roles/{roleUUID}/Users/Unassigned")]
-        public ServiceResult GetUnassignedUsersForRole(string roleUUID,string filter = "")
+        public ServiceResult GetUnassignedUsersForRole(string roleUUID)
         {
             RoleManager rm = new RoleManager(Globals.DBConnectionKey, CurrentUser);
      
             List<dynamic> availableUsers =rm.GetUsersNotInRole(roleUUID, CurrentUser.AccountUUID).OrderBy(ob => ob.Name).Cast<dynamic>().ToList();
          
             int count =0;
-
-            if (!string.IsNullOrWhiteSpace(filter))
+            DataFilter filter = GetFilter(Request);
+            if (filter != null)
             {
-                DataFilter tmpFilter = this.GetFilter(filter);
-                availableUsers = FilterEx.FilterInput(availableUsers, tmpFilter, out count);
+                 DataFilter tmpFilter = this.GetFilter(Request);
+                availableUsers = availableUsers.Filter( tmpFilter, out count);
             }
 
             return ServiceResponse.OK("", availableUsers, count);
@@ -417,7 +443,7 @@ namespace TreeMon.Web.api.v1
 
             RoleManager roleManager = new RoleManager(Globals.DBConnectionKey, this.GetUser(Request.Headers?.Authorization?.Parameter));
 
-            Role dbRole = (Role)roleManager.GetBy( r.UUID );
+            Role dbRole = (Role)roleManager.Get( r.UUID );
 
             if (dbRole == null)
                 return ServiceResponse.Error("Role was not found.");

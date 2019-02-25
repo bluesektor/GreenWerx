@@ -39,13 +39,25 @@ namespace TreeMon.Managers.General
             return res;
         }
 
-        public INode Get(string status)
+        public INode Get(string uuid)
         {
-            if (string.IsNullOrWhiteSpace(status))
+            if (string.IsNullOrWhiteSpace(uuid))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<TMG.Attribute>().FirstOrDefault(sw => sw.Status.EqualsIgnoreCase(status));
+                return context.GetAll<TMG.Attribute>()?.FirstOrDefault(sw => sw.UUID == uuid);
+            }
+        }
+
+
+        public List<TMG.Attribute> Search(string status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+                return new List<Models.General.Attribute>();
+
+            using (var context = new TreeMonDbContext(this._connectionKey))
+            {
+                return context.GetAll<TMG.Attribute>()?.Where(sw => sw.Status.EqualsIgnoreCase(status)).ToList();
             }
         }
 
@@ -54,7 +66,7 @@ namespace TreeMon.Managers.General
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<TMG.Attribute>().Where(sw => (sw.AccountUUID == accountUUID  && 
+                return context.GetAll<TMG.Attribute>()?.Where(sw => (sw.AccountUUID == accountUUID  && 
                                                                         sw.ReferenceUUID == referenceUUID && 
                                                                         (sw.ReferenceType?.EqualsIgnoreCase(referenceType)??false)))
                                                                         .OrderBy(ob => ob.Name).ToList();
@@ -66,23 +78,12 @@ namespace TreeMon.Managers.General
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
 
-                return context.GetAll<TMG.Attribute>().Where(sw => (sw.AccountUUID == accountUUID)).OrderBy(ob => ob.Status).ToList();
+                return context.GetAll<TMG.Attribute>()?.Where(sw => (sw.AccountUUID == accountUUID)).OrderBy(ob => ob.Status).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public INode  GetBy(string uuid)
-        {
-            if (string.IsNullOrWhiteSpace(uuid))
-                return null;
-            using (var context = new TreeMonDbContext(this._connectionKey))
-            {
-                return context.GetAll<TMG.Attribute>().FirstOrDefault(sw => sw.UUID == uuid);
-            }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-        }
-
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -92,13 +93,12 @@ namespace TreeMon.Managers.General
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    TMG.Attribute dbU = context.GetAll<TMG.Attribute>().FirstOrDefault(wu => wu.Status.EqualsIgnoreCase(s.Status) && wu.AccountUUID == s.AccountUUID);
+              
+                    TMG.Attribute dbU = context.GetAll<TMG.Attribute>()?.FirstOrDefault(wu => wu.Status.EqualsIgnoreCase(s.Status) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Attribute already exists.");
-                }
+                
           
                 if (context.Insert<TMG.Attribute>(s))
                     return ServiceResponse.OK("", s);

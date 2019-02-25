@@ -13,6 +13,8 @@ using TreeMon.Models.Membership;
 using System.Linq;
 using TreeMon.Utilites.Security;
 using TreeMon.Managers.Membership;
+using TreeMon.Data.Helpers;
+using Dapper;
 
 namespace TreeMon.Web.Tests._templates
 {
@@ -95,7 +97,7 @@ namespace TreeMon.Web.Tests._templates
 
         //    //if (AppCommands.Count == 0 || (AppCommands.Count > 0 && AppCommands.Contains("web.install") == false))
         //    //    return new ServiceResult() { Code = 500, Status = "ERROR", Message = "Application is already installed." };
-      
+
 
         //    Assert.AreEqual(m.Install(setting).Code, 500);
         //    Assert.IsTrue(m.Install(setting).Message.Contains("Username is empty"));
@@ -145,7 +147,7 @@ namespace TreeMon.Web.Tests._templates
         //    Assert.IsTrue(acct.UUIDType == "Account");
         //    Assert.IsTrue(acct.AccountSource == setting.AccountName);
         //    Assert.IsTrue(acct.Active);
-          
+
         //    Assert.IsTrue(acct.OwnerUUID == setting.UserName);
         //    Assert.IsTrue(acct.OwnerType == "user.username");
         //    Assert.IsTrue(acct.DateCreated != DateTime.MinValue);
@@ -239,8 +241,8 @@ namespace TreeMon.Web.Tests._templates
         //    Assert.IsFalse(File.Exists(EnvironmentEx.AppDataFolder + "\\install.cmd"));
         //    #endregion
 
-            
-           
+
+
         //}
 
         //[TestMethod]
@@ -252,7 +254,51 @@ namespace TreeMon.Web.Tests._templates
         //    Assert.AreEqual(res.Code, 200);
         //}
 
+        [TestMethod]
+        public void AppManager_SeedDatabases()
+        {
+            List<string> tables = DatabaseEx.GetTableNames();
+            foreach (string table in tables)
+            {
+                  TreeMonDbContext sourceContext = new TreeMonDbContext("MSSQL_SOURCE");
+              //  sourceContext.GetAll<
 
+                TreeMonDbContext destContext = new TreeMonDbContext("MSSQL_DEST");
+
+                
+
+                //_user = context.GetAll<User>().FirstOrDefault();
+                DynamicParameters parameters = new DynamicParameters();//dapper
+                                                                       //parameters.Add("@PROVIDER", "UPDATED_PROVIDER");
+                                                                       //parameters.Add("@UUID", _user.UUID);
+
+                // List<SqlParameter> parameters = new List<SqlParameter>();
+                // parameters.Add(new SqlParameter("@PROVIDER", "UPDATED_PROVIDER"));
+                // parameters.Add(new SqlParameter("@UUID", _user.UUID));
+
+                string query = "SET IDENTITY_INSERT " + table + " ON; ";
+
+
+             //get column names then use them in the select instead of * may need to compare with destination
+             //   "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Categories' AND TABLE_SCHEMA = 'dbo'"
+
+                query += "INSERT INTO TreemonSystemTest.dbo." + table + " SELECT * FROM TreemonBackup_original.dbo." + table;
+                query += " SET IDENTITY_INSERT " + table + " OFF; ";
+                int res = destContext.ExecuteNonQuery(query, parameters);
+
+                //                -SET IDENTITY_INSERT Employee ON
+                //     --SET IDENTITY_INSERT Employee OFF
+
+                //--select 'set identity_insert [' + s.name + '].[' + o.name + '] on'
+                //--from sys.objects o
+                //--inner
+                //  join sys.schemas s on s.schema_id = o.schema_id
+                //--where o.[type] = 'U'
+                //--and exists(select 1 from sys.columns where object_id = o.object_id and is_identity = 1)
+                //--
+
+            }
+        }
 
         //[TestMethod]
         //public void AppManager_Insert_Setting()
@@ -266,7 +312,7 @@ namespace TreeMon.Web.Tests._templates
         //    //        SettingClass = "TESTCLASS", Type = "STRING", Value = "testValue",
         //    //        AccountUUID = "a",
         //    //        Name = name, AppType = appType
-                    
+
         //    //    })
         //    // .Code, 200);
         //}
@@ -344,7 +390,7 @@ namespace TreeMon.Web.Tests._templates
         //        Name = name, AppType = appType
         //    };
 
-            
+
         //    m.Insert(s,"encryption.key");
 
         //    //Test the delete flag

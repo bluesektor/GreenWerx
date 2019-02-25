@@ -34,9 +34,9 @@ namespace TreeMon.Models.Membership
 
         public string Status  { get; set; }
 
-        public string SyncKey { get; set; }
+        public string GUUID { get; set; }
 
-        public string SyncType { get; set; }
+        public string GuuidType { get; set; }
 
         public int RoleWeight { get; set; }
 

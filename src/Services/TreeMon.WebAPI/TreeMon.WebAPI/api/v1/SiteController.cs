@@ -54,7 +54,7 @@ namespace TreeMon.Web.api.v1
             EmailLog emailLog = new EmailLog();
             emailLog.Message = form.Comment + "<br/><br/><br/>Message Key:" + emailLog.UUID;
             emailLog.Subject = form.Subject;
-            emailLog.EmailFrom = form.SentFrom;
+            emailLog.EmailFrom = Cipher.Crypt(Globals.Application.AppSetting("AppKey"), form.SentFrom, true);
             emailLog.UUIDType += "." + form.Type;
 
             if (form.Type?.ToLower() != "contactus")
@@ -88,13 +88,15 @@ namespace TreeMon.Web.api.v1
             settings.MailHost = Globals.Application.AppSetting("MailHost");
             settings.MailPort = StringEx.ConvertTo<int>(Globals.Application.AppSetting("MailPort"));
             settings.SiteDomain = Globals.Application.AppSetting("SiteDomain");
+            settings.EmailDomain = Globals.Application.AppSetting("EmailDomain");
             settings.SiteEmail = Globals.Application.AppSetting("SiteEmail");
             settings.UseSSL = StringEx.ConvertTo<bool>(Globals.Application.AppSetting("UseSSL"));
 
-            MailAddress ma = new MailAddress(form.SentFrom, form.SentFrom);
+            MailAddress ma = new MailAddress(settings.SiteEmail, settings.SiteEmail);
             MailMessage mail = new MailMessage();
             mail.From = ma;
-            mail.ReplyToList.Add( ma );
+            // mail.ReplyToList.Add( ma );
+            mail.ReplyToList.Add(form.SentFrom);
             mail.To.Add(emailLog.EmailTo);
             mail.Subject = emailLog.Subject;
             mail.Body = emailLog.Message + "<br/><br/><br/>IP:" + ipAddress; 

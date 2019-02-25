@@ -6,12 +6,34 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TreeMon.Models.Membership
 {
-    [Table("ProfileLogs")]
-    public  class Profile:Node
+    [Table("Profiles")]
+    public class Profile : Node
     {
         public Profile()
         {
             UUIDType = "Profile";
+
+        }
+
+        //todo pull from account? if empty?  
+        public string Location { get; set; }
+
+        public string LocationType { get; set; }
+
+        public string Theme { get; set; }
+
+        public string View { get; set; }
+
+        public string UserUUID { get; set; }
+
+    }
+
+    [Table("ProfileLogs")]
+    public  class PersonalProfile:Node
+    {
+        public PersonalProfile()
+        {
+            UUIDType = "PersonalProfile";
 
         }
         public DateTime? DOB { get; set; }

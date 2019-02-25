@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Web.Http;
 using TreeMon.Managers;
 using TreeMon.Managers.Medical;
@@ -49,8 +50,6 @@ namespace TreeMon.Web.api.v1
             if (us == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
-         
-
             if (us.Captcha?.ToUpper() != d.Captcha?.ToUpper())
                 return ServiceResponse.Error("Invalid code.");
 
@@ -75,7 +74,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must select a product.");
             
              ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Product p = (Product)productManager.GetBy(d.ProductUUID);
+            Product p = (Product)productManager.Get(d.ProductUUID);
             if(p== null)
             {
                 return ServiceResponse.Error("Product could not be found. You must select a product, or create one from the products page.");
@@ -92,9 +91,9 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must select a unit of measure.");
 
             UnitOfMeasureManager uomm = new UnitOfMeasureManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            if (uomm.GetBy(d.UnitOfMeasure) == null)
+            if (uomm.Get(d.UnitOfMeasure) == null)
             {
-                UnitOfMeasure uom = (UnitOfMeasure)uomm.Get(d.UnitOfMeasure);
+                UnitOfMeasure uom = (UnitOfMeasure)uomm.Search(d.UnitOfMeasure)?.FirstOrDefault();
                 if (uom == null)
                 {
                     uom = new UnitOfMeasure();
@@ -119,37 +118,37 @@ namespace TreeMon.Web.api.v1
             var dest = mapper.Map<DoseLogForm, DoseLog>(d);
 
             DoseManager DoseManager = new DoseManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            ServiceResult sr = DoseManager.Insert(dest,false);
+            ServiceResult sr = DoseManager.Insert(dest);
             if (sr.Code != 200)
                 return sr;
 
             SymptomManager sm = new SymptomManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            string symptomErrors = "";
+            StringBuilder symptomErrors = new StringBuilder();
            
             int index = 1;
             foreach (SymptomLog s in d.Symptoms)
             {
                 if (string.IsNullOrWhiteSpace(s.UUID)) {
-                    symptomErrors += "Symptom " + index + " UUID must be set! <br/>";
+                    symptomErrors.AppendLine( "Symptom " + index + " UUID must be set!");
                     Debug.Assert(false, "SYMPTOM UUID MUST BE SET!!");
                     continue;
                 }
 
-                Symptom stmp = (Symptom)sm.GetBy(s.UUID);
+                Symptom stmp = (Symptom)sm.Get(s.UUID);
 
                 if (stmp == null)
-                    stmp = (Symptom)sm.GetBy(s.UUID);
+                    stmp = (Symptom)sm.Get(s.UUID);
 
                 if (stmp == null)
                 {
-                    symptomErrors += "Symptom " + s.UUID + " could not be found! <br/>";
+                    symptomErrors.AppendLine("Symptom " + s.UUID + " could not be found!");
                     continue;
                 }
                 s.Name = stmp.Name;
 
                 if(s.SymptomDate == null || s.SymptomDate == DateTime.MinValue)
                 {
-                    symptomErrors += "Symptom " + s.UUID + " date must be set! <br/>";
+                    symptomErrors.AppendLine("Symptom " + s.UUID + " date must be set!");
                     continue;
                 }
                 //s.Status
@@ -160,20 +159,24 @@ namespace TreeMon.Web.api.v1
                 s.Deleted = false;
                 s.DoseUUID = dest.UUID;
                 s.Private = true;
-                ServiceResult slSr = sm.Insert(s, false);
+                ServiceResult slSr = sm.Insert(s);
 
                 if(slSr.Code != 200)
-                    symptomErrors += "Symptom " + index + " failed to save. " + slSr.Message;
+                    symptomErrors.AppendLine( "Symptom " + index + " failed to save. " + slSr.Message);
                 index++;
             }
+
+            if (symptomErrors.Length > 0)
+                return ServiceResponse.Error(symptomErrors.ToString());
+
             return ServiceResponse.OK("",dest);
         }
 
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/DoseLogs/")]
-        public ServiceResult GetLogs(string filter = "")
+        [Route("api/DoseLogs")]
+        public ServiceResult GetLogs()
         {
             if (Request.Headers.Authorization == null || string.IsNullOrWhiteSpace(Request.Headers?.Authorization?.Parameter))
                 return ServiceResponse.Error("You must be logged in to access this functionality.");
@@ -185,10 +188,11 @@ namespace TreeMon.Web.api.v1
             DoseManager DoseManager = new DoseManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
             List<dynamic> Doses = DoseManager.GetDoses(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
 
-            if (!string.IsNullOrWhiteSpace(filter))
+            DataFilter filter = this.GetFilter(Request);
+            if (filter != null)
             {
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                Doses = FilterEx.FilterInput(Doses, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                Doses = Doses.Filter( tmpFilter, out count);
            
                  //todo move the code below to the filter input
                 string sortField = tmpFilter.SortBy?.ToUpper();
@@ -237,9 +241,8 @@ namespace TreeMon.Web.api.v1
 
             int count = 0;
             DoseManager DoseManager = new DoseManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            DoseLog d =  (DoseLog)DoseManager.Get(name);
-
-            return ServiceResponse.OK("", d, count);
+            List<DoseLog> s = DoseManager.Search(name);
+                return ServiceResponse.OK("", s, count);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
@@ -256,7 +259,7 @@ namespace TreeMon.Web.api.v1
 
             int count = 0;
             DoseManager DoseManager = new DoseManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            DoseLog d = (DoseLog)DoseManager.GetBy(uuid);
+            DoseLog d = (DoseLog)DoseManager.Get(uuid);
 
             return ServiceResponse.OK("", d, count);
         }
@@ -287,7 +290,7 @@ namespace TreeMon.Web.api.v1
 
             DoseManager DoseManager = new DoseManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (DoseLog)DoseManager.GetBy(form.UUID);
+            var dbS = (DoseLog)DoseManager.Get(form.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Strain was not found.");

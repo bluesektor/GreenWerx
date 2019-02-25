@@ -7,7 +7,7 @@ using System.Linq;
 using TreeMon.Data;
 using TreeMon.Models;
 using TreeMon.Models.App;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Utilites.Extensions;
 
 namespace TreeMon.Managers.Event
@@ -40,7 +40,7 @@ namespace TreeMon.Managers.Event
             }
 
             //get the Notification from the table with all the data so when its updated it still contains the same data.
-            s = (Notification) this.GetBy(s.UUID);
+            s = (Notification) this.Get(s.UUID);
             if (s == null)
                 return ServiceResponse.Error("Symptom not found");
             s.Deleted = true;
@@ -52,15 +52,16 @@ namespace TreeMon.Managers.Event
             return res;
         }
 
-        public INode Get(string name)
+        public List<Notification> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Notification>();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Notification>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<Notification>().Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ////if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
         public List<Notification> GetNotifications(string accountUUID, bool deleted = false)
@@ -69,11 +70,11 @@ namespace TreeMon.Managers.Event
             {
                 return context.GetAll<Notification>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            //////if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
@@ -81,10 +82,10 @@ namespace TreeMon.Managers.Event
             {
                 return context.GetAll<Notification>().FirstOrDefault(sw => sw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ////if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "post", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -94,13 +95,12 @@ namespace TreeMon.Managers.Event
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
+               
                     Notification dbU = context.GetAll<Notification>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
               
                     if (dbU != null)
                         return ServiceResponse.Error("Notification already exists.");
-                }
+               
     
                 if (context.Insert<Notification>(s))
                     return ServiceResponse.OK("",s);

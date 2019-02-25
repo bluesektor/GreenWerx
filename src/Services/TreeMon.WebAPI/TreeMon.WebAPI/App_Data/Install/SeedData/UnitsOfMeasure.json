@@ -1,7 +1,7 @@
 ﻿[ 
   {
-    "SyncKey": "0c2b603b45714ba5861eee39e55e9ad8",
-    "SyncType": "UnitOfMeasure",
+    "GUUID": "0c2b603b45714ba5861eee39e55e9ad8",
+    "GuuidType": "UnitOfMeasure",
     "UUParentID": "0",
     "UUParentIDType": "",
     "Name": "Milligram",
@@ -16,8 +16,8 @@
     "SortOrder": "0"
   },
   {
-    "SyncKey": "f30ed89bc21d49c1b281c9443743752d",
-    "SyncType": "UnitOfMeasure",
+    "GUUID": "f30ed89bc21d49c1b281c9443743752d",
+    "GuuidType": "UnitOfMeasure",
     "UUParentID": "0",
     "UUParentIDType": "",
     "Name": "Gram",
@@ -32,8 +32,8 @@
     "SortOrder": "0"
   },
   {
-    "SyncKey": "a9d6c08d0eaf4f0ea2597e059fed0f82",
-    "SyncType": "UnitOfMeasure",
+    "GUUID": "a9d6c08d0eaf4f0ea2597e059fed0f82",
+    "GuuidType": "UnitOfMeasure",
     "UUParentID": "0",
     "UUParentIDType": "",
     "Name": "Ounce",
@@ -48,8 +48,8 @@
     "SortOrder": "0"
   },
   {
-    "SyncKey": "4dc064e206c64ba5a394f8f4f2e0e87e",
-    "SyncType": "UnitOfMeasure",
+    "GUUID": "4dc064e206c64ba5a394f8f4f2e0e87e",
+    "GuuidType": "UnitOfMeasure",
     "UUParentID": "0",
     "UUParentIDType": "",
     "Name": "Kilogram",
@@ -64,8 +64,8 @@
     "SortOrder": "0"
   },
   {
-    "SyncKey": "864392ab840a4950abedb1abe1b24bde",
-    "SyncType": "UnitOfMeasure",
+    "GUUID": "864392ab840a4950abedb1abe1b24bde",
+    "GuuidType": "UnitOfMeasure",
     "UUParentID": "0",
     "UUParentIDType": "",
     "Name": "Pound",

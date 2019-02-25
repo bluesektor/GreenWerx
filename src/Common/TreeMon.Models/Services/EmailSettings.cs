@@ -20,6 +20,8 @@ namespace TreeMon.Models.Services
 
         public string SiteDomain { get; set; }
 
+        public string EmailDomain { get; set; }
+
         /// <summary>
         /// Should be the AppKey
         /// </summary>

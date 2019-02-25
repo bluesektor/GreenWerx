@@ -8,7 +8,7 @@ Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/lice
  
     <!-- Nonadmin/public template-->
     <div *ngIf="userIsLoggedIn === false || userIsAdmin === false" >
-        <tm-navbar-default *ngIf="showNavbar"></tm-navbar-default>       
+        <app-navbar-default *ngIf="showNavbar"></app-navbar-default>       
         <router-outlet></router-outlet>
     </div>
 

@@ -1,7 +1,7 @@
 ﻿// Copyright 2015, 2017 TreeMon.org.
 // Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { SessionService } from '../services/session.service';
@@ -12,6 +12,7 @@ import { DataTableModule, SharedModule, DialogModule } from 'primeng/primeng';
 import { Filter } from '../models/filter';
 import { Screen } from '../models/screen';
 @Component({
+    selector: 'app-settings',
     templateUrl: './settings.component.html',
     providers: [SettingsService, SessionService]
 
@@ -25,6 +26,9 @@ export class SettingsComponent implements OnInit {
     setting: Setting = new Setting();
     settingFilters: Filter[] = [];
     totalSettings = 0;
+    @Input() settingType: string;
+    @Input() settingClass: string;
+
 
     types: any[] = [
         { 'name': 'Select one...', 'value': '' },
@@ -62,6 +66,22 @@ export class SettingsComponent implements OnInit {
         filter.PageResults = true;
         filter.StartIndex = page;
         filter.PageSize = pageSize;
+        if (this.settingType !== '') {
+            const screen = new Screen();
+            screen.Command = 'SEARCHBY';
+            screen.Field = 'UUIDType';
+            screen.Value = this.settingType;
+            filter.Screens.push(screen);
+        }
+
+        if (this.settingClass !== '') {
+            const classScreen = new Screen();
+            classScreen.Command = 'SEARCHBY';
+            classScreen.Field = 'SettingClass';
+            classScreen.Value = this.settingClass;
+            filter.Screens.push(classScreen);
+        }
+
         const res = this._settingService.getSettings(filter);
 
         res.subscribe(response => {

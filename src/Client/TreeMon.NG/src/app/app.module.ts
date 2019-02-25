@@ -8,8 +8,8 @@ import { HttpModule } from '@angular/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
-// 3rd Parth
-import { StepsModule, PanelMenuModule, CheckboxModule } from 'primeng/primeng';
+// 3rd Party
+import { StepsModule, PanelMenuModule, CheckboxModule, ChartModule } from 'primeng/primeng';
 import { CookieService } from 'angular2-cookie/services/cookies.service';
 
 // Components
@@ -44,9 +44,10 @@ import { GeoModule } from './geo/geo.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { PlantsModule } from './plants/plants.module';
 import { RolesModule } from './membership/roles/roles.module';
-
+import { APIModule } from './membership/api/api.module';
 import { UsersModule } from './membership/users/users.module';
 import { MessageBoxesModule } from './common/messageboxes.module';
+import { GraphsModule } from './common/graphs.module';
 
 
 @NgModule({
@@ -60,6 +61,7 @@ import { MessageBoxesModule } from './common/messageboxes.module';
     StepsModule,
     HttpModule,
     AccountsModule,
+    APIModule,
     SystemModule,
     UtilitiesModule,
     StoreModule,
@@ -70,7 +72,9 @@ import { MessageBoxesModule } from './common/messageboxes.module';
     GeoModule,
     PlantsModule,
     MessageBoxesModule,
-    CheckboxModule
+    CheckboxModule,
+    ChartModule,
+    GraphsModule
   ],
   declarations: [
     AboutComponent,

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -64,7 +65,10 @@ namespace TreeMon.Utilites.Security
                 string pathToPasswords = Path.Combine(EnvironmentEx.AppDataFolder.Replace("\\\\","\\"), "WordLists\\CommonPasswords.txt");
 
                 if (!File.Exists(pathToPasswords))
+                {
+                    Debug.Assert(false, "PASSWORD FILE IS MISSING");
                     return true;
+                }
 
                 string[] passwords = File.ReadAllLines(pathToPasswords);
 

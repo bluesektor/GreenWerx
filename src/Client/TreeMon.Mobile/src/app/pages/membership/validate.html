@@ -1,0 +1,7 @@
+
+<div  *ngIf="validating === false">
+<div  innerHtml="{{message}}" style="display: block;margin: auto;"></div>
+</div>
+ 
+
+<ion-spinner *ngIf="validating === true"  style="display: block;margin: auto;"  ></ion-spinner>

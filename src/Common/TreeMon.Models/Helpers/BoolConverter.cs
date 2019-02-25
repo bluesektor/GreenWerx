@@ -15,9 +15,6 @@ namespace TreeMon.Models.Helpers
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             writer.WriteValue(value);
-            //writer.WriteValue(((bool)value) ? 1 : 0);
-            // writer.WriteValue(((bool)value) ? "true" : "false");
-
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

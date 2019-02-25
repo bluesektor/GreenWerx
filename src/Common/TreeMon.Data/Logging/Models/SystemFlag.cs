@@ -47,6 +47,7 @@ namespace TreeMon.Data.Logging.Models
             //
             public const string Account = "system.default.account";
 
+
             public const string AppType = "system.default.app";
         }
     }

@@ -10,15 +10,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using TreeMon.Data.Logging;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers;
+using TreeMon.Managers.Events;
+using TreeMon.Managers.Geo;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Store;
 
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
+using TreeMon.Models.Events;
 using TreeMon.Models.Geo;
 using TreeMon.Models.Membership;
 using TreeMon.Utilites.Extensions;
@@ -29,13 +33,15 @@ using TreeMon.Web.Filters;
 using TreeMon.Web.Models;
 using TreeMon.WebAPI.Helpers;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 using WebApiThrottle;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class AppsController : ApiBaseController 
     {
-        SystemLogger _logger = null;
+        readonly  SystemLogger _logger = null;
 
         public AppsController()
         {
@@ -130,7 +136,7 @@ namespace TreeMon.Web.api.v1
         public ServiceResult GetBy(string uuid)
         {
             AppManager am = new AppManager(Globals.DBConnectionKey, "web", Request.Headers?.Authorization?.Parameter);
-            Setting s = am.GetBy(uuid);
+            Setting s = am.Get(uuid);
             if (s == null)
                 return ServiceResponse.Error("Settings by could not find:" +  uuid  );
             return ServiceResponse.OK("", JsonConvert.SerializeObject(s));
@@ -178,15 +184,15 @@ namespace TreeMon.Web.api.v1
         [HttpGet]
         [HttpPost]
         [Route("api/Apps/Settings")]
-        public ServiceResult GetSettings(string filter = "")
+        public ServiceResult GetSettings()
         {
             AppManager am = new AppManager(Globals.DBConnectionKey, "web", Request.Headers?.Authorization?.Parameter);
   
             List<dynamic> settings =am.GetAppSettings("web").Cast<dynamic>().ToList();
             int count;
-            
-            DataFilter tmpFilter = this.GetFilter(filter);
-            settings = FilterEx.FilterInput(settings, tmpFilter, out count);
+
+            DataFilter tmpFilter = this.GetFilter(Request);
+            settings = settings.Filter( tmpFilter, out count);
             
             return ServiceResponse.OK("",settings, count);
         }
@@ -194,7 +200,7 @@ namespace TreeMon.Web.api.v1
         [HttpGet]
         [HttpPost]
         [Route("api/Apps/Public/Settings")]
-        public ServiceResult GetPublicSettings(string filter = "")
+        public ServiceResult GetPublicSettings()
         {
                 if (Globals.Application.Status == "INSTALLING")
                     return ServiceResponse.Error("Application is installing, general settings are not available yet.");
@@ -209,8 +215,8 @@ namespace TreeMon.Web.api.v1
                 int count;
 
 
-                DataFilter tmpFilter = this.GetFilter(filter);
-                settings = FilterEx.FilterInput(settings, tmpFilter, out count);
+                 DataFilter tmpFilter = this.GetFilter(Request);
+                settings = settings.Filter( tmpFilter, out count);
 
                 return ServiceResponse.OK("", settings, count);
       
@@ -228,7 +234,7 @@ namespace TreeMon.Web.api.v1
             AppManager AppManager = new AppManager(Globals.DBConnectionKey,"web", Request.Headers?.Authorization?.Parameter);
             
 
-            var dbS = (Setting)AppManager.GetBy(form.UUID);
+            var dbS = (Setting)AppManager.Get(form.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Setting was not found.");
@@ -300,8 +306,8 @@ namespace TreeMon.Web.api.v1
             if ( Globals.Application.SaveConfigSetting("DefaultDbConnection", appSettings.ActiveDbProvider) == false)
                 return ServiceResponse.Error("Failed to save .config setting DefaultDbConnection for provider:" + appSettings.ActiveDbProvider);
 
-            //if (!string.IsNullOrWhiteSpace(appSettings.ActiveDatabase))
-            //    appSettings.ActiveDbPassword = Cipher.Crypt(appSettings.AppKey, appSettings.ActiveDbPassword, true);
+            ////if (!string.IsNullOrWhiteSpace(appSettings.ActiveDatabase))
+            ////    appSettings.ActiveDbPassword = Cipher.Crypt(appSettings.AppKey, appSettings.ActiveDbPassword, true);
 
             return am.CreateDatabase(appSettings, connectionString);
         }
@@ -365,21 +371,6 @@ namespace TreeMon.Web.api.v1
 
             if (!wa.SaveConfigSetting("EmailStoreTemplateOrderStatusReceived", "App_Data\\Templates\\Store\\EmailOrderReceived.html"))
                 return ServiceResponse.Error("Failed to save EmailStoreTemplateOrderStatusReceived:App_Data\\Templates\\Store\\EmailOrderReceived.html");
-
-            #region depricate
-            ////Razor versioning. Backlog: depricate when remaining razor tags are removed.
-            //if (string.IsNullOrWhiteSpace(AppSetting("webpages:Version")))
-            //    SaveConfigSetting("webpages:Version", "3.0.0.0");
-
-            //if (string.IsNullOrWhiteSpace(AppSetting("webpages:Enabled")))
-            //    SaveConfigSetting("webpages:Enabled", "false");
-
-            //if (string.IsNullOrWhiteSpace(AppSetting("vs:EnableBrowserLink")))
-            //    SaveConfigSetting("vs:EnableBrowserLink", "false");
-
-            //if (string.IsNullOrWhiteSpace(AppSetting("UnobtrusiveJavaScriptEnabled")))
-            //    SaveConfigSetting("UnobtrusiveJavaScriptEnabled", "true");
-            #endregion
 
             return ServiceResponse.OK("", appSettings);
         }
@@ -468,7 +459,8 @@ namespace TreeMon.Web.api.v1
             AppManager am = new AppManager(Globals.DBConnectionKey, "web", "");
             am.Installing = true;
 
-            string siteDomain = appSettings.SiteDomain.StartsWith("http://") ? appSettings.SiteDomain : "http://" + appSettings.SiteDomain;
+            string protocol = HttpContext.Current.Request.IsSecureConnection == true ? "https://" : "http://";
+            string siteDomain = protocol + appSettings.SiteDomain;
            
             am.Insert(new Setting()
             {
@@ -499,7 +491,7 @@ namespace TreeMon.Web.api.v1
                     Globals.Application.ApiStatus = "PROTECTED";
                 }
 
-                if (am.SettingExists("AllowedOrigin", origin))
+                if (am.SettingExistsInDatabase("AllowedOrigin", origin))
                     continue;
 
                 am.Insert(new Setting()
@@ -626,8 +618,8 @@ namespace TreeMon.Web.api.v1
             if (res.Code != 200)
                 return res;
 
-
-            string siteDomain = appSettings.SiteDomain.StartsWith("http://") ? appSettings.SiteDomain : "http://" + appSettings.SiteDomain;
+            string protocol = HttpContext.Current.Request.IsSecureConnection == true ? "https://" : "http://";
+            string siteDomain = protocol + appSettings.SiteDomain;
 
             am.Insert(new Setting()
             {
@@ -649,7 +641,7 @@ namespace TreeMon.Web.api.v1
             Request.Headers.TryGetValues("Origin", out originValues);
             foreach (string origin in originValues) {
 
-                if (am.SettingExists("AllowedOrigin", origin))
+                if (am.SettingExistsInDatabase("AllowedOrigin", origin))
                     continue;
 
                 am.Insert(new Setting()
@@ -695,20 +687,6 @@ namespace TreeMon.Web.api.v1
             Globals.Application.UseDatabaseConfig = true;
           return res;
         }
-
-        //[ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
-        //[HttpPost]
-        //[HttpPatch]
-        //[Route("api/Apps/Settings/Update")]
-        //public ServiceResult UpdateSetting(Setting setting)
-        //{
-        //    if(setting == null )
-        //        return ServiceResponse.Error("Invalid data sent to server.");
-        //    if(string.IsNullOrWhiteSpace(setting.UUID))
-        //        return ServiceResponse.Error("Invalid setting id.");
-        //    AppManager am = new AppManager(Globals.DBConnectionKey, "web", Request.Headers?.Authorization?.Parameter);
-        //    return am.Update(setting, Globals.Application.AppSetting("AppKey"));
-        //}
 
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpGet]
@@ -804,7 +782,7 @@ namespace TreeMon.Web.api.v1
             AppManager am = new AppManager(Globals.DBConnectionKey, "web", Request?.Headers?.Authorization?.Parameter);
             db.Domain = am.GetSetting("SiteDomain")?.Value;
 
-           db.Content = am.GetAppSettings("web").Where(w => w.AccountUUID == CurrentUser.AccountUUID && w.Deleted == false && w.Private == false && w.RoleWeight == 0)
+           db.Content = am.GetAppSettings("web")?.Where(w => w.AccountUUID == CurrentUser.AccountUUID && w.Deleted == false && w.Private == false && w.RoleWeight == 0)
                 .Select(s => new KeyValuePair<string, string>(s.Name,s.Value)).ToList();
 
             switch (view)
@@ -815,6 +793,8 @@ namespace TreeMon.Web.api.v1
                     break;
                 case "privacy":
                     break;
+                case "events":
+                    return ServiceResponse.OK("",BuildEventsDashboard(options));
                 default: 
                     db.Title = db.Domain;
                     BuildMenu(view, ref db);
@@ -823,12 +803,31 @@ namespace TreeMon.Web.api.v1
             return ServiceResponse.OK("Dashboard." + view, db);
         }
 
+        protected EventsDashboard BuildEventsDashboard(string filter)
+        {
+            EventsDashboard dash = new EventsDashboard();
+            string defaultEventUUID = "";//blank parent id will return main events. Globals.Application.AppSetting("DefaultEvent");
+            EventManager eventManager = new EventManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
+
+            int count;
+            DataFilter tmpFilter = this.GetFilter(Request);
+ 
+            //get events starting from midnight today
+            List<dynamic> events = eventManager.GetSubEvents(defaultEventUUID, true).Cast<dynamic>().ToList();
+            dash.Events = events.Filter(tmpFilter,out count);
+            dash.Groups = eventManager.GetEventGroups(defaultEventUUID);
+            dash.Inventory = eventManager.GetEventInventory(defaultEventUUID);
+            dash.Members = eventManager.GetEventMembers(defaultEventUUID);
+            dash.Locations = eventManager.GetEventLocations(defaultEventUUID);
+          
+            return dash;
+        }
 
         protected void BuildMenu(string view, ref Dashboard db)
         {
             //todo move data to settings table. make SettingsClass = "MenuItem" or "List<MenuItem>"
             //   this way we can set roleweight and operation. Store it in value as json string
-            //
+            //   make the key = view name, value is entire menu for that key in json format?
             switch (view)
             {
                 case "navbar_default":
@@ -856,6 +855,7 @@ namespace TreeMon.Web.api.v1
                     break;
 
                 #region navbar_admin
+               
                 case "navbar_admin":
                     db.SideMenuItems.Add(new MenuItem()
                     {
@@ -914,11 +914,11 @@ namespace TreeMon.Web.api.v1
                         icon = "fa-cogs",
                         items = new List<MenuItem>()
                         {
-                            //new MenuItem() {   href = "/coupons", label = "Coupons", type = "link" },
+                            ////new MenuItem() {   href = "/coupons", label = "Coupons", type = "link" },
                             new MenuItem() {   href = "/store/departments", label = "Departments", type = "link" },
                             new MenuItem() {   href = "/store/orders", label = "Orders", type = "link" },
-                            //new MenuItem() {   href = "/shipping", label = "Shipping", type = "link" },
-                              //,new MenuItem() {   href = "/vendors", label = "vendors", type = "link" }
+                            ////new MenuItem() {   href = "/shipping", label = "Shipping", type = "link" },
+                              ////,new MenuItem() {   href = "/vendors", label = "vendors", type = "link" }
                             new MenuItem() {   href = "/store/payoptions", label = "Payment Options", type = "link" }
                           
                         }
@@ -937,6 +937,7 @@ namespace TreeMon.Web.api.v1
                             new MenuItem() {   href = "/membership/roles", label = "Roles", type = "link" }
                         }
                     });
+
 
                     db.SideMenuItems.Add(new MenuItem()
                     {
@@ -975,7 +976,7 @@ namespace TreeMon.Web.api.v1
                         icon = "fa-question"
                     });
                     break;
-                #endregion
+                #endregion //navbar_admin
 
                 default:
                     db.TopMenuItems.Add(new MenuItem()
@@ -1001,8 +1002,9 @@ namespace TreeMon.Web.api.v1
                     });
                     break;
             }
+
             db.SideMenuItems = db.SideMenuItems.OrderBy(o => o.label).ToList();
-            //db.TopMenuItems = db.TopMenuItems.OrderBy(o => o.label).ToList();
+            ////db.TopMenuItems = db.TopMenuItems.OrderBy(o => o.label).ToList();
         }
 
 

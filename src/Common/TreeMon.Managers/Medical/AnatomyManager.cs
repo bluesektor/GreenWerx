@@ -41,7 +41,7 @@ namespace TreeMon.Models.Medical
             }
 
             //get the Anatomy from the table with all the data so when its updated it still contains the same data.
-            s =  (Anatomy)this.GetBy(s.UUID);
+            s =  (Anatomy)this.Get(s.UUID);
             if (s == null)
                 return ServiceResponse.Error("Anatomy not found");
 
@@ -54,39 +54,40 @@ namespace TreeMon.Models.Medical
             return res;
         }
 
-        public INode Get( string name)
+        public List<Anatomy> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Anatomy>();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Anatomy>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name) && sw.AccountUUID == this._requestingUser.AccountUUID) ;
+                return context.GetAll<Anatomy>()?.Where(sw => sw.Name.EqualsIgnoreCase(name) && sw.AccountUUID == this._requestingUser.AccountUUID).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
         public List<Anatomy> GetAnatomies(string accountUUID, bool deleted = false)
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Anatomy>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Anatomy>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
                     using (var context = new TreeMonDbContext(this._connectionKey))
                     {
-                        return context.GetAll<Anatomy>().FirstOrDefault(sw => sw.UUID == uuid);
+                        return context.GetAll<Anatomy>()?.FirstOrDefault(sw => sw.UUID == uuid);
                     }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n )
         {
             if (!this.DataAccessAuthorized(n, "post", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -96,13 +97,12 @@ namespace TreeMon.Models.Medical
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    Anatomy dbU = context.GetAll<Anatomy>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
+               
+                    Anatomy dbU = context.GetAll<Anatomy>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Anatomy already exists.");
-                }
+               
   
                 if (context.Insert<Anatomy>(s))
                     return ServiceResponse.OK("",s);
@@ -132,9 +132,9 @@ namespace TreeMon.Models.Medical
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<AnatomyTag>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<AnatomyTag>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
         public int Delete(AnatomyTag s, bool purge = false)
@@ -143,8 +143,6 @@ namespace TreeMon.Models.Medical
                 return 0;
 
             if (!this.DataAccessAuthorized(s, "DELETE", false)) return 0;
-
-            List<AnatomyTag> pms = new List<AnatomyTag>();
 
             if (purge)
             {
@@ -165,27 +163,18 @@ namespace TreeMon.Models.Medical
             }
         }
 
-        public AnatomyTag GetAnatomyTag(string name)
+        public AnatomyTag GetAllAnatomyTag(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<AnatomyTag>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<AnatomyTag>()?.FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public List<AnatomyTag> GetAnatomyTag(string accountUUID, bool deleted = false)
-        {
-            using (var context = new TreeMonDbContext(this._connectionKey))
-            {
-
-                return context.GetAll<AnatomyTag>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
-            }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-        }
-
+        
 
         public AnatomyTag GetAnatomyTagBy(string uuid)
         {
@@ -193,22 +182,21 @@ namespace TreeMon.Models.Medical
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<AnatomyTag>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<AnatomyTag>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(AnatomyTag s, bool validateFirst = true)
+        public ServiceResult Insert(AnatomyTag s)
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    AnatomyTag dbU = context.GetAll<AnatomyTag>().FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
+             
+                    AnatomyTag dbU = context.GetAll<AnatomyTag>()?.FirstOrDefault(wu => wu.Name.EqualsIgnoreCase(s.Name) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("AnatomyTag already exists.");
-                }
+                
                 if (string.IsNullOrWhiteSpace(s.UUID))
                     s.UUID = Guid.NewGuid().ToString("N");
                 s.UUIDType = "AnatomyTag";

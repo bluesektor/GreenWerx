@@ -5,13 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers;
-using TreeMon.Managers.Event;
+using TreeMon.Managers.Events;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Utilites.Extensions;
 using TreeMon.Web.Filters;
 using TreeMon.Web.Models;
@@ -83,11 +85,11 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            ServiceResult sr = reminderManager.Insert(dest, true);
+            ServiceResult sr = reminderManager.Insert(dest);
             if (sr.Code != 200)
                 return sr;
 
-            string ruleErrors = "";
+            StringBuilder ruleErrors = new StringBuilder();
            
             int index = 1;
             foreach (ReminderRule r in s.ReminderRules)
@@ -98,16 +100,16 @@ namespace TreeMon.Web.api.v1
                 {
                     case "DATE":
                         if (!DateTime.TryParse(r.RangeStart, out dt))
-                            ruleErrors += "Rule " + index + " is not a valid start date.";
+                            ruleErrors.AppendLine("Rule " + index + " is not a valid start date.");
                         if (!DateTime.TryParse(r.RangeEnd, out dt))
-                            ruleErrors += "Rule " + index + " is not a valid end date.";
+                            ruleErrors.AppendLine("Rule " + index + " is not a valid end date.");
                         break;
 
                     case "TIME":
                         if (!DateTime.TryParse(r.RangeStart, out dt))
-                            ruleErrors += "Rule " + index + " is not a valid start time.";
+                            ruleErrors.AppendLine("Rule " + index + " is not a valid start time.");
                         if (!DateTime.TryParse(r.RangeEnd, out dt))
-                            ruleErrors += "Rule " + index + " is not a valid end time.";
+                            ruleErrors.AppendLine("Rule " + index + " is not a valid end time.");
                         break;
                 }
                 index++;
@@ -116,20 +118,20 @@ namespace TreeMon.Web.api.v1
                 r.CreatedBy = CurrentUser.UUID;
                 r.DateCreated = DateTime.UtcNow;
             }
-
-            if(!string.IsNullOrWhiteSpace(ruleErrors))
-                return ServiceResponse.Error(ruleErrors);
+            
+            if(ruleErrors.Length > 0)
+                return ServiceResponse.Error(ruleErrors.ToString());
 
             index = 1;
             foreach (ReminderRule r in s.ReminderRules) {
                ServiceResult srr =   reminderManager.Insert(r);
                 if(srr.Code!= 200)
                 {
-                    ruleErrors += "Rule " + index + " failed to save.";
+                    ruleErrors.AppendLine("Rule " + index + " failed to save.");
                 }
              }
-            if (!string.IsNullOrWhiteSpace(ruleErrors))
-                return ServiceResponse.Error(ruleErrors);
+            if (ruleErrors.Length > 0)
+                return ServiceResponse.Error(ruleErrors.ToString());
 
             return sr;
         }
@@ -145,9 +147,9 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            Reminder s = (Reminder)reminderManager.Get(name);
+            List<Reminder> s = reminderManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Reminder could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -164,7 +166,7 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            Reminder s = (Reminder)reminderManager.GetBy(uuid);
+            Reminder s = (Reminder)reminderManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("Reminder could not be located for the uuid " + uuid);
@@ -172,11 +174,11 @@ namespace TreeMon.Web.api.v1
             return ServiceResponse.OK("", s);
         }
 
-        [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
+        [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 0)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Reminders/")]
-        public ServiceResult GetReminders(string filter = "")
+        [Route("api/Reminders")]
+        public ServiceResult GetReminders()
         {
             if (Request.Headers.Authorization == null || string.IsNullOrWhiteSpace(Request.Headers?.Authorization?.Parameter))
                 return ServiceResponse.Error("You must be logged in to access this functionality.");
@@ -186,11 +188,15 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            List<dynamic> Reminders =reminderManager.GetReminders(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
+            var tmp = reminderManager.GetReminders(CurrentUser.UUID, CurrentUser.AccountUUID);
+            if (tmp == null)
+                return ServiceResponse.OK("", null, 0);
+
+            List<dynamic> Reminders =tmp.Cast<dynamic>()?.ToList();
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            Reminders = FilterEx.FilterInput(Reminders, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            Reminders = Reminders.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", Reminders, count);
         }
@@ -232,7 +238,7 @@ namespace TreeMon.Web.api.v1
 
             ReminderManager reminderManager = new ReminderManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (Reminder) reminderManager.GetBy(s.UUID);
+            var dbS = (Reminder) reminderManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Reminder was not found.");
@@ -250,6 +256,8 @@ namespace TreeMon.Web.api.v1
             dbS.RepeatForever = s.RepeatForever;
             dbS.RepeatCount = s.RepeatCount;
             dbS.Frequency = s.Frequency;
+            dbS.EventUUID = s.EventUUID;
+            dbS.Favorite = s.Favorite;
             return reminderManager.Update(dbS);
         } 
     }

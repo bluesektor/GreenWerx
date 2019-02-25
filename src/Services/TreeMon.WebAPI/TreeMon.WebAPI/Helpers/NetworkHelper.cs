@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2017 TreeMon.org.
 //Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Web;
 
@@ -9,15 +10,15 @@ namespace TreeMon.Web.api.Helpers
     public class NetworkHelper
     {
 
-         readonly private long[][] _privateIps = new long[][] {
-          new long[] { ConvertIPToLong("0.0.0.0"), ConvertIPToLong("2.255.255.255")},
-          new long[] {ConvertIPToLong("10.0.0.0"), ConvertIPToLong("10.255.255.255")},
-          new long[] {ConvertIPToLong("127.0.0.0"), ConvertIPToLong("127.255.255.255")},
-          new long[] {ConvertIPToLong("169.254.0.0"), ConvertIPToLong("169.254.255.255")},
-          new long[] {ConvertIPToLong("172.16.0.0"), ConvertIPToLong("172.31.255.255")},
-          new long[] {ConvertIPToLong("192.0.2.0"), ConvertIPToLong("192.0.2.255")},
-          new long[] {ConvertIPToLong("192.168.0.0"), ConvertIPToLong("192.168.255.255")},
-          new long[] {ConvertIPToLong("255.255.255.0"), ConvertIPToLong("255.255.255.255")}
+         readonly private UInt64[][] _privateIps = new UInt64[][] {
+          new UInt64[] { ConvertIPToLong("0.0.0.0"), ConvertIPToLong("2.255.255.255")},
+          new UInt64[] {ConvertIPToLong("10.0.0.0"), ConvertIPToLong("10.255.255.255")},
+          new UInt64[] {ConvertIPToLong("127.0.0.0"), ConvertIPToLong("127.255.255.255")},
+          new UInt64[] {ConvertIPToLong("169.254.0.0"), ConvertIPToLong("169.254.255.255")},
+          new UInt64[] {ConvertIPToLong("172.16.0.0"), ConvertIPToLong("172.31.255.255")},
+          new UInt64[] {ConvertIPToLong("192.0.2.0"), ConvertIPToLong("192.0.2.255")},
+          new UInt64[] {ConvertIPToLong("192.168.0.0"), ConvertIPToLong("192.168.255.255")},
+          new UInt64[] {ConvertIPToLong("255.255.255.0"), ConvertIPToLong("255.255.255.255")}
         };
 
         /// <summary>
@@ -69,12 +70,12 @@ namespace TreeMon.Web.api.Helpers
         {
             if (!String.IsNullOrEmpty(ip))
             {
-                long ipToLong;
+                UInt64 ipToLong;
                 //Is it valid IP address
-                if (TryConvertIPToLong(ip, out ipToLong))
+                if (TryConvertIP(ip, out ipToLong))
                 {
                     //Does it fall within a private network range
-                    foreach (long[] privateIp in _privateIps)
+                    foreach (UInt64[] privateIp in _privateIps)
                         if ((ipToLong >= privateIp[0]) && (ipToLong <= privateIp[1]))
                             return false;
                     return true;
@@ -86,24 +87,90 @@ namespace TreeMon.Web.api.Helpers
                 return false;
         }
 
-        private bool TryConvertIPToLong(string ip, out long ipToLong)
+        public static bool TryConvertIP(string ip, out UInt64 ipResult )
         {
+            ipResult = 0;
             try
             {
-                ipToLong = ConvertIPToLong(ip);
-                return true;
+                ipResult = ConvertIPV6(ip);
             }
             catch
             {
-                ipToLong = -1;
                 return false;
             }
+            return true;
         }
 
-        private static long ConvertIPToLong(string ip)
+        /// <summary>
+        /// https://lite.ip2location.com/
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        private static UInt64 ConvertIPV6(string ip)
         {
-            string[] ipSplit = ip.Split('.');
-            return (16777216 * Convert.ToInt32(ipSplit[0]) + 65536 * Convert.ToInt32(ipSplit[1]) + 256 * Convert.ToInt32(ipSplit[2]) + Convert.ToInt32(ipSplit[3]));
+            string strIP = ip; //"2404:6800:4001:805::1006";
+            System.Net.IPAddress address;
+            UInt64 ipnum = 0;
+
+            if (!System.Net.IPAddress.TryParse(strIP, out address))
+                return 0;
+
+             byte[] addrBytes = address.GetAddressBytes();
+
+             if (System.BitConverter.IsLittleEndian)
+             {
+                 System.Collections.Generic.List<byte> byteList = new System.Collections.Generic.List<byte>(addrBytes);
+                 byteList.Reverse();
+                 addrBytes = byteList.ToArray();
+             }
+
+             if (addrBytes.Length > 8)
+             {
+                 //IPv6
+                 ipnum = System.BitConverter.ToUInt64(addrBytes, 8);
+                 ipnum <<= 64;
+                 ipnum += System.BitConverter.ToUInt64(addrBytes, 0);
+             }
+             else
+             {
+                 ////IPv4
+                 ipnum = System.BitConverter.ToUInt32(addrBytes, 0);
+             }
+
+            return ipnum;
+        }
+
+        public static float GetIpVersion(string ip)
+        {
+            if (string.IsNullOrWhiteSpace(ip))
+                return 0;
+                        
+            System.Net.IPAddress address;
+       
+            if (!System.Net.IPAddress.TryParse(ip, out address))
+                return 0;
+
+            byte[] addrBytes = address.GetAddressBytes();
+
+            if (System.BitConverter.IsLittleEndian)
+            {
+                System.Collections.Generic.List<byte> byteList = new System.Collections.Generic.List<byte>(addrBytes);
+                byteList.Reverse();
+                addrBytes = byteList.ToArray();
+            }
+
+            if (addrBytes.Length > 8)
+                return 6;
+            else
+                return 4;
+        }
+
+        private static UInt64 ConvertIPToLong(string ip)
+        {
+            UInt64 res;
+            TryConvertIP(ip, out res);
+            return res;
+           // string[] ipSplit = ip.Split('.');            return (16777216 * Convert.ToInt32(ipSplit[0]) + 65536 * Convert.ToInt32(ipSplit[1]) + 256 * Convert.ToInt32(ipSplit[2]) + Convert.ToInt32(ipSplit[3]));
         }
      
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
 using TreeMon.Managers.Medical;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Medical;
@@ -40,7 +41,7 @@ namespace TreeMon.Web.api.v1
 
             SymptomManager symptomManager = new SymptomManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            return symptomManager.Insert(n, true);
+            return symptomManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -54,9 +55,9 @@ namespace TreeMon.Web.api.v1
 
             SymptomManager symptomManager = new SymptomManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            Symptom s = (Symptom) symptomManager.Get(name);
+            List<Symptom> s = symptomManager.Search(name);
 
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Symptom could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -85,20 +86,20 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Symptoms/")]
-        public ServiceResult GetSymptoms(string filter = "")
+        [Route("api/Symptoms")]
+        public ServiceResult GetSymptoms()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
            
-            DataFilter tmpFilter = this.GetFilter(filter);
+             DataFilter tmpFilter = this.GetFilter(Request);
             SymptomManager symptomManager = new SymptomManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
             List<dynamic> Symptoms = symptomManager.GetSymptoms(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count = 0;
 
 
-            Symptoms = FilterEx.FilterInput(Symptoms, tmpFilter, out count);
+            Symptoms = Symptoms.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Symptoms, count);
           
         }
@@ -139,7 +140,7 @@ namespace TreeMon.Web.api.v1
  
             SymptomManager symptomManager = new SymptomManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (Symptom)symptomManager.GetBy(s.UUID);
+            var dbS = (Symptom)symptomManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Symptom was not found.");
@@ -205,7 +206,7 @@ namespace TreeMon.Web.api.v1
             }
             else if (string.IsNullOrWhiteSpace(s.Name) && string.IsNullOrWhiteSpace(s.SymptomUUID) == false)
             {   //get and assign the name
-                Symptom symptom = (Symptom)symptomManager.GetBy(s.SymptomUUID);
+                Symptom symptom = (Symptom)symptomManager.Get(s.SymptomUUID);
                 if(symptom == null)
                     return ServiceResponse.Error("Symptom could not be found for id " + s.SymptomUUID);
 
@@ -214,7 +215,7 @@ namespace TreeMon.Web.api.v1
             else if (!string.IsNullOrWhiteSpace(s.Name) && string.IsNullOrWhiteSpace(s.SymptomUUID) )
             {   //create the symptoms and assign it to the symptomuuid
 
-                Symptom symptom  = (Symptom)symptomManager.Get(s.Name);
+                Symptom symptom  = (Symptom)symptomManager.Search(s.Name)?.FirstOrDefault();
 
                 if (symptom != null)
                 {
@@ -233,7 +234,7 @@ namespace TreeMon.Web.api.v1
                         Category = "General"
                     };
 
-                    ServiceResult sr = symptomManager.Insert(symptom, true);
+                    ServiceResult sr = symptomManager.Insert(symptom);
                     if (sr.Code == 500)
                         return ServiceResponse.Error(sr.Message);
 
@@ -251,7 +252,7 @@ namespace TreeMon.Web.api.v1
             if (s.Severity > 5) return ServiceResponse.Error("Severity must not be greater than 5.");
             if (s.Efficacy > 5) return ServiceResponse.Error("Efficacy must not be greater than 5.");
 
-            return symptomManager.Insert(s, false);
+            return symptomManager.Insert(s);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -278,7 +279,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/SymptomsLog/{parentUUID}")]
-        public ServiceResult GetSymptomLogs(string parentUUID ="",string filter = "")
+        public ServiceResult GetSymptomLogs(string parentUUID ="")
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -290,8 +291,8 @@ namespace TreeMon.Web.api.v1
 
             int count;
 
-            DataFilter tmpFilter = this.GetFilter(filter);
-            SymptomsLog = FilterEx.FilterInput(SymptomsLog, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            SymptomsLog = SymptomsLog.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", SymptomsLog, count);
         }
 
@@ -300,7 +301,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Doses/{doseUUID}/SymptomsLog/History/{parentUUID}")]
-        public ServiceResult GetChildSymptomLogs(string doseUUID, string parentUUID = "", string filter = "")
+        public ServiceResult GetChildSymptomLogs(string doseUUID, string parentUUID = "")
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -313,8 +314,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> SymptomsLog = symptomManager.GetSymptomsByDose(doseUUID, parentUUID, CurrentUser.AccountUUID).Cast<dynamic>().ToList();
 
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            SymptomsLog = FilterEx.FilterInput(SymptomsLog, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            SymptomsLog = SymptomsLog.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", SymptomsLog, count);
         }
 
@@ -322,8 +323,8 @@ namespace TreeMon.Web.api.v1
         //[ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Doses/{doseUUID}/SymptomsLog/")]
-        public ServiceResult GetSymptomsLogByDose(string doseUUID, string filter = "")
+        [Route("api/Doses/{doseUUID}/SymptomsLog")]
+        public ServiceResult GetSymptomsLogByDose(string doseUUID)
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -338,8 +339,8 @@ namespace TreeMon.Web.api.v1
 
             SymptomsLog = symptomManager.GetSymptomsByDose(doseUUID,"", CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            SymptomsLog = FilterEx.FilterInput(SymptomsLog, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            SymptomsLog = SymptomsLog.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", SymptomsLog, count);
         }
 

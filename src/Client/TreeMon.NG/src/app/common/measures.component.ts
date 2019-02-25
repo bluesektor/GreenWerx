@@ -140,7 +140,6 @@ export class MeasuresComponent implements OnInit {
             }
 
         });
-      
     }
 
     lazyLoadUnitOfMeasuresList(event) {
@@ -179,7 +178,9 @@ export class MeasuresComponent implements OnInit {
     cloneUnitOfMeasure(c: UnitOfMeasure): UnitOfMeasure {
         const measure = new UnitOfMeasure();
         for (const prop in c) {
-            measure[prop] = c[prop];
+            if (prop != null) {
+                measure[prop] = c[prop];
+            }
         }
         return measure;
     }

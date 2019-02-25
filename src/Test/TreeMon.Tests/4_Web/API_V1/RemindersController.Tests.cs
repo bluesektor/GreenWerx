@@ -13,7 +13,7 @@ using TreeMon.Managers;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Store;
 using TreeMon.Models.App;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Models.Membership;
 using TreeMon.Models.Store;
 using TreeMon.Web.Tests;

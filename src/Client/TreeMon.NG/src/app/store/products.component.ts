@@ -518,7 +518,8 @@ export class ProductsComponent implements OnInit {
 
         this.searchStrains.Screens = [];
         const screen = new Screen();
-        screen.Command = 'Contains';
+        screen.Command = 'SearchBy';
+        screen.Operator = 'Contains';
         screen.Field = 'Name';
         screen.Value = event.query.toLowerCase();
         this.searchStrains.Screens.push(screen);
@@ -573,7 +574,8 @@ export class ProductsComponent implements OnInit {
         this.searchAccountsFilter.StartIndex = 1;
         this.searchAccountsFilter.PageSize = 25;
         const screen = new Screen();
-        screen.Command = 'Contains';
+        screen.Command = 'SearchBy';
+        screen.Operator = 'Contains';
         screen.Field = 'Name';
         screen.Value = event.query.toLowerCase();
         this.searchAccountsFilter.Screens.push(screen);

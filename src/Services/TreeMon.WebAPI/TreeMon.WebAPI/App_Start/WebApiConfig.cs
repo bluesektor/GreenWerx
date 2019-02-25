@@ -18,9 +18,9 @@ namespace TreeMon.WebAPI
                 Repository = new CacheRepository()
             });
 
-            //If you enable this you will have to disable it in the Global.asax.cs
-            //var cors = new EnableCorsAttribute("*", "*", "*");
-            //config.EnableCors(cors);
+            ///If you enable this you will have to disable it in the Global.asax.cs
+            ///var cors = new EnableCorsAttribute("*", "*", "*");
+            ///config.EnableCors(cors);
 
             // Web API routes
             config.MapHttpAttributeRoutes();

@@ -14,6 +14,7 @@ using TreeMon.Managers.General;
 using TreeMon.Managers.Membership;
 using TreeMon.Managers.Plant;
 using TreeMon.Managers.Store;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.General;
@@ -25,10 +26,12 @@ using TreeMon.Utilites.Helpers;
 using TreeMon.Web.Filters;
 using TreeMon.Web.Models;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 using TMG = TreeMon.Models.General;
 
 namespace TreeMon.Web.api.v1
 {
+    [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class ProductsController : ApiBaseController
     {
         public ProductsController()
@@ -64,20 +67,8 @@ namespace TreeMon.Web.api.v1
                 n.AccountUUID = CurrentUser.AccountUUID;
                 n.DateCreated = DateTime.UtcNow;
             }
-
-            #region Convert to product from productview because entity frameworks doesn't recognize casting.
-
-            //var config = new MapperConfiguration(cfg =>
-            //{
-            //    cfg.CreateMap<ProductForm, Product>();
-            //});
-
-            //IMapper mapper = config.CreateMapper();
-            //var dest = mapper.Map<ProductForm, Product>(n);
-            #endregion
-
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            return productManager.Insert(n, true);
+            return productManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -87,15 +78,15 @@ namespace TreeMon.Web.api.v1
         public ServiceResult Get( string name )
         {
             if (string.IsNullOrWhiteSpace(name))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide a name for the produc.");
 
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Product p = (Product)productManager.Get(name);
+            List<Product> s = productManager.Search(name);
 
-            if (p == null)
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Product could not be located for the name " + name);
 
-            return ServiceResponse.OK("",p);
+            return ServiceResponse.OK("",s);
         }
 
 
@@ -106,10 +97,10 @@ namespace TreeMon.Web.api.v1
         public ServiceResult GetBy(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide an id for the product.");
 
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Product p = (Product)productManager.GetBy(uuid);
+            Product p = (Product)productManager.Get(uuid);
 
             if (p == null)
                 return ServiceResponse.Error("Product could not be located for the uuid " + uuid);
@@ -124,7 +115,7 @@ namespace TreeMon.Web.api.v1
         public ServiceResult GetProductDetails(string uuid, string type)
         {
             if (string.IsNullOrWhiteSpace(uuid))
-                return ServiceResponse.Error("You must provide a name for the strain.");
+                return ServiceResponse.Error("You must provide an id for the product.");
 
 
             string refUUID = "";
@@ -136,7 +127,7 @@ namespace TreeMon.Web.api.v1
             if (type.EqualsIgnoreCase( "PRODUCT"))
             {
                 ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-                Product p = (Product)productManager.GetBy(uuid);
+                Product p = (Product)productManager.Get(uuid);
 
                 if (p == null)
                     return ServiceResponse.Error("Product could not be located for the uuid " + uuid);
@@ -150,10 +141,10 @@ namespace TreeMon.Web.api.v1
            
 
             AccountManager am = new AccountManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Account a = (Account)am.GetBy(ManufacturerUUID);
+            Account a = (Account)am.Get(ManufacturerUUID);
 
             AttributeManager atm = new AttributeManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            List<TMG.Attribute> attributes =  atm.GetAttributes(refUUID, refType, refAccount).Where(w => w.Deleted == false).ToList();
+            List<TMG.Attribute> attributes =  atm.GetAttributes(refUUID, refType, refAccount)?.Where(w => w.Deleted == false).ToList();
             if (attributes == null)
                 attributes = new List<TMG.Attribute>();
             if(a != null) { 
@@ -176,7 +167,7 @@ namespace TreeMon.Web.api.v1
 
             #region plant related info
             StrainManager pm = new StrainManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Strain s = (Strain)pm.GetBy(strainUUID);
+            Strain s = (Strain)pm.Get(strainUUID);
             if (s != null)
             {
                 attributes.Add(new TMG.Attribute()
@@ -247,7 +238,7 @@ namespace TreeMon.Web.api.v1
                 }
 
                CategoryManager cm = new CategoryManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-               Category c = (Category)cm.GetBy(s.CategoryUUID);
+               Category c = (Category)cm.Get(s.CategoryUUID);
                 if (c != null)
                 {
                     attributes.Add(new TMG.Attribute()
@@ -276,13 +267,13 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Products")]
-        public ServiceResult GetProducts(string filter = "")
+        public ServiceResult GetProducts()
         {
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            List<dynamic> Products = (List<dynamic>)productManager.GetAll("").Where(w => w.Deleted == false).Cast<dynamic>().ToList();
+            List<dynamic> Products = (List<dynamic>)productManager.GetAll("")?.Where(w => w.Deleted == false).Cast<dynamic>().ToList();
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            Products = FilterEx.FilterInput(Products, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            Products = Products.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Products, count);
         }
 
@@ -299,8 +290,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 1)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Products/Categories/{category}/")]
-        public ServiceResult GetProducts(string category, string filter = "")
+        [Route("api/Products/Categories/{category}")]
+        public ServiceResult GetProducts(string category)
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -311,8 +302,8 @@ namespace TreeMon.Web.api.v1
                                                                     .Cast<dynamic>().ToList();
 
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            products = FilterEx.FilterInput(products, tmpFilter, out count );
+             DataFilter tmpFilter = this.GetFilter(Request);
+            products = products.Filter( tmpFilter, out count );
 
             if (products == null || products.Count == 0)
                 return ServiceResponse.Error("No products available.");
@@ -324,18 +315,18 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Products/Categories")]
-        public ServiceResult GetProductCategories(string filter = "")
+        public ServiceResult GetProductCategories()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
 
             CategoryManager catManager = new CategoryManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            List<dynamic> categories = (List<dynamic>)catManager.GetCategories(CurrentUser.AccountUUID, false, true).Where(w => (w.CategoryType?.EqualsIgnoreCase("PRODUCT")??false) ).Cast<dynamic>().ToList();
+            List<dynamic> categories = (List<dynamic>)catManager.GetCategories(CurrentUser.AccountUUID, false , true)?.Where(w => (w.CategoryType?.EqualsIgnoreCase("PRODUCT")??false) ).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                categories = FilterEx.FilterInput(categories, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                categories = categories.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", categories, count);
         }
 
@@ -404,7 +395,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must be logged in to access this function.");
 
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Product p = (Product)productManager.GetBy(productUUID);
+            Product p = (Product)productManager.Get(productUUID);
 
             if (p == null || string.IsNullOrWhiteSpace(p.UUID))
                 return ServiceResponse.Error("Invalid account was sent.");
@@ -438,7 +429,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("Invalid product sent to server.");
 
             ProductManager productManager = new ProductManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            var dbP = productManager.GetAll().FirstOrDefault( pw => pw.UUID == pv.UUID );
+            var dbP = productManager.GetAll()?.FirstOrDefault( pw => pw.UUID == pv.UUID );
 
             if ( dbP == null )
                 return ServiceResponse.Error( "Product was not found." );
@@ -465,26 +456,26 @@ namespace TreeMon.Web.api.v1
             dbP.Weight = pv.Weight;
             dbP.UOMUUID = pv.UOMUUID;
 
-            //dbP.Expires           =
-            //dbP.Category          =
+            ////dbP.Expires           =
+            ////dbP.Category          =
             dbP.Description = pv.Description;
 
             #region future implementation. may need to be implemented in inventory.
-            //     dbP.Cost = pv.Cost;
-            //dbP.StockCount        =
-            //dbP.Discount          =
-            //dbP.MarkUp            =
-            //dbP.MarkUpType        =
-            //dbP.Condition         =
-            //dbP.Quality           =
-            //dbP.Rating            =
-            //dbP.LocationUUID      =
-            //dbP.ParentId          =
-            //dbP.Status            =
-            //dbP.Active            =
-            //dbP.Deleted           =
-            //dbP.Private           =
-            //dbP.SortOrder         =
+            ////     dbP.Cost = pv.Cost;
+            ////dbP.StockCount        =
+            ////dbP.Discount          =
+            ////dbP.MarkUp            =
+            ////dbP.MarkUpType        =
+            ////dbP.Condition         =
+            ////dbP.Quality           =
+            ////dbP.Rating            =
+            ////dbP.LocationUUID      =
+            ////dbP.ParentId          =
+            ////dbP.Status            =
+            ////dbP.Active            =
+            ////dbP.Deleted           =
+            ////dbP.Private           =
+            ////dbP.SortOrder         =
 
             #endregion
 

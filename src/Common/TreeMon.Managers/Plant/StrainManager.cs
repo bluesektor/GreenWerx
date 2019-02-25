@@ -32,16 +32,16 @@ namespace TreeMon.Managers.Plant
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                Category c = context.GetAll<Category>().FirstOrDefault(w => w.UUID == p.CategoryUUID);
+                Category c = context.GetAll<Category>()?.FirstOrDefault(w => w.UUID == p.CategoryUUID);
                 if (c == null || c.UsesStrains == false)
                     return null;
             }
             //since the user can type a new strain in the uuid field, search the db to make sure
             //         
-            Strain s = FindStrain(p.StrainUUID, p.StrainUUID, p.AccountUUID);
+            List<Strain> s = FindStrain(p.StrainUUID, p.StrainUUID, p.AccountUUID);
 
-            if (s != null)
-                return s;
+            if (s != null && s.Count > 0)
+                return s.FirstOrDefault();
 
             string variety = DetectVariety(p.CategoryUUID);
 
@@ -88,112 +88,110 @@ namespace TreeMon.Managers.Plant
             return "";
         }
 
-        public ServiceResult Delete(INode s, bool purge = false)
+        public ServiceResult Delete(INode n, bool purge = false)
         {
             ServiceResult res = ServiceResponse.OK();
 
-            if (s == null)
+            if (n == null)
                 return ServiceResponse.Error("No record sent.");
 
-            if (!this.DataAccessAuthorized(s, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
+            if (!this.DataAccessAuthorized(n, "DELETE", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (purge)
-                {
-                    if (context.Delete<Strain>((Strain)s) == 0)
-                        return ServiceResponse.Error(s.Name + " failed to delete. ");
+                if (purge && context.Delete<Strain>((Strain)n) == 0) {
+                        return ServiceResponse.Error(n.Name + " failed to delete. ");
                 }
 
                 //get the strain from the table with all the data so when its updated it still contains the same data.
-                s = this.GetBy(s.UUID);
-                if (s == null)
-                    ServiceResponse.Error("Strain not found.");
-                s.Deleted = true;
-                if (context.Update<Strain>((Strain)s) == 0)
-                    return ServiceResponse.Error(s.Name + " failed to delete. ");
+                n = this.Get(n.UUID);
+                if (n == null)
+                   return ServiceResponse.Error("Strain not found.");
+
+                n.Deleted = true;
+                if (context.Update<Strain>((Strain)n) == 0)
+                    return ServiceResponse.Error(n.Name + " failed to delete. ");
             }
             return res;
         }
 
-        public INode Get( string name)
+        public List<Strain> Search(string name)
         {
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<Strain>();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Strain>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<Strain>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
         public List<Strain> GetStrains(string accountUUID, bool deleted = false, bool includeSystemAccount = false)
         {
 
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (includeSystemAccount)
                 {
-                    return context.GetAll<Strain>().Where(sw => (sw.AccountUUID == accountUUID || sw.AccountUUID == SystemFlag.Default.Account) && sw.Deleted == deleted).GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();
+                    return context.GetAll<Strain>()?.Where(sw => (sw.AccountUUID == accountUUID || sw.AccountUUID == SystemFlag.Default.Account) && sw.Deleted == deleted).GroupBy(x => x.Name).Select(group => group.First()).OrderBy(ob => ob.Name).ToList();
                 }
-                return context.GetAll<Strain>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<Strain>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Strain>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<Strain>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
-        public INode GetByGetBySyncKey(string syncKey)
+        public INode GetByGetByGUUID(string GUUID)
         {
-            if (string.IsNullOrWhiteSpace(syncKey))
+            if (string.IsNullOrWhiteSpace(GUUID))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<Strain>().FirstOrDefault(sw => sw.SyncKey == syncKey);
+                return context.GetAll<Strain>()?.FirstOrDefault(sw => sw.GUUID == GUUID);
             }
         }
 
 
-        private Strain FindStrain(string uuid, string name, string AccountUUID, bool includeDefaultAccount = true)
+        private List<Strain> FindStrain(string uuid, string name, string AccountUUID, bool includeDefaultAccount = true)
         {
-            Strain res = null;
+            List<Strain> res = null;
 
             if (string.IsNullOrWhiteSpace(uuid) && string.IsNullOrWhiteSpace(name) == false)
-                res = (Strain)this.Get(name);
-            else if (string.IsNullOrWhiteSpace(uuid) == false && string.IsNullOrWhiteSpace(name))
-                res = (Strain)this.GetBy(uuid);
+                res = this.Search(name);
             else
             {
                 using (var context = new TreeMonDbContext(this._connectionKey))
                 {
-                    res = context.GetAll<Strain>().FirstOrDefault(w => w.UUID == uuid || (w.Name?.EqualsIgnoreCase(name) ?? false));
+                    res = context.GetAll<Strain>()?.Where(w => w.UUID == uuid || (w.Name?.EqualsIgnoreCase(name) ?? false)).ToList();
                 }
             }
 
             if (res == null)
                 return res;
 
-            if (includeDefaultAccount && (res.AccountUUID == AccountUUID))
+            if (includeDefaultAccount && (res.FirstOrDefault().AccountUUID == AccountUUID))
                 return res;
 
-            if (res.AccountUUID == AccountUUID)
+            if (res.FirstOrDefault().AccountUUID == AccountUUID)
                 return res;
 
-            return null;
+            return new List<Strain>();
 
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -203,13 +201,12 @@ namespace TreeMon.Managers.Plant
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    Strain dbU = context.GetAll<Strain>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name) ?? false) && wu.AccountUUID == s.AccountUUID);
+      
+                    Strain dbU = context.GetAll<Strain>()?.FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name) ?? false) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Strain already exists.");
-                }
+                
             
                 if (context.Insert<Strain>((Strain)s))
                     return ServiceResponse.OK("", s);
@@ -217,16 +214,16 @@ namespace TreeMon.Managers.Plant
             return ServiceResponse.Error("An error occurred inserting strain " + s.Name);
         }
 
-        public ServiceResult Update(INode s)
+        public ServiceResult Update(INode n)
         {
-            if (s == null)
+            if (n == null)
                 return ServiceResponse.Error("Invalid Strain data.");
 
-            if (!this.DataAccessAuthorized(s, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
+            if (!this.DataAccessAuthorized(n, "PATCH", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (context.Update<Strain>((Strain)s) > 0)
+                if (context.Update<Strain>((Strain)n) > 0)
                     return ServiceResponse.OK();
             }
             return ServiceResponse.Error("System error, Strain was not updated.");

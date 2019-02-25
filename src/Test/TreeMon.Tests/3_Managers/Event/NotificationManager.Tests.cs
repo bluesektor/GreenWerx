@@ -12,7 +12,7 @@ namespace TreeMon.Web.Tests.Managers.Event
     [TestClass]
     public class NotificationManagerTests
     {
-        //private string connectionKey = "MSSQL_TEST";
+        ////private string connectionKey = "MSSQL_TEST";
         //[TestMethod]
         //public void NotificationManager_Insert() {
         //    NotificationManager nm = new NotificationManager(connectionKey);

@@ -1,0 +1,56 @@
+app-details {
+    .host-detail img {
+      max-width: 140px;
+     // border-radius: 50%;
+    }
+  
+    .host-detail p {
+      color: #60646B;
+    }
+    .map-canvas {
+      position: absolute;
+      height: 90%;
+      width: 90%;
+      background-color: transparent;
+      opacity: 0;
+      transition: opacity 150ms ease-in
+    }
+  
+    #map {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .show-map {
+      opacity: 1;
+    }
+  
+    label.fileInput input[type="file"] {
+      position:absolute;
+      top: -1000px;
+  }
+  
+  .fileInput {
+      border: 2px solid #AAA;
+      border-radius: 4px;
+      padding: 2px 5px;
+      margin: 2px;
+      background: #DDD;
+      display: inline-block;
+  }
+  .fileInput:hover {
+      background: #CCC;
+  }
+  .fileInput:active {
+      background: #CCF;
+  }
+  .fileInput :invalid + span {
+      color: #A44;
+  }
+  .fileInput :valid + span {
+      color: #4A4;
+  }
+  }
+  

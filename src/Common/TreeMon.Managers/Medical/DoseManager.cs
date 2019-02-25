@@ -42,7 +42,7 @@ namespace TreeMon.Managers
             }
 
             //get the Dose from the table with all the data so when its updated it still contains the same data.
-            s = (DoseLog)this.GetBy(s.UUID);
+            s = (DoseLog)this.Get(s.UUID);
             if (s == null)
                 return ServiceResponse.Error("Dose not found");
             s.Deleted = true;
@@ -54,39 +54,39 @@ namespace TreeMon.Managers
             return res;
         }
 
-        public INode Get( string name)
+        public List<DoseLog> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<DoseLog>();
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<DoseLog>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                return context.GetAll<DoseLog>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
         public List<DoseLog> GetDoses(string accountUUID, bool deleted = false)
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<DoseLog>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name)?.ToList();
+                return context.GetAll<DoseLog>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name)?.ToList();
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                return context.GetAll<DoseLog>().FirstOrDefault(sw => sw.UUID == uuid);
+                return context.GetAll<DoseLog>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
-            //if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(s, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
         }
 
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -96,13 +96,12 @@ namespace TreeMon.Managers
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                if (validateFirst)
-                {
-                    DoseLog dbU = context.GetAll<DoseLog>().FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name)??false) && wu.AccountUUID == s.AccountUUID);
+             
+                    DoseLog dbU = context.GetAll<DoseLog>()?.FirstOrDefault(wu => (wu.Name?.EqualsIgnoreCase(s.Name)??false) && wu.AccountUUID == s.AccountUUID);
 
                     if (dbU != null)
                         return ServiceResponse.Error("Dose already exists.");
-                }
+                
 
                 if (context.Insert<DoseLog>(s))
                     return ServiceResponse.OK("",s);

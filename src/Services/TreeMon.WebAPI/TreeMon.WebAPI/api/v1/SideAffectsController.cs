@@ -46,26 +46,7 @@ namespace TreeMon.Web.api.v1
 
             SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            return SideAffectManager.Insert(n, true);
-        }
-
-        [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
-        [HttpPost]
-        [HttpGet]
-        [Route("api/SideAffect/{name}")]
-        public ServiceResult Get( string name )
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return ServiceResponse.Error("You must provide a name for the SideAffect.");
-
-            SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-
-            SideAffect s = (SideAffect)SideAffectManager.Get(name);
-
-            if (s == null)
-                return ServiceResponse.Error("SideAffect could not be located for the name " + name);
-
-            return ServiceResponse.OK("",s);
+            return SideAffectManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -79,7 +60,7 @@ namespace TreeMon.Web.api.v1
 
             SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            SideAffect s = (SideAffect)SideAffectManager.GetBy(uuid);
+            SideAffect s = (SideAffect)SideAffectManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("SideAffect could not be located for the uuid " + uuid);
@@ -91,7 +72,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/SideAffects/{parentUUID}")]
-        public ServiceResult GetSideAffects(string parentUUID = "", string filter = "")
+        public ServiceResult GetSideAffects(string parentUUID = "")
             {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -103,8 +84,8 @@ namespace TreeMon.Web.api.v1
             SideAffects = SideAffectManager.GetSideAffects(parentUUID, CurrentUser.AccountUUID).Cast<dynamic>().ToList(); ;
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                SideAffects = FilterEx.FilterInput(SideAffects, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                SideAffects = SideAffects.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("",SideAffects, count);
         }
@@ -113,7 +94,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Doses/{doseUUID}/SideAffects/History/{parentUUID}")]
-        public ServiceResult GetChildSideAffects(string doseUUID, string parentUUID = "", string filter = "")
+        public ServiceResult GetChildSideAffects(string doseUUID, string parentUUID = "")
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -129,8 +110,8 @@ namespace TreeMon.Web.api.v1
             int count;
 
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                SymptomsLog = FilterEx.FilterInput(SymptomsLog, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                SymptomsLog = SymptomsLog.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("",SymptomsLog, count);
         }
@@ -176,7 +157,7 @@ namespace TreeMon.Web.api.v1
 
             SideAffectManager SideAffectManager = new SideAffectManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (SideAffect) SideAffectManager.GetBy(s.UUID);
+            var dbS = (SideAffect) SideAffectManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("SideAffect was not found.");

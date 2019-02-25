@@ -29,14 +29,14 @@ namespace TreeMon.WebAPI.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/Equipment/Type/{type}")]
-        public ServiceResult GetEquipment(string type = "", string filter = "")
+        public ServiceResult GetEquipment(string type = "")
         {
             EquipmentManager equipmentManager  = new  EquipmentManager( Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter );
             List<dynamic> Equipment = (List<dynamic>)equipmentManager.GetAll(type).Cast<dynamic>().ToList();
 
             int count;
-            DataFilter tmpFilter = this.GetFilter(filter);
-            Equipment = FilterEx.FilterInput(Equipment, tmpFilter, out count);
+             DataFilter tmpFilter = this.GetFilter(Request);
+            Equipment = Equipment.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", Equipment, count);
         }
     }

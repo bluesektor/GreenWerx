@@ -16,13 +16,13 @@ namespace TreeMon.Managers.Finance
 {
     public class FinanceAccountTransactionsManager : BaseManager, ICrud
     {
-        private string _sessionKey = string.Empty;
-        private SystemLogger _logger = null;
+       
+        private readonly SystemLogger _logger = null;
         public FinanceAccountTransactionsManager(string connectionKey, string sessionKey) : base(connectionKey, sessionKey)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(connectionKey), "FinanceAccountManager CONTEXT IS NULL!");
 
-            _sessionKey = sessionKey;
+            SessionKey = sessionKey;
             this._connectionKey = connectionKey;
 
             _logger = new SystemLogger(connectionKey);
@@ -48,11 +48,11 @@ namespace TreeMon.Managers.Finance
                     if (context.Delete<FinanceAccountTransaction>("WHERE UUID=@UUID", parameters) == 0)
                         return ServiceResponse.Error(p.Name + " failed to delete. ");
                 }
-                //SQLITE
-                //this was the only way I could get it to delete a RolePermission without some stupid EF error.
-                //object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
-                //context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
-                //  context.Delete<RolePermission>(rp);
+                ////SQLITE
+                ////this was the only way I could get it to delete a RolePermission without some stupid EF error.
+                ////object[] paramters = new object[] { rp.PermissionUUID , rp.RoleUUID ,rp.AccountUUID };
+                ////context.Delete<RolePermission>("WHERE PermissionUUID=? AND RoleUUID=? AND AccountUUID=?", paramters);
+                ////  context.Delete<RolePermission>(rp);
             }
             catch (Exception ex)
             {
@@ -66,36 +66,37 @@ namespace TreeMon.Managers.Finance
 
         public List<FinanceAccountTransaction> GetAccountFinanceAccountTransaction(string accountUUID)
         {
-            //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+            ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
                 if (string.IsNullOrWhiteSpace(accountUUID))
                     return context.GetAll<FinanceAccountTransaction>().ToList();
 
-                return context.GetAll<FinanceAccountTransaction>().Where(pw => pw.AccountUUID == accountUUID).ToList();
+                return context.GetAll<FinanceAccountTransaction>()?.Where(pw => pw.AccountUUID == accountUUID).ToList();
             }
         }
 
-        public INode GetBy(string uuid)
+        public INode Get(string uuid)
         {
             if (string.IsNullOrWhiteSpace(uuid))
                 return null;
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<FinanceAccountTransaction>().FirstOrDefault(sw => sw.UUID == uuid);
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                return context.GetAll<FinanceAccountTransaction>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
-        public INode Get(string name)
+        public List<FinanceAccountTransaction> Search(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return null;
+                return new List<FinanceAccountTransaction>();
+
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<FinanceAccountTransaction>().FirstOrDefault(sw => sw.Name.EqualsIgnoreCase(name));
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                return context.GetAll<FinanceAccountTransaction>()?.Where(sw => sw.Name.EqualsIgnoreCase(name)).ToList();
             }
         }
 
@@ -103,9 +104,9 @@ namespace TreeMon.Managers.Finance
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
 
-                return context.GetAll<FinanceAccountTransaction>().Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
+                return context.GetAll<FinanceAccountTransaction>()?.Where(sw => (sw.AccountUUID == accountUUID) && sw.Deleted == deleted).OrderBy(ob => ob.Name).ToList();
             }
         }
 
@@ -113,7 +114,7 @@ namespace TreeMon.Managers.Finance
         {
             using (var context = new TreeMonDbContext(this._connectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<FinanceAccountTransaction>().ToList();
             }
         }
@@ -143,7 +144,7 @@ namespace TreeMon.Managers.Finance
         /// <param name="p"></param>
         /// <param name="checkName">This will check the products by name to see if they exist already. If it does an error message will be returned.</param>
         /// <returns></returns>
-        public ServiceResult Insert(INode n, bool validateFirst = true)
+        public ServiceResult Insert(INode n)
         {
             if (!this.DataAccessAuthorized(n, "POST", false)) return ServiceResponse.Error("You are not authorized this action.");
 
@@ -152,19 +153,13 @@ namespace TreeMon.Managers.Finance
             var p = (FinanceAccountTransaction)n;
 
 
-            if (validateFirst)
-            {
-                FinanceAccountTransaction dbU = (FinanceAccountTransaction)Get(p.Name);
-
-                if (dbU != null)
-                    return ServiceResponse.Error("FinanceAccountTransaction already exists.");
-
+          
                 if (string.IsNullOrWhiteSpace(p.CreatedBy))
                     return ServiceResponse.Error("You must assign who the product was created by.");
 
                 if (string.IsNullOrWhiteSpace(p.AccountUUID))
                     return ServiceResponse.Error("The account id is empty.");
-            }
+           
  
             using (var context = new TreeMonDbContext(this._connectionKey))
             {

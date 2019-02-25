@@ -44,7 +44,7 @@ namespace TreeMon.Web.api.v1
 
             StatusMessageManager StatusMessageManager = new StatusMessageManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            return StatusMessageManager.Insert(n, true);
+            return StatusMessageManager.Insert(n);
             }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -77,7 +77,7 @@ namespace TreeMon.Web.api.v1
 
             StatusMessageManager StatusMessageManager = new StatusMessageManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
 
-            StatusMessage s = (StatusMessage)StatusMessageManager.GetBy(uuid);
+            StatusMessage s = (StatusMessage)StatusMessageManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("StatusMessage could not be located for the uuid " + uuid);
@@ -89,7 +89,7 @@ namespace TreeMon.Web.api.v1
         [HttpPost]
         [HttpGet]
         [Route("api/StatusMessages/Type/{statusType}")]
-        public ServiceResult GetStatusMessages(string statusType, string filter = "")
+        public ServiceResult GetStatusMessages(string statusType)
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -99,8 +99,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> StatusMessages = StatusMessageManager.GetStatusByType(statusType, CurrentUser.UUID, CurrentUser.AccountUUID).OrderBy(ob => ob.Status).Cast<dynamic>().ToList();
 
             int count;
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                StatusMessages = FilterEx.FilterInput(StatusMessages, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                StatusMessages = StatusMessages.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", StatusMessages, count);
         }
@@ -108,8 +108,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/StatusMessages/")]
-        public ServiceResult GetStatusMessages(string filter = "")
+        [Route("api/StatusMessages")]
+        public ServiceResult GetStatusMessages()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -121,8 +121,8 @@ namespace TreeMon.Web.api.v1
 
           int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                StatusMessages = FilterEx.FilterInput(StatusMessages, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                StatusMessages = StatusMessages.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", StatusMessages, count);
         }
@@ -153,7 +153,7 @@ namespace TreeMon.Web.api.v1
 
             StatusMessageManager StatusMessageManager = new StatusMessageManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
 
-            var dbS = (StatusMessage) StatusMessageManager.GetBy(s.UUID);
+            var dbS = (StatusMessage) StatusMessageManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("StatusMessage was not found.");

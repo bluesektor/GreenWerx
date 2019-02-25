@@ -375,8 +375,6 @@ export class InstallComponent implements OnInit {
             this.processingRequest = false;
             this.msgBox.ShowResponseMessage(err.status, 9999999);
 
-          
-
         });
 
     //    //NOTE to user, do not share this account. it controls the entire

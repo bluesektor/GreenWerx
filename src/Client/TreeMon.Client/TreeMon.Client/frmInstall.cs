@@ -360,9 +360,9 @@ namespace TreeMon.Client
             if (string.IsNullOrWhiteSpace(appSettings.AccountName))
                 appSettings.AccountName = appSettings.SiteDomain;
 
-            //if (string.IsNullOrWhiteSpace(appSettings.UserEmail))return ServiceResponse.Error("Email is empty.");
+            ////if (string.IsNullOrWhiteSpace(appSettings.UserEmail))return ServiceResponse.Error("Email is empty.");
 
-            //if (string.IsNullOrWhiteSpace(appSettings.AccountEmail))appSettings.AccountEmail = appSettings.UserEmail;
+            ////if (string.IsNullOrWhiteSpace(appSettings.AccountEmail))appSettings.AccountEmail = appSettings.UserEmail;
 
             if (string.IsNullOrWhiteSpace(appSettings.SecurityQuestion))
                 return ServiceResponse.Error("Security question is empty." );
@@ -404,27 +404,26 @@ namespace TreeMon.Client
             AppManager am = new AppManager(appSettings.ActiveDbConnectionKey, "FORMS", "");
             am.Installing = true;
 
-            ServiceResult res;
             am.SeedDataSetAccount(user.AccountUUID);
             
 
-            //  string appKey = appSettings.AppKey; //this should pull from config file. UseDatabaseConfig should be false.
+            ////  string appKey = appSettings.AppKey; //this should pull from config file. UseDatabaseConfig should be false.
 
-            //copy all the app settings to the database settings.
-            //res = wa.ImportWebConfigToDatabase(user, appKey, true, true);
-            //if (res.Code != 200)
-            //    return res;
+            ////copy all the app settings to the database settings.
+            ////res = wa.ImportWebConfigToDatabase(user, appKey, true, true);
+            ////if (res.Code != 200)
+            ////    return res;
 
-            //read back the settings and validate to make sure it's all good.
-            //AppInfo app = am.GetAppInfo(user.AccountUUID, "web");
-            //if (app == null)
-            //    return ServiceResponse.Error("App settings could not be found.");
+            ////read back the settings and validate to make sure it's all good.
+            ////AppInfo app = am.GetAppInfo(user.AccountUUID, "web");
+            ////if (app == null)
+            ////    return ServiceResponse.Error("App settings could not be found.");
 
 
-            //Confirm the minimum settings required to run this thing..
-            //res = am.ValidateInstallSettings(app);
-            //if (res.Code != 200)
-            //    return res;
+            ////Confirm the minimum settings required to run this thing..
+            ////res = am.ValidateInstallSettings(app);
+            ////if (res.Code != 200)
+            ////    return res;
 
             ////We need to make sure the file is gone before moving on because
             ////the status flag may not get reset correctly to running.

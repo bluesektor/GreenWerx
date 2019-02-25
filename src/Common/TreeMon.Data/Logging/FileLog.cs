@@ -41,7 +41,8 @@ namespace TreeMon.Data.Logging
                     _Mutex.Add(pathToFile, new Mutex());
                 }
             }
-            catch { }
+            catch {//
+            }
 
         } 
 

@@ -119,7 +119,7 @@ namespace TreeMon.Web.Tests
                 return res;
 
             RoleManager roleManager = new RoleManager(connectionKey,user);
-            Role role = (Role)roleManager.Get(userRole);
+            Role role =  roleManager.Search(userRole).FirstOrDefault();
 
             if (role == null)
             {
@@ -128,13 +128,12 @@ namespace TreeMon.Web.Tests
                 if (res.Code != 200)
                     return res;
 
-
-                role = (Role)roleManager.Get(userRole);
+                role = (Role)roleManager.Search(userRole).FirstOrDefault();
                 if (role == null)
                     return ServiceResponse.Error("Failed to get role in InitializeControllerTestData(..)");
             }
 
-            res = roleManager.AddUserToRole(role.UUID, user, GenerateTestUser("inituser"));
+            res = roleManager.AddUserToRole(role.UUID, user, GenerateTestUser("testuser"));
             if (res.Code != 200)
                 return res;
 
@@ -229,6 +228,12 @@ namespace TreeMon.Web.Tests
                 }
             }
             return res;
+        }
+
+
+        public static void InsertLocation()
+        {
+
         }
     }
 }

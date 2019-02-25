@@ -21,8 +21,9 @@ namespace TreeMon.Models.General
         //
         public string ReferenceUUID { get; set; }
 
-        //The type being referenced ( Plant, Fan, Vendor, Product, InventoryItem etc..);
-        //
+        /// <summary>
+        /// The type being referenced ( Plant, Fan, Vendor, Product, InventoryItem etc..);
+        /// </summary>
         public string ReferenceType { get; set; }
     }
 }

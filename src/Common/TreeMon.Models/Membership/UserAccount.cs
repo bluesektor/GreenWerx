@@ -37,9 +37,14 @@ namespace TreeMon.Models.Membership
             this.RoleOperation = "=";
         }
 
-        public string SyncKey { get; set; }
+        //TODO temporary for mobile unitl I can implement with categories
+        public string Category { get; set; }
 
-        public string SyncType { get; set; }
+        public string Description { get; set; }
+
+        public string GUUID { get; set; }
+
+        public string GuuidType { get; set; }
 
         public int RoleWeight { get; set; }
 
@@ -82,6 +87,13 @@ namespace TreeMon.Models.Membership
         public bool Private { get; set; }
 
         public int SortOrder { get; set; }
+
+        public string LocationUUID { get; set; }
+
+        /// <summary>
+        /// EventLocation, Location
+        /// </summary>
+        public string LocationType { get; set; }
 
         public string BillingAddress { get; set; }
 

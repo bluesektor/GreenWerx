@@ -17,6 +17,7 @@ using TreeMon.Models.Finance.PaymentGateways;
 using TreeMon.Models.Flags;
 using TreeMon.Models.Store;
 using TreeMon.Utilites.Extensions;
+using TreeMon.Utilites.Security;
 
 namespace TreeMon.Managers.Finance
 {
@@ -44,8 +45,8 @@ namespace TreeMon.Managers.Finance
                 return null;
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<PaymentGatewayLog>().FirstOrDefault(sw => sw.UUID == uuid);
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                return context.GetAll<PaymentGatewayLog>()?.FirstOrDefault(sw => sw.UUID == uuid);
             }
         }
 
@@ -55,8 +56,8 @@ namespace TreeMon.Managers.Finance
                 return null;
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
-                return context.GetAll<PaymentGatewayLog>().FirstOrDefault(sw => (sw.Gateway?.Trim()?.EqualsIgnoreCase(gateway?.Trim())??false) ) ;
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                return context.GetAll<PaymentGatewayLog>()?.FirstOrDefault(sw => (sw.Gateway?.Trim()?.EqualsIgnoreCase(gateway?.Trim())??false) ) ;
             }
         }
 
@@ -64,7 +65,7 @@ namespace TreeMon.Managers.Finance
         {
             using (var context = new TreeMonDbContext(_dbConnectionKey))
             {
-                //if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
+                ///if (!this.DataAccessAuthorized(dbP, "GET", false)) return ServiceResponse.Error("You are not authorized this action.");
                 return context.GetAll<PaymentGatewayLog>().ToList();
             }
         }
@@ -190,7 +191,7 @@ namespace TreeMon.Managers.Finance
                 using (var transactionScope = new TransactionScope())
                 using (var context = new TreeMonDbContext(_dbConnectionKey))
                 {
-                    Order o = context.GetAll<Order>().FirstOrDefault(w => w.CartUUID == ipnResponse.custom);
+                    Order o = context.GetAll<Order>()?.FirstOrDefault(w => w.CartUUID == ipnResponse.custom);
 
                     if (o == null)
                     {   //  get order by shoppingCartUUID == ipnResponse.custom
@@ -225,7 +226,7 @@ namespace TreeMon.Managers.Finance
                         o.PayStatus = LedgerFlag.Status.Paid;
                     }
 
-                    FinanceAccount financeAccount = context.GetAll<FinanceAccount>().FirstOrDefault(w => w.UUID == o.FinancAccountUUID);
+                    FinanceAccount financeAccount = context.GetAll<FinanceAccount>()?.FirstOrDefault(w => w.UUID == o.FinancAccountUUID);
 
                     if (financeAccount == null)
                     {
@@ -233,14 +234,17 @@ namespace TreeMon.Managers.Finance
                         _logger.InsertInfo("Unable to find finance account.:" + o.FinancAccountUUID, "PaymentGateway", "ProcessPayPalPurchase");
                         return;
                     }
+                    var  app = new AppManager(_dbConnectionKey, "web", "");
+                    string secret = app.GetSetting("AppKey")?.Value;
+                     var email = Cipher.Crypt(secret, ipnResponse.receiver_email, true );
 
-                    if (!financeAccount.Email.EqualsIgnoreCase(ipnResponse.receiver_email))
+                    if (financeAccount.Email != email )
                     {   // check that Receiver_email is your Primary PayPal email
                         Debug.Assert(false, "Receiver_email doesn't match financeAccount Email");
-                        _logger.InsertInfo("Receiver_email doesn't match financeAccount Email:" + ipnResponse.receiver_email + ":" + financeAccount.Email, "PaymentGateway", "ProcessPayPalPurchase");
+                        _logger.InsertInfo("Receiver_email doesn't match financeAccount Email:" + email + ":" + financeAccount.Email, "PaymentGateway", "ProcessPayPalPurchase");
                         return;
                     }
-                    Currency currency =context.GetAll<Currency>().FirstOrDefault(w => w.UUID == o.CurrencyUUID);
+                    Currency currency =context.GetAll<Currency>()?.FirstOrDefault(w => w.UUID == o.CurrencyUUID);
                     if (currency == null)
                     {
                         Debug.Assert(false, "Unable to find currency .");
@@ -256,7 +260,7 @@ namespace TreeMon.Managers.Finance
 
                     if (o.PayStatus == LedgerFlag.Status.Paid || o.PayStatus == LedgerFlag.Status.OverPaymentReceived)
                     {
-                        List<OrderItem> orderItems = context.GetAll<OrderItem>().Where(w => w.OrderUUID == o.UUID).ToList();
+                        List<OrderItem> orderItems = context.GetAll<OrderItem>()?.Where(w => w.OrderUUID == o.UUID).ToList();
                         foreach (OrderItem oi in orderItems)
                         {
                             oi.AccessGranted = true;

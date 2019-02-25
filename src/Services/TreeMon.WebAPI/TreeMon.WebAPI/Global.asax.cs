@@ -2,6 +2,7 @@
 //Licensed under CPAL 1.0,  See license.txt  or go to http://treemon.org/docs/license.txt  for full license details.
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -9,6 +10,7 @@ using System.Web.Routing;
 using TreeMon.Data.Logging;
 using TreeMon.Managers;
 using TreeMon.Utilites;
+using TreeMon.Utilites.Extensions;
 using TreeMon.Utilites.Security;
 using TreeMon.Web;
 
@@ -64,11 +66,11 @@ namespace TreeMon.WebAPI
 
             SetCorsOptions();
 
-            //if (Globals.Application.Status == "REQUIRES_INSTALL" || Globals.Application.Status == "INSTALLING")
-            //{
-            //    Globals.Application.Status = "INSTALLING";
-            //    return;
-            //}
+            ////if (Globals.Application.Status == "REQUIRES_INSTALL" || Globals.Application.Status == "INSTALLING")
+            ////{
+            ////    Globals.Application.Status = "INSTALLING";
+            ////    return;
+            ////}
            
             SessionManager sessionManager = new SessionManager(Globals.DBConnectionKey);
             TimeSpan ts = DateTime.UtcNow - _lastSessionsClear;
@@ -105,8 +107,15 @@ namespace TreeMon.WebAPI
                     case "PROTECTED"://check to see if this domain is allowed to make an api request. NOTE: this is different from the request throttling code.
                         AppManager appManager = new AppManager(Globals.DBConnectionKey, "web", "");
                         var origin = HttpContext.Current.Request.Headers["Origin"];
-                        if (appManager.SettingExists("AllowedOrigin", origin))
+                        if (Globals.Application.UseDatabaseConfig && appManager.SettingExistsInDatabase("AllowedOrigin", origin))
                             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", origin);
+                        else if (!Globals.Application.UseDatabaseConfig)
+                        {
+                            var value = appManager.GetSetting("AllowedOrigins", false)?.Value;
+                            if (!string.IsNullOrWhiteSpace(value) && value.Split(',').Any(x => x.EqualsIgnoreCase(origin) ) )
+                                HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", origin);
+
+                        }
                         break;
                     case "PUBLIC":
                         HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*");
@@ -139,8 +148,7 @@ namespace TreeMon.WebAPI
 
             catch (HttpException httpEx)
             {
-               // Debug.Assert(false, httpEx.Message);
-
+               Debug.Assert(false, httpEx.Message);
             }
         }
     }

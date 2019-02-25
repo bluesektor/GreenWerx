@@ -41,20 +41,20 @@ namespace TreeMon.Web.api.v1
                 n.DateCreated = DateTime.UtcNow;
 
             AnatomyManager AnatomyTagsManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            return AnatomyTagsManager.Insert(n, true);
+            return AnatomyTagsManager.Insert(n);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
         [HttpPost]
         [HttpGet]
         [Route("api/AnatomyTag/{name}")]
-        public ServiceResult Get(string name )
+        public ServiceResult Search(string name )
         {
             if (string.IsNullOrWhiteSpace(name))
                 return ServiceResponse.Error("You must provide a name for the AnatomyTags.");
 
             AnatomyManager AnatomyTagsManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            AnatomyTag s = AnatomyTagsManager.GetAnatomyTag(name);
+            List<AnatomyTag> s = AnatomyTagsManager.GetAnatomyTags(name);
 
             if (s == null)
                 return ServiceResponse.Error("AnatomyTags could not be located for the name " + name);
@@ -72,7 +72,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must provide a name for the AnatomyTags.");
 
             AnatomyManager AnatomyTagsManager = new AnatomyManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            AnatomyTag s = (AnatomyTag) AnatomyTagsManager.GetBy(uuid);
+            AnatomyTag s = (AnatomyTag) AnatomyTagsManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("AnatomyTags could not be located for the uuid " + uuid);
@@ -84,8 +84,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/AnatomyTags/")]
-        public ServiceResult GetAnatomyTags(string filter = "")
+        [Route("api/AnatomyTags")]
+        public ServiceResult GetAnatomyTags()
         {
             if (CurrentUser == null)
                 return ServiceResponse.Error("You must be logged in to access this function.");
@@ -98,8 +98,8 @@ namespace TreeMon.Web.api.v1
 
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                AnatomyTags = FilterEx.FilterInput(AnatomyTags, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                AnatomyTags = AnatomyTags.Filter( tmpFilter, out count);
             return ServiceResponse.OK("", AnatomyTags, count);
         }
 
@@ -140,7 +140,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("Invalid AnatomyTags sent to server.");
 
             AnatomyManager AnatomyTagsManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            var dbS = (AnatomyTag) AnatomyTagsManager.GetBy(n.UUID);
+            var dbS = (AnatomyTag) AnatomyTagsManager.Get(n.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("AnatomyTags was not found.");

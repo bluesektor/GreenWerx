@@ -5,16 +5,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
-using TreeMon.Managers.Event;
+using TreeMon.Managers.Events;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
-using TreeMon.Models.Event;
+using TreeMon.Models.Events;
 using TreeMon.Utilites.Extensions;
 using TreeMon.Web.Filters;
 using TreeMon.WebAPI.Models;
+using WebApi.OutputCache.V2;
 
 namespace TreeMon.Web.api.v1
 {
+   [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
     public class NotificationsController : ApiBaseController
     {
         public NotificationsController()
@@ -48,7 +51,7 @@ namespace TreeMon.Web.api.v1
                 s.FromType = "ip";
             }
             NotificationManager NotificationManager = new NotificationManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            return NotificationManager.Insert(s, true);
+            return NotificationManager.Insert(s);
         }
 
         [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -61,9 +64,10 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must provide a name for the Notification.");
 
             NotificationManager NotificationManager = new NotificationManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            Notification s = (Notification)NotificationManager.Get(name);
 
-            if (s == null)
+            List<Notification> s = NotificationManager.Search(name);
+
+            if (s == null || s.Count == 0)
                 return ServiceResponse.Error("Notification could not be located for the name " + name);
 
             return ServiceResponse.OK("",s);
@@ -79,7 +83,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("You must provide a name for the Notification.");
 
             NotificationManager NotificationManager = new NotificationManager(Globals.DBConnectionKey, Request.Headers?.Authorization?.Parameter);
-            Notification s = (Notification)NotificationManager.GetBy(uuid);
+            Notification s = (Notification)NotificationManager.Get(uuid);
 
             if (s == null)
                 return ServiceResponse.Error("Notification could not be located for the uuid " + uuid);
@@ -90,8 +94,8 @@ namespace TreeMon.Web.api.v1
         [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
         [HttpGet]
-        [Route("api/Notifications/")]
-        public ServiceResult GetNotifications(string filter = "")
+        [Route("api/Notifications")]
+        public ServiceResult GetNotifications()
         {
             if (Request.Headers.Authorization == null || string.IsNullOrWhiteSpace(Request.Headers?.Authorization?.Parameter))
                 return ServiceResponse.Error("You must be logged in to access this functionality.");
@@ -103,8 +107,8 @@ namespace TreeMon.Web.api.v1
             List<dynamic> Notifications = NotificationManager.GetNotifications(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
             int count;
 
-                            DataFilter tmpFilter = this.GetFilter(filter);
-                Notifications = FilterEx.FilterInput(Notifications, tmpFilter, out count);
+                             DataFilter tmpFilter = this.GetFilter(Request);
+                Notifications = Notifications.Filter( tmpFilter, out count);
 
             return ServiceResponse.OK("", Notifications, count);
         }
@@ -143,7 +147,7 @@ namespace TreeMon.Web.api.v1
                 return ServiceResponse.Error("Invalid Notification sent to server.");
 
             NotificationManager NotificationManager = new NotificationManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            var dbS = (Notification)NotificationManager.GetBy(s.UUID);
+            var dbS = (Notification)NotificationManager.Get(s.UUID);
 
             if (dbS == null)
                 return ServiceResponse.Error("Notification was not found.");

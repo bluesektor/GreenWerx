@@ -117,6 +117,7 @@ namespace PluginInterface
             }
             catch (Exception ex)
             {
+                Debug.Assert(false, ex.Message);
                 return ex.Message;
             }
             return "Plugins loaded.";
@@ -199,9 +200,13 @@ namespace PluginInterface
 
                             //Set the Plugin's host to this class which inherited IPluginHost
                             newPlugin.Instance.Host = this;
+                            try
+                            {
+                                //Call the initialization sub of the plugin
+                                newPlugin.Instance.Initialize(session, settings);
+                            }
+                            catch { }
 
-                            //Call the initialization sub of the plugin
-                            newPlugin.Instance.Initialize(session, settings);
 
                             //Add the new plugin to our collection here
                             this.colAvailablePlugins.Add(newPlugin);

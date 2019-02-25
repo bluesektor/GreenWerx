@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using TreeMon.Data.Logging.Models;
+using TreeMon.Models;
 using TreeMon.Models.App;
 using TreeMon.Models.Datasets;
 using TreeMon.Models.Medical;
@@ -39,7 +40,7 @@ namespace TreeMon.Web.api.v1
                 s.DateCreated = DateTime.UtcNow;
 
             AnatomyManager anatomyManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            return anatomyManager.Insert(s, true);
+            return anatomyManager.Insert(s);
         }
 
     [ApiAuthorizationRequired(Operator = ">=", RoleWeight = 1)]
@@ -47,24 +48,24 @@ namespace TreeMon.Web.api.v1
     [HttpGet]
     [Route("api/Anatomy/{name}")]
     public ServiceResult GetAnatomyByName(string name)
-            {
-                if (string.IsNullOrWhiteSpace(name))
-                    return ServiceResponse.Error("You must provide a name for the Anatomy.");
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return ServiceResponse.Error("You must provide a name for the Anatomy.");
 
-            AnatomyManager anatomyManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            Anatomy s = (Anatomy) anatomyManager.Get(name );
+        AnatomyManager anatomyManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
+        List<Anatomy> s = anatomyManager.Search(name);
 
-                if (s == null)
-                    return ServiceResponse.Error("Anatomy could not be located for the name " + name);
+        if (s == null || s.Count == 0)
+            return ServiceResponse.Error("Anatomy could not be located for the name " + name);
 
-                return ServiceResponse.OK("",s);
-            }
+        return ServiceResponse.OK("",s);
+    }
 
     [ApiAuthorizationRequired(Operator =">=" , RoleWeight = 4)]
         [HttpPost]
     [HttpGet]
-    [Route("api/Anatomy/")]
-    public ServiceResult Get( string filter = "")
+    [Route("api/Anatomy")]
+    public ServiceResult Get( )
     {
         if (CurrentUser == null)
             return ServiceResponse.Error("You must be logged in to access this function.");
@@ -72,8 +73,8 @@ namespace TreeMon.Web.api.v1
         AnatomyManager anatomyManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
         List<dynamic> anatomy = anatomyManager.GetAnatomies(CurrentUser.AccountUUID).Cast<dynamic>().ToList();
         int count;
-        DataFilter tmpFilter = this.GetFilter(filter);
-        anatomy = FilterEx.FilterInput(anatomy, tmpFilter, out count);
+         DataFilter tmpFilter = this.GetFilter(Request);
+        anatomy = anatomy.Filter( tmpFilter, out count);
         return ServiceResponse.OK("", anatomy, count);
     }
 
@@ -112,7 +113,7 @@ namespace TreeMon.Web.api.v1
                     return ServiceResponse.Error("Invalid Anatomy sent to server.");
 
             AnatomyManager anatomyManager = new AnatomyManager(Globals.DBConnectionKey,Request.Headers?.Authorization?.Parameter);
-            var dbS = (Anatomy)anatomyManager.GetBy(s.UUID);
+            var dbS = (Anatomy)anatomyManager.Get(s.UUID);
 
                 if (dbS == null)
                     return ServiceResponse.Error("Anatomy was not found.");

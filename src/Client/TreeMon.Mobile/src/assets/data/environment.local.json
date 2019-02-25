@@ -1,0 +1,8 @@
+{
+    "production": false,
+    "serviceUrl": "https://dev.treemon.org/",
+    "name":"local",
+    "version": "POC",
+    "theme" : "green-black-theme",
+    "viewtype" :"event"
+}

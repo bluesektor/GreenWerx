@@ -4,6 +4,7 @@ using System;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
+using System.Text;
 using System.Threading;
 using TreeMon.Data.Logging;
 using TreeMon.Data.Logging.Models;
@@ -192,6 +193,7 @@ namespace TreeMon.Web
             if (user == null)
                 return ServiceResponse.Error("Inavlid use passed in ImportWebConfigToDatabase.");
             ServiceResult res = ServiceResponse.OK();
+            StringBuilder msg = new StringBuilder();
             NameValueCollection settings = ConfigurationManager.AppSettings;
 
             AppManager appManager = new AppManager(Globals.DBConnectionKey, "web", "");
@@ -238,7 +240,7 @@ namespace TreeMon.Web
 
                 if (r.Code != 200)
                 {
-                    res.Message += r.Message;
+                   msg.AppendLine( r.Message );
                     res.Code = r.Code;
                     res.Status = r.Status;
                 }
@@ -280,11 +282,12 @@ namespace TreeMon.Web
 
                 if (r.Code != 200)
                 {
-                    res.Message += r.Message;
+                    msg.AppendLine(r.Message);
                     res.Code = r.Code;
                     res.Status = r.Status;
                 }
             }
+            res.Message = msg.ToString();
             return res;
 
         }
@@ -360,14 +363,15 @@ namespace TreeMon.Web
 
             if (string.IsNullOrWhiteSpace(AppSetting("ApiStatus")))
             {
-                string apiStatus = "PRIVATE";
 #if DEBUG
-                apiStatus = "PROTECTED";//using NG server will cut off access because it's on a different port.
+                //using NG server will cut off access because it's on a different port.
+                SaveConfigSetting("ApiStatus", "PROTECTED");
+#else
+                SaveConfigSetting("ApiStatus", "PRIVATE");         
 #endif
-                SaveConfigSetting("ApiStatus", apiStatus);
             }
 
-          
+
 
             if (string.IsNullOrWhiteSpace(AppSetting("DBBackupKey")))
             {

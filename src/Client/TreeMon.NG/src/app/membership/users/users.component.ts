@@ -70,7 +70,7 @@ export class UsersComponent implements OnInit {
                  // at the given index.
                 this.users.splice(index, 1);
                 this.msgBox.ShowMessage('info', 'User deleted.', 10    );
-                this.loadUsers();// not updating the list so reload for now.
+                this.loadUsers(); // not updating the list so reload for now.
 
             }, err => {
                 this.processingRequest = false;
@@ -113,7 +113,7 @@ export class UsersComponent implements OnInit {
         res.subscribe(response => {
 
             this.processingRequest = false;
-  
+
             this.displayDialog = false;
             if (response.Code !== 200) {
                 this.msgBox.ShowMessage(response.Status, response.Message, 10);
@@ -158,7 +158,9 @@ export class UsersComponent implements OnInit {
     cloneUser(c: User): User {
         const user = new User();
         for (const prop in c) {
-            user[prop] = c[prop];
+            if (prop != null) {
+                user[prop] = c[prop];
+            }
         }
         return user;
     }

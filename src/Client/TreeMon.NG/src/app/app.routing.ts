@@ -21,6 +21,7 @@ const routes: Routes = [
   { path: 'utilities', loadChildren: 'app/utilities/utilities.module#UtilitiesModule' },
   { path: 'finance', loadChildren: 'app/finance/finance.module#FinanceModule' },
   { path: 'general', loadChildren: 'app/general/general.module#GeneralModule' },
+  { path: 'membership', loadChildren: 'app/membership/api/api.module#APIModule' },
   { path: 'membership', loadChildren: 'app/membership/roles/roles.module#RolesModule' },
   { path: 'membership', loadChildren: 'app/membership/accounts/accounts.module#AccountsModule' },
   { path: 'membership', loadChildren: 'app/membership/users/users.module#UsersModule' },
