@@ -1,3 +1,6 @@
+***Update:** This project is undegoing a major revamping. The name will change as well as the target "framework" (React and Node). 
+
+
 # TreeMon Project #
 ### Cannabis Management System ###
 
