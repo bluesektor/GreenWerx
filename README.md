@@ -1,4 +1,4 @@
-***Update:** This name of this project is going to change, and also changing to React/Node for client/server.
+***Update:** This name of this project is going to change, and the code is being updated to React/Node for client/server.
 
 
 # TreeMon Project #
