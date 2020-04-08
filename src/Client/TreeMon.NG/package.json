@@ -22,7 +22,7 @@
     "@angular/platform-browser-dynamic": "5.2.10",
     "@angular/router": "5.2.10",
     "angular2-cookie": "^1.2.6",
-    "bootstrap": "4.1.0",
+    "bootstrap": "3.4.1",
     "chart.js": "^2.7.2",
     "core-js": "2.5.5",
     "font-awesome": "^4.7.0",
