@@ -1,4 +1,4 @@
-***Update:** This project is undegoing a major revamping. The name will change as well as the target "framework" (React and Node). 
+***Update:** This name of this project is going to change, and also changing to React/Node for client/server.
 
 
 # TreeMon Project #
