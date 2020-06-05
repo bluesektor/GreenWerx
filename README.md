@@ -1,5 +1,5 @@
  
-# GreenWerx #
+# GreenWerx #  
 
 ***An open source software solution used for recording day to day operations of a cannabis related business.***
 
@@ -13,3 +13,5 @@ Thank you.
 **Credits**: [WebAPI Throttle](https://github.com/stefanprodan/WebApiThrottle), [Angular](https://github.com/angular)
 
 **License** [CPAL 1.0](https://opensource.org/licenses/CPAL-1.0)
+
+NOTE: The project as well as the website names have changed. I will be updating the site soon.
