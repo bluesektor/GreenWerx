@@ -3,6 +3,7 @@
 
 ***An open source software solution used for recording day to day operations of a cannabis related business.***
 
+
 NOTE: The project as well as the website names have changed and will be updated the site soon. Code from this repository will be split amongst their respective project types.
 
  GreenWerx.org is an open source start-up project looking to disrupt the conventional "seed to sale" market with software specifically designed to the industry aka Cannabis Management System. By moving to open source and tailoring the software to the industry, we are working to create confidence in a community not only skeptical of outsiders, but help us move forward after so many failures from other companies. No longer will you have to depend on a third party for your information and be at the mercy of someone elses internet connection. You will have the power to keep, run and manage your own system and data as you see fit.
@@ -14,6 +15,7 @@ NOTE: The project as well as the website names have changed and will be updated 
 C# WebApi.
 
 ** Source code
+
 https://github.com/bluesektor/Services
 
 The service and website have code to run an installer similar
@@ -48,6 +50,7 @@ haven't revisited it yet.
 Angular 5
 
 ** Source Code
+
 https://github.com/bluesektor/Client/tree/master/GreenWerx.NG
 
 This is combination admin/website. It was my first real Angular project and
@@ -62,6 +65,7 @@ database with strains, accounts, and roles/permissions.
 
 
  ** Admin Screenshots
+ 
  <a href="https://greenwerx.org/img/admin.strains.png">Strains Screen</a>
 
 <a href="https://greenwerx.org/img/admin.currency.add.png">Currency  Screen</a>
@@ -108,8 +112,11 @@ https://showcase.ionicframework.com/apps/top
 
 
 ---=== WinForms ===---
+
 C#, WinForms
+
 ** Source code.
+
 https://github.com/bluesektor/Client/tree/master/GreenWerx.Client
 For the application devs there is the WinForms repo. It uses an plugin
 system I found somewhere on the web. 
@@ -117,7 +124,9 @@ system I found somewhere on the web.
 
 
 ---=== Basic quick start ===---
+
 **Tools to get started.
+
 -- Visual Studio: (Services, Winforms) Everything has been developed using the free version, no additional plugins or special tools.
 -- Visual Studio Code: (Website, Mobile) 
 -- MS SQL: I use the developer edition. https://www.microsoft.com/en-us/sql-server/sql-server-downloads
