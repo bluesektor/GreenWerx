@@ -80,7 +80,7 @@ database with strains, accounts, and roles/permissions.
 ---=== Mobile ===---
 
 Angular 7/Ionic 4
- NOTE: I have an updated version in a private repo for another project. I'll
+NOTE: I have an updated version in a private repo for another project. I'll
 update it with that code (Angular 8/Ionic 5)
 I'm thinking this will become an app for dispensaries. I ran across
 <a href="https://github.com/7LPdWcaW"> another opensource app</a>
