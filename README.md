@@ -10,6 +10,7 @@ NOTE: The project as well as the website names have changed and will be updated 
 
 
 ---=== API ===---
+
 C# WebApi.
 
 ** Source code
@@ -43,6 +44,7 @@ I had also started porting it to .Net Core. I had about 80% done I think, but re
 haven't revisited it yet.
 
 ---=== Website ===---
+
 Angular 5
 
 ** Source Code
@@ -72,6 +74,7 @@ database with strains, accounts, and roles/permissions.
 
 
 ---=== Mobile ===---
+
 Angular 7/Ionic 4
  NOTE: I have an updated version in a private repo for another project. I'll
 update it with that code (Angular 8/Ionic 5)
@@ -79,9 +82,6 @@ I'm thinking this will become an app for dispensaries. I ran across
 <a href="https://github.com/7LPdWcaW"> another opensource app</a>
  by <a href="/u/7LPdWcaW">/u/7LPdWcaW</a>  <a href="https://www.reddit.com/r/GrowUtils/">Reddit</a> for growing thaty I may fork and port to run off
 the GreenWerx api.
-
-
-
 
 
 ** Source code.
