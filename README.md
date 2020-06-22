@@ -51,7 +51,7 @@ Angular 5
 
 ** Source Code
 
-https://github.com/bluesektor/Client/tree/master/GreenWerx.NG
+https://github.com/bluesektor/Greenwerx.NG
 
 This is combination admin/website. It was my first real Angular project and
 uses PrimeNG controls. The menus are all 'dynamically' generated in that
@@ -75,8 +75,6 @@ database with strains, accounts, and roles/permissions.
 <a href="https://greenwerx.org/img/admin.utilities.png"> Utilities</a>
 
 
-
-
 ---=== Mobile ===---
 
 Angular 7/Ionic 4
@@ -89,7 +87,7 @@ the GreenWerx api.
 
 
 ** Source code.
-https://github.com/bluesektor/Client/tree/master/GreenWerx.Mobile
+https://github.com/bluesektor/GreenWerx.Mobile
 
 If you’re not familiar with Ionic, it will allow you to create
 mobile apps for IOS, Android and PWA (progressive web app).   
@@ -117,7 +115,8 @@ C#, WinForms
 
 ** Source code.
 
-https://github.com/bluesektor/Client/tree/master/GreenWerx.Client
+https://github.com/bluesektor/GreenWerx.WinForms
+
 For the application devs there is the WinForms repo. It uses an plugin
 system I found somewhere on the web. 
 
