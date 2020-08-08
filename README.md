@@ -8,10 +8,13 @@ NOTE: The project as well as the website names have changed and will be updated 
 
  GreenWerx.org is an open source start-up project looking to disrupt the conventional "seed to sale" market with software specifically designed to the industry aka Cannabis Management System. By moving to open source and tailoring the software to the industry, we are working to create confidence in a community not only skeptical of outsiders, but help us move forward after so many failures from other companies. No longer will you have to depend on a third party for your information and be at the mercy of someone elses internet connection. You will have the power to keep, run and manage your own system and data as you see fit.
 
-
-
+---=== UPDATES ===---
+8/8/2020 GreenWerx.NG Project Update: Did a massive version update from 5 to 9. As a result some features are broken or don't function as they should. 
+	  This will be fixed so please be patient.
+	  
 ---=== API ===---
 
+Greenwerx.API
 C# WebApi.
 
 ** Source code
@@ -45,9 +48,10 @@ project but I will make it public if you want it.
 I had also started porting it to .Net Core. I had about 80% done I think, but refactored the permissions and
 haven't revisited it yet.
 
----=== Website ===---
+---=== Website - Admin Site===---
 
-Angular 5
+GreenWerx.NG
+Angular 9
 
 ** Source Code
 
@@ -77,6 +81,7 @@ database with strains, accounts, and roles/permissions.
 
 ---=== Mobile ===---
 
+GreenWerx.Mobile
 Angular 7/Ionic 4
 NOTE: I have an updated version in a private repo for another project. I'll
 update it with that code (Angular 8/Ionic 5)
@@ -111,6 +116,7 @@ https://showcase.ionicframework.com/apps/top
 
 ---=== WinForms ===---
 
+GreenWerx.Client
 C#, WinForms
 
 ** Source code.
